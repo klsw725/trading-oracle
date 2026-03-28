@@ -138,7 +138,18 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         lines.append(causal_context)
         lines.append("")
 
-    # 웹 검색 컨텍스트 (Phase 10)
+    # 매크로 글로벌 뉴스 (Phase 10 M4)
+    web_macro = data.market_context.get("web_macro", {})
+    macro_news = []
+    for key in ("kr_macro", "us_macro", "rates", "fx"):
+        macro_news.extend(web_macro.get(key, []))
+    if macro_news:
+        lines.append("### 매크로 최신 동향 (웹 검색)")
+        for n in macro_news[:7]:
+            lines.append(f"- {n.get('title', '')[:80]}")
+        lines.append("")
+
+    # 종목별 웹 검색 컨텍스트 (Phase 10 M3)
     if data.web_context:
         from src.data.web_search import format_web_context_for_prompt
         web_text = format_web_context_for_prompt(data.web_context, "macro")

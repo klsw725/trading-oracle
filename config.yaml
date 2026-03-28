@@ -41,3 +41,11 @@ llm:
   provider: codex
   model: gpt-5.4
   max_tokens: 4096
+
+# 웹 검색 설정 (DuckDuckGo 기반, API 키 불필요)
+web_search:
+  enabled: true           # false로 끄면 검색 없이 기존 동작
+  max_news: 7             # 뉴스 최대 건수
+  max_text: 5             # 텍스트 검색 최대 건수
+  cache_ttl_hours: 12     # 캐시 TTL (시간)
+  rate_limit_sec: 0.5     # 검색 간 대기 시간

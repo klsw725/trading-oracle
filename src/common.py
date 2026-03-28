@@ -162,6 +162,16 @@ def collect_market_data(include_us: bool = False) -> dict:
     if causal_age and causal_age.get("warn"):
         market_data["causal_warning"] = causal_age["message"]
 
+    # 매크로 웹 검색 (Phase 10 M4)
+    try:
+        from src.data.web_search import search_market_context
+        config = load_config()
+        web_macro = search_market_context(include_us=include_us, config=config)
+        if web_macro:
+            market_data["web_macro"] = web_macro
+    except Exception:
+        pass
+
     return market_data
 
 
@@ -297,6 +307,8 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         market_context["kosdaq"] = market_data["kosdaq"]
     if "regime" in market_data:
         market_context["regime"] = market_data["regime"]
+    if "web_macro" in market_data:
+        market_context["web_macro"] = market_data["web_macro"]
 
     def _analyze_one(item: dict) -> tuple[str, dict]:
         ticker = item["ticker"]
