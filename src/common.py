@@ -109,8 +109,26 @@ def _detect_regime(index_data: dict, ohlcv_closes: np.ndarray | None = None) -> 
         return {"regime": "sideways", "label": "횡보", "description": f"코스피 20일 {change_20d:+.1f}%, 방향성 부재"}
 
 
+def _check_causal_graph_age() -> dict | None:
+    """인과 그래프 나이를 확인하여 갱신 경고를 반환한다. 90일 이상이면 경고."""
+    try:
+        from src.causal.graph import CausalGraph, CAUSAL_GRAPH_PATH
+        if not CAUSAL_GRAPH_PATH.exists():
+            return {"warn": True, "message": "인과 그래프가 없습니다. `uv run scripts/build_causal.py build`로 구축하세요.", "days": None}
+        graph = CausalGraph.load()
+        updated = graph.metadata.get("updated_at")
+        if not updated:
+            return None
+        age = (datetime.now() - datetime.strptime(updated, "%Y-%m-%d")).days
+        if age >= 90:
+            return {"warn": True, "message": f"인과 그래프가 {age}일 경과했습니다. `uv run scripts/build_causal.py build --fresh`로 갱신을 권장합니다.", "days": age}
+        return {"warn": False, "days": age}
+    except Exception:
+        return None
+
+
 def collect_market_data() -> dict:
-    """코스피/코스닥 지수 수집 + 시장 레짐 감지"""
+    """코스피/코스닥 지수 수집 + 시장 레짐 감지 + 인과 그래프 나이 체크"""
     market_data = {"date": datetime.now().strftime("%Y-%m-%d")}
     kospi = get_index_summary("KS11", "코스피")
     kosdaq = get_index_summary("KQ11", "코스닥")
@@ -126,6 +144,11 @@ def collect_market_data() -> dict:
         market_data["regime"] = _detect_regime(kospi, closes)
     else:
         market_data["regime"] = {"regime": "unknown", "label": "판정 불가", "description": "코스피 데이터 부족"}
+
+    # 인과 그래프 나이 체크
+    causal_age = _check_causal_graph_age()
+    if causal_age and causal_age.get("warn"):
+        market_data["causal_warning"] = causal_age["message"]
 
     return market_data
 
