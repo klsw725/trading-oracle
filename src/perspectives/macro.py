@@ -14,6 +14,48 @@ from src.perspectives.base import (
 )
 
 
+def _get_causal_context(name: str, ticker: str) -> str:
+    """인과 그래프에서 종목 관련 인과 체인 조회. 없으면 빈 문자열."""
+    try:
+        from src.causal.graph import CausalGraph
+        graph = CausalGraph.load_if_exists()
+        if not graph:
+            return ""
+
+        # 종목명, 섹터 키워드로 관련 인과 체인 조회
+        keywords = [name]
+        # 종목명에서 키워드 추출 (예: "삼성전자" → "삼성", "전자", "반도체")
+        if "전자" in name or "반도체" in name or "하이닉스" in name:
+            keywords.extend(["반도체", "메모리", "디램"])
+        elif "자동차" in name or "기아" in name or "현대" in name:
+            keywords.extend(["자동차", "전기차"])
+        elif "에어로" in name or "한화" in name:
+            keywords.extend(["방산", "무기"])
+        elif "금융" in name or "은행" in name or "지주" in name:
+            keywords.extend(["금리", "금융"])
+        elif "바이오" in name or "제약" in name:
+            keywords.extend(["바이오", "신약"])
+        elif "에너지" in name or "배터리" in name:
+            keywords.extend(["에너지", "배터리", "2차전지"])
+
+        chains = graph.get_related_chains(keywords, depth=2)
+        if not chains:
+            return ""
+
+        seen = set()
+        lines = []
+        for chain in chains[:5]:
+            for items in (chain.get("causes", [])[:2], chain.get("effects", [])[:2]):
+                for c in items:
+                    key = (c["subject"], c["relation"], c["object"])
+                    if key not in seen:
+                        seen.add(key)
+                        lines.append(f"- {c['subject']} → ({c['relation']}) → {c['object']}")
+        return "\n".join(lines) if lines else ""
+    except Exception:
+        return ""
+
+
 SYSTEM_PROMPT = """\
 당신은 매크로 경제 분석 전문가입니다. 금리, 환율, 지정학, 섹터 사이클의 인과 체인으로 개별 종목의 투자 판단을 내립니다.
 
@@ -77,11 +119,17 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%%, 20일 {idx['change_20d']:+.1f}%%)")
         lines.append("")
 
-    # 인과 그래프 참조 (Phase 3 구현 후 활성화)
-    # TODO: data/causal_graph.json에서 관련 인과 체인 조회하여 삽입
+    # 인과 그래프 참조
+    causal_context = _get_causal_context(data.name, data.ticker)
+    if causal_context:
+        lines.append("### 인과 그래프 참조 (배경 지식)")
+        lines.append(causal_context)
+        lines.append("")
 
     lines.append("위 데이터를 기반으로 매크로 인과 관점에서 분석하고 JSON으로 응답하세요.")
     lines.append("이 기업의 이익에 가장 큰 영향을 미치는 매크로 변수를 식별하고, 인과 체인을 구성하세요.")
+    if causal_context:
+        lines.append("인과 그래프의 배경 지식을 참고하되, 현재 시장 상황에 맞게 판단하세요.")
 
     return "\n".join(lines)
 

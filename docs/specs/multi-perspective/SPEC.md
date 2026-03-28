@@ -6,7 +6,7 @@
 |-------|-----|------|------|
 | Phase 1 | [phase1-perspectives.md](prds/phase1-perspectives.md) | ✅ 완료 | 5개 투자 관점 + 합의도 시스템 (MAXS-lite) — M1~M5 전체 |
 | Phase 2 | [phase2-scripts.md](prds/phase2-scripts.md) | ✅ 완료 | scripts/ 분리 + shacs-bot 연동 |
-| Phase 3 | [phase3-causal-graph.md](prds/phase3-causal-graph.md) | 🟡 미착수 | 인과 그래프 (DEMOCRITUS-lite) |
+| Phase 3 | [phase3-causal-graph.md](prds/phase3-causal-graph.md) | ✅ 완료 | 인과 그래프 (DEMOCRITUS-lite) |
 
 > 각 PRD는 마일스톤, 검증 기준, 진행 로그를 포함한다. 구현 착수 시 PRD의 마일스톤을 체크리스트로 사용한다.
 
