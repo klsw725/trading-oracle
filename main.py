@@ -291,6 +291,8 @@ def cmd_analyze(args):
         print_header()
 
     config = load_config()
+    if getattr(args, "no_search", False):
+        config.setdefault("web_search", {})["enabled"] = False
     portfolio = load_portfolio()
 
     # 분석할 종목 (시장 데이터 수집 전에 먼저 수집하여 US 여부 판단)
@@ -484,6 +486,7 @@ def main():
     parser.add_argument("--no-llm", action="store_true", help="LLM 분석 생략")
     parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
     parser.add_argument("--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)")
+    parser.add_argument("--no-search", action="store_true", help="웹 검색 비활성화")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     args = parser.parse_args()

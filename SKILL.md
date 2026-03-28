@@ -37,6 +37,11 @@ uv run scripts/daily.py --no-llm --json
 uv run scripts/daily.py --no-weights --json
 ```
 
+웹 검색 비활성화 (LLM 학습 데이터만):
+```bash
+uv run scripts/daily.py --no-search --json
+```
+
 기존 단일 관점 분석 (레거시):
 ```bash
 uv run scripts/daily.py --legacy --json
