@@ -110,9 +110,17 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
             if idx:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (20일 {idx['change_20d']:+.1f}%%)")
 
+    # 웹 검색 컨텍스트 (Phase 10 — OUROBOROS 강화)
+    if data.web_context:
+        from src.data.web_search import format_web_context_for_prompt
+        web_text = format_web_context_for_prompt(data.web_context, "ouroboros")
+        if web_text:
+            lines.append("")
+            lines.append(web_text)
+
     lines.append("")
     lines.append("위 데이터를 기반으로 포렌식 감사관 관점에서 숨겨진 리스크를 분석하고 JSON으로 응답하세요.")
-    lines.append("주의: 제공된 데이터 범위 내에서 분석하되, 공개적으로 알려진 기업 정보(유상증자, CB 이력 등)를 활용하세요.")
+    lines.append("웹 검색 결과가 제공된 경우, 추측이 아닌 검색 데이터 기반으로 판정하세요.")
 
     return "\n".join(lines)
 

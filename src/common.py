@@ -183,12 +183,21 @@ def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict
     cap_data = fetch_market_cap(ticker)
     market_cap = cap_data.get("market_cap", 0)
 
+    # 웹 검색 (Phase 10)
+    web_context = {}
+    try:
+        from src.data.web_search import search_ticker_context
+        web_context = search_ticker_context(ticker, name, config)
+    except Exception:
+        pass
+
     return {
         "ticker": ticker,
         "name": name,
         "signals": signals,
         "fundamentals": fund,
         "market_cap": market_cap,
+        "web_context": web_context,
         "_ohlcv": ohlcv,  # 메모리 내 재사용 (JSON 직렬화 대상 아님)
     }
 
@@ -307,6 +316,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
             position=pos,
             market_context=market_context,
             config=config,
+            web_context=item.get("web_context", {}),
         )
 
         results = run_all_perspectives(pi)

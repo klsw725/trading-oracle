@@ -83,8 +83,16 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
             lines.append(f"- 현재 수익률: {pnl:+.2f}%%")
     lines.append("")
 
+    # 웹 검색 컨텍스트 (Phase 10)
+    if data.web_context:
+        from src.data.web_search import format_web_context_for_prompt
+        web_text = format_web_context_for_prompt(data.web_context, "value")
+        if web_text:
+            lines.append("")
+            lines.append(web_text)
+
     lines.append("위 데이터를 기반으로 가치 투자 관점에서 절대/상대 밸류에이션을 분석하고 JSON으로 응답하세요.")
-    lines.append("업종 평균 PER은 공개적으로 알려진 정보를 기반으로 추정하세요.")
+    lines.append("웹 검색으로 컨센서스/목표주가가 제공된 경우 이를 참조하세요.")
 
     return "\n".join(lines)
 
