@@ -90,11 +90,17 @@ def extract_json(text: str) -> dict | None:
 
 
 def call_llm(system_prompt: str, user_prompt: str, config: dict, max_tokens: int = 2048) -> str:
-    """Claude API 호출 → 텍스트 반환. SSE raw string 처리 포함."""
-    from src.agent.oracle import get_client, _parse_sse_response
-
-    client = get_client()
+    """LLM 호출 → 텍스트 반환. config.llm.provider에 따라 Anthropic/Codex 분기."""
     llm_config = config.get("llm", {})
+    provider = llm_config.get("provider", "anthropic")
+
+    if provider == "codex":
+        from src.agent.codex import generate
+        model = llm_config.get("model", "gpt-5.1-codex")
+        return generate(system_prompt, user_prompt, model=model)
+
+    from src.agent.oracle import get_client, _parse_sse_response
+    client = get_client()
     model = llm_config.get("model", "claude-sonnet-4-20250514")
 
     response = client.messages.create(
