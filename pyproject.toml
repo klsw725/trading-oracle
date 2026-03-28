@@ -19,3 +19,6 @@ dependencies = [
     "setuptools<81",
     "yfinance>=0.2.40",
 ]
+
+[dependency-groups]
+dev = []

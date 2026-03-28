@@ -987,6 +987,9 @@ requires-dist = [
     { name = "yfinance", specifier = ">=0.2.40" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "typing-extensions"
 version = "4.15.0"
