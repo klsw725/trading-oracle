@@ -3,7 +3,9 @@
 
 사용법:
     uv run scripts/portfolio.py add 005930 55000 10 --reason "반도체"
+    uv run scripts/portfolio.py add AAPL 200 10 --reason "AI"
     uv run scripts/portfolio.py remove 005930 --price 60000
+    uv run scripts/portfolio.py remove 005930 --price 60000 -n 5     # 5주만 분할 매도
     uv run scripts/portfolio.py cash 5000000
     uv run scripts/portfolio.py show --json
     uv run scripts/portfolio.py history --json
@@ -43,15 +45,22 @@ def cmd_add(args):
     shares = args.shares
     reason = args.reason or ""
     stop_loss = args.stop_loss or price * 0.9
+    invested = price * shares
+
+    # 현금 차감
+    cash_before = portfolio.get("cash", 0)
+    portfolio["cash"] = cash_before - invested
 
     add_position(portfolio, ticker, name, price, shares, reason, stop_loss)
-    invested = price * shares
 
     if args.json:
         print(json_dump({"status": "ok", "action": "add", "ticker": ticker, "name": name,
-                          "price": price, "shares": shares, "invested": invested, "stop_loss": stop_loss}))
+                          "price": price, "shares": shares, "invested": invested, "stop_loss": stop_loss,
+                          "cash": portfolio["cash"]}))
     else:
         print(f"{name}({ticker}) 매수 기록: {price:,.0f}원 × {shares}주 = {invested:,.0f}원 (손절가: {stop_loss:,.0f}원)")
+        if portfolio["cash"] < 0:
+            print(f"  ⚠️ 현금 부족: {cash_before:,.0f}원 → {portfolio['cash']:,.0f}원")
 
 
 def cmd_remove(args):
@@ -64,6 +73,7 @@ def cmd_remove(args):
 
     sell_price = args.price
     reason = args.reason or ""
+    sell_shares = args.shares  # None이면 전량
 
     if not sell_price:
         ohlcv = fetch_ohlcv(ticker, days_back=5)
@@ -72,18 +82,41 @@ def cmd_remove(args):
         else:
             sell_price = pos["entry_price"]
 
+    actual_sell_shares = sell_shares if sell_shares is not None else pos["shares"]
+
+    # 수량 검증
+    if actual_sell_shares > pos["shares"]:
+        _error(args, f"매도 수량({actual_sell_shares})이 보유 수량({pos['shares']})을 초과합니다")
+        return
+
     name = pos["name"]
     pnl_pct = (sell_price - pos["entry_price"]) / pos["entry_price"] * 100
-    pnl_amt = (sell_price - pos["entry_price"]) * pos["shares"]
+    pnl_amt = (sell_price - pos["entry_price"]) * actual_sell_shares
 
-    remove_position(portfolio, ticker, sell_price, reason)
+    # 현금 가산
+    proceeds = sell_price * actual_sell_shares
+    portfolio["cash"] = portfolio.get("cash", 0) + proceeds
+
+    try:
+        remove_position(portfolio, ticker, sell_price, reason, shares=sell_shares)
+    except ValueError as e:
+        _error(args, str(e))
+        return
+
+    leftover = pos["shares"] - actual_sell_shares
+    sell_label = f"{actual_sell_shares}주" if sell_shares is not None else f"전량 {actual_sell_shares}주"
 
     if args.json:
         print(json_dump({"status": "ok", "action": "remove", "ticker": ticker, "name": name,
-                          "sell_price": sell_price, "pnl_pct": pnl_pct, "pnl_amount": pnl_amt}))
+                          "sell_price": sell_price, "sell_shares": actual_sell_shares,
+                          "remaining_shares": leftover, "pnl_pct": pnl_pct, "pnl_amount": pnl_amt,
+                          "proceeds": proceeds, "cash": portfolio["cash"]}))
     else:
         sign = "+" if pnl_pct >= 0 else ""
-        print(f"{name}({ticker}) 매도: {sell_price:,.0f}원 {sign}{pnl_amt:,.0f}원 ({sign}{pnl_pct:.1f}%%)")
+        print(f"{name}({ticker}) 매도: {sell_price:,.0f}원 × {sell_label} {sign}{pnl_amt:,.0f}원 ({sign}{pnl_pct:.1f}%%)")
+        if leftover > 0:
+            print(f"  잔여 보유: {leftover}주")
+        print(f"  보유 현금: {portfolio['cash']:,.0f}원 (+{proceeds:,.0f}원)")
 
 
 def cmd_cash(args):
@@ -162,6 +195,7 @@ def main():
     rm_p = subparsers.add_parser("remove", help="매도 기록")
     rm_p.add_argument("ticker", help="종목코드")
     rm_p.add_argument("--price", "-p", type=float, help="매도가")
+    rm_p.add_argument("--shares", "-n", type=int, help="매도 수량 (미지정 시 전량)")
     rm_p.add_argument("--reason", "-r", help="매도 이유")
     rm_p.add_argument("--json", action="store_true", help="JSON 출력")
 
