@@ -23,6 +23,12 @@
 
 - **help 문자열에 `%` 리터럴 쓰면 크래시**. Python 3.14의 argparse가 help 문자열을 `%` 포맷팅함. `"기본: -10%"` → ValueError. `"기본 매수가의 90%%"` 처럼 이스케이프 필수.
 
+## Codex provider 지뢰
+
+- **Codex Responses API는 모델 제한 있음**. ChatGPT 계정 기반이라 `gpt-4.1-mini` 등 일부 모델은 400 에러. 기본값 `gpt-5.1-codex` 사용.
+- **OAuth 토큰 경로**: `~/.trading-oracle/auth/codex.json`. 없으면 `~/.shacs-bot/auth/codex.json`에서 자동 복사. 둘 다 없으면 `uv run main.py codex-login` 필요.
+- **`config.yaml`의 `llm.provider`가 `codex`일 때 `llm.model`은 Codex 모델명으로 변경 필요**. anthropic 모델명 그대로 두면 Codex API가 400 반환.
+
 ## 상태 파일
 
 - **`data/portfolio.json`에 numpy 타입이 섞임**. pykrx/FDR이 반환하는 int64/float64가 포지션에 저장됨. `json.dumps` 시 `_NumEncoder` 없으면 `TypeError: Object of type int64 is not JSON serializable`. tracker.py와 main.py 양쪽에 별도 인코더 존재 — 통일되지 않음.
