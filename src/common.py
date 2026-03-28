@@ -14,6 +14,7 @@ from src.data.market import (
     fetch_market_cap,
     fetch_ohlcv,
     get_ticker_name,
+    is_us_ticker,
 )
 from src.data.fundamentals import fetch_naver_fundamentals, fetch_fundamentals_cached
 from src.signals.technical import compute_signals
@@ -127,8 +128,8 @@ def _check_causal_graph_age() -> dict | None:
         return None
 
 
-def collect_market_data() -> dict:
-    """코스피/코스닥 지수 수집 + 시장 레짐 감지 + 인과 그래프 나이 체크"""
+def collect_market_data(include_us: bool = False) -> dict:
+    """지수 수집 + 시장 레짐 감지 + 인과 그래프 나이 체크"""
     market_data = {"date": datetime.now().strftime("%Y-%m-%d")}
     kospi = get_index_summary("KS11", "코스피")
     kosdaq = get_index_summary("KQ11", "코스닥")
@@ -137,13 +138,24 @@ def collect_market_data() -> dict:
     if kosdaq:
         market_data["kosdaq"] = kosdaq
 
-    # 레짐 감지 (코스피 기준)
-    if kospi:
-        kospi_ohlcv = fetch_index_ohlcv("KS11", days_back=60)
-        closes = kospi_ohlcv["close"].values.astype(float) if not kospi_ohlcv.empty else None
-        market_data["regime"] = _detect_regime(kospi, closes)
+    # 미국 지수
+    if include_us:
+        nasdaq = get_index_summary("IXIC", "나스닥")
+        sp500 = get_index_summary("US500", "S&P 500")
+        if nasdaq:
+            market_data["nasdaq"] = nasdaq
+        if sp500:
+            market_data["sp500"] = sp500
+
+    # 레짐 감지 (코스피 기준, 없으면 나스닥)
+    regime_source = kospi or (market_data.get("nasdaq") if include_us else None)
+    if regime_source:
+        idx_code = "KS11" if kospi else "IXIC"
+        idx_ohlcv = fetch_index_ohlcv(idx_code, days_back=60)
+        closes = idx_ohlcv["close"].values.astype(float) if not idx_ohlcv.empty else None
+        market_data["regime"] = _detect_regime(regime_source, closes)
     else:
-        market_data["regime"] = {"regime": "unknown", "label": "판정 불가", "description": "코스피 데이터 부족"}
+        market_data["regime"] = {"regime": "unknown", "label": "판정 불가", "description": "지수 데이터 부족"}
 
     # 인과 그래프 나이 체크
     causal_age = _check_causal_graph_age()
@@ -167,7 +179,7 @@ def analyze_ticker(ticker: str, config: dict) -> dict | None:
     if "error" in signals:
         return None
 
-    fund = fetch_naver_fundamentals(ticker)
+    fund = fetch_fundamentals_cached(ticker)
     cap_data = fetch_market_cap(ticker)
     market_cap = cap_data.get("market_cap", 0)
 
@@ -209,6 +221,18 @@ def collect_tickers(args_tickers: list[str] | None, config: dict, portfolio: dic
             tickers.add(c["ticker"])
 
     return tickers, candidates
+
+
+def has_us_tickers(tickers: set[str] | list[str], portfolio: dict | None = None) -> bool:
+    """종목 세트에 미국 종목이 포함되어 있는지."""
+    for t in tickers:
+        if is_us_ticker(t):
+            return True
+    if portfolio:
+        for pos in portfolio.get("positions", []):
+            if is_us_ticker(pos["ticker"]):
+                return True
+    return False
 
 
 def analyze_tickers(tickers: set[str], config: dict) -> list[dict]:

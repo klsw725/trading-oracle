@@ -81,21 +81,38 @@ def add_position(
     save_portfolio(portfolio)
 
 
-def remove_position(portfolio: dict, ticker: str, sell_price: float | None = None, reason: str = ""):
+def remove_position(portfolio: dict, ticker: str, sell_price: float | None = None, reason: str = "", shares: int | None = None):
+    """매도 기록. shares=None이면 전량, 숫자면 해당 수량만 매도."""
     remaining = []
     for pos in portfolio["positions"]:
-        if pos["ticker"] == ticker:
-            if sell_price:
-                record = {
-                    **pos,
-                    "sell_price": sell_price,
-                    "sell_date": datetime.now().isoformat(),
-                    "sell_reason": reason,
-                    "final_pnl_pct": (sell_price - pos["entry_price"]) / pos["entry_price"] * 100,
-                }
-                portfolio["history"].append(record)
-        else:
+        if pos["ticker"] != ticker:
             remaining.append(pos)
+            continue
+
+        sell_shares = shares if shares is not None else pos["shares"]
+        if sell_shares > pos["shares"]:
+            raise ValueError(f"매도 수량({sell_shares})이 보유 수량({pos['shares']})을 초과합니다")
+
+        if sell_price:
+            record = {
+                **pos,
+                "sell_shares": sell_shares,
+                "sell_price": sell_price,
+                "sell_date": datetime.now().isoformat(),
+                "sell_reason": reason,
+                "final_pnl_pct": (sell_price - pos["entry_price"]) / pos["entry_price"] * 100,
+            }
+            portfolio["history"].append(record)
+
+        # 분할 매도: 잔여 수량이 있으면 포지션 유지
+        leftover = pos["shares"] - sell_shares
+        if leftover > 0:
+            pos["shares"] = leftover
+            if pos.get("current_price"):
+                pos["market_value"] = pos["current_price"] * leftover
+                pos["pnl_amount"] = (pos["current_price"] - pos["entry_price"]) * leftover
+            remaining.append(pos)
+
     portfolio["positions"] = remaining
     save_portfolio(portfolio)
 

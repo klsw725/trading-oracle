@@ -1,4 +1,4 @@
-"""네이버 금융에서 PER/PBR/배당수익률 스크래핑 + 7일 TTL 캐시"""
+"""펀더멘털 데이터 수집 (한국: 네이버 금융, 미국: yfinance) + 7일 TTL 캐시"""
 
 import json
 import re
@@ -7,6 +7,8 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+from src.data.market import is_us_ticker
 
 
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
@@ -81,12 +83,38 @@ def _is_cache_valid(entry: dict) -> bool:
     return (datetime.now() - cached_date).days < _CACHE_TTL_DAYS
 
 
+def fetch_us_fundamentals(ticker: str) -> dict:
+    """yfinance에서 미국 종목 PER/PBR/배당수익률 가져오기"""
+    try:
+        import yfinance as yf
+        info = yf.Ticker(ticker).info
+        result = {}
+        if info.get("trailingPE"):
+            result["per"] = round(info["trailingPE"], 2)
+        elif info.get("forwardPE"):
+            result["per"] = round(info["forwardPE"], 2)
+        if info.get("priceToBook"):
+            result["pbr"] = round(info["priceToBook"], 2)
+        if info.get("trailingAnnualDividendYield"):
+            result["div_yield"] = round(info["trailingAnnualDividendYield"] * 100, 2)
+        elif info.get("dividendYield") and info["dividendYield"] < 1:
+            result["div_yield"] = round(info["dividendYield"] * 100, 2)
+        if info.get("marketCap"):
+            result["market_cap_billion"] = int(info["marketCap"] / 100_000_000)  # 억 단위
+        return result
+    except Exception:
+        return {}
+
+
 def fetch_fundamentals_cached(ticker: str) -> dict:
-    """네이버 금융에서 PER/PBR 가져오기. 실패 시 7일 캐시 사용.
+    """PER/PBR 가져오기 (한국: 네이버, 미국: yfinance). 실패 시 7일 캐시 사용.
 
     Returns dict with fundamentals + optional "cache_date" key if from cache.
     """
-    result = fetch_naver_fundamentals(ticker)
+    if is_us_ticker(ticker):
+        result = fetch_us_fundamentals(ticker)
+    else:
+        result = fetch_naver_fundamentals(ticker)
 
     cache = _load_cache()
 

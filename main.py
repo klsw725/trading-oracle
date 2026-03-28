@@ -11,8 +11,9 @@
 
     uv run main.py add 005930 55000 10                 # 매수 기록: 종목 매수가 수량
     uv run main.py add 005930 55000 10 --reason "반도체 수출 증가"
-    uv run main.py remove 005930                       # 매도 기록
-    uv run main.py remove 005930 --price 60000         # 매도가 기록
+    uv run main.py remove 005930                       # 전량 매도 기록
+    uv run main.py remove 005930 --price 60000         # 매도가 지정
+    uv run main.py remove 005930 --price 60000 -n 5    # 5주만 분할 매도
     uv run main.py cash 5000000                        # 현금 설정
     uv run main.py portfolio                           # 포트폴리오 조회
     uv run main.py portfolio --json                    # 포트폴리오 JSON
@@ -37,6 +38,7 @@ from src.common import (
     analyze_tickers,
     run_multi_perspective,
     build_signals_json,
+    has_us_tickers,
 )
 from src.data.market import fetch_ohlcv, get_ticker_name
 from src.portfolio.tracker import (
@@ -103,15 +105,23 @@ def cmd_add(args):
     price, shares = args.price, args.shares
     reason = args.reason or ""
     stop_loss = args.stop_loss or price * 0.9
+    invested = price * shares
+
+    # 현금 차감
+    cash_before = portfolio.get("cash", 0)
+    portfolio["cash"] = cash_before - invested
+    if portfolio["cash"] < 0:
+        console.print(f"[yellow]⚠️ 현금 부족: {cash_before:,.0f}원 → {portfolio['cash']:,.0f}원 (매수 대금 {invested:,.0f}원)[/yellow]")
 
     add_position(portfolio, ticker, name, price, shares, reason, stop_loss)
-    invested = price * shares
 
     if getattr(args, "json", False):
         print(json_dump({"status": "ok", "action": "add", "ticker": ticker, "name": name,
-                          "price": price, "shares": shares, "invested": invested, "stop_loss": stop_loss}))
+                          "price": price, "shares": shares, "invested": invested, "stop_loss": stop_loss,
+                          "cash": portfolio["cash"]}))
     else:
         print_success(f"{name}({ticker}) 매수 기록 완료: {price:,.0f}원 × {shares}주 = {invested:,.0f}원 (손절가: {stop_loss:,.0f}원)")
+        console.print(f"  [dim]보유 현금: {portfolio['cash']:,.0f}원[/dim]")
 
 
 def cmd_remove(args):
@@ -127,21 +137,53 @@ def cmd_remove(args):
 
     sell_price = args.price
     reason = args.reason or ""
+    sell_shares = args.shares  # None이면 전량
     if not sell_price:
         ohlcv = fetch_ohlcv(ticker, days_back=5)
         sell_price = float(ohlcv["close"].values[-1]) if not ohlcv.empty else pos["entry_price"]
 
+    actual_sell_shares = sell_shares if sell_shares is not None else pos["shares"]
+
+    # 수량 검증
+    if actual_sell_shares > pos["shares"]:
+        msg = f"매도 수량({actual_sell_shares})이 보유 수량({pos['shares']})을 초과합니다"
+        if getattr(args, "json", False):
+            print(json_dump({"status": "error", "message": msg}))
+        else:
+            print_error(msg)
+        return
+
     name = pos["name"]
     pnl_pct = (sell_price - pos["entry_price"]) / pos["entry_price"] * 100
-    pnl_amt = (sell_price - pos["entry_price"]) * pos["shares"]
-    remove_position(portfolio, ticker, sell_price, reason)
+    pnl_amt = (sell_price - pos["entry_price"]) * actual_sell_shares
+
+    # 현금 가산
+    proceeds = sell_price * actual_sell_shares
+    portfolio["cash"] = portfolio.get("cash", 0) + proceeds
+
+    try:
+        remove_position(portfolio, ticker, sell_price, reason, shares=sell_shares)
+    except ValueError as e:
+        if getattr(args, "json", False):
+            print(json_dump({"status": "error", "message": str(e)}))
+        else:
+            print_error(str(e))
+        return
+
+    leftover = pos["shares"] - actual_sell_shares
+    sell_label = f"{actual_sell_shares}주" if sell_shares is not None else f"전량 {actual_sell_shares}주"
 
     if getattr(args, "json", False):
         print(json_dump({"status": "ok", "action": "remove", "ticker": ticker, "name": name,
-                          "sell_price": sell_price, "pnl_pct": pnl_pct, "pnl_amount": pnl_amt}))
+                          "sell_price": sell_price, "sell_shares": actual_sell_shares,
+                          "remaining_shares": leftover, "pnl_pct": pnl_pct, "pnl_amount": pnl_amt,
+                          "proceeds": proceeds, "cash": portfolio["cash"]}))
     else:
         pnl_color = "green" if pnl_pct >= 0 else "red"
-        console.print(f"[bold]{name}({ticker}) 매도 완료[/bold]: {sell_price:,.0f}원 × {pos['shares']}주 [{pnl_color}]{pnl_amt:+,.0f}원 ({pnl_pct:+.1f}%)[/{pnl_color}]")
+        console.print(f"[bold]{name}({ticker}) 매도 완료[/bold]: {sell_price:,.0f}원 × {sell_label} [{pnl_color}]{pnl_amt:+,.0f}원 ({pnl_pct:+.1f}%)[/{pnl_color}]")
+        if leftover > 0:
+            console.print(f"  [dim]잔여 보유: {leftover}주 (평단가 {pos['entry_price']:,.0f}원)[/dim]")
+        console.print(f"  [dim]보유 현금: {portfolio['cash']:,.0f}원 (+{proceeds:,.0f}원)[/dim]")
 
 
 def cmd_cash(args):
@@ -251,12 +293,19 @@ def cmd_analyze(args):
     config = load_config()
     portfolio = load_portfolio()
 
+    # 분석할 종목 (시장 데이터 수집 전에 먼저 수집하여 US 여부 판단)
+    tickers, _ = collect_tickers(args.tickers, config, portfolio, getattr(args, "screen", False))
+    include_us = has_us_tickers(tickers, portfolio)
+
     # 시장 현황
     if not quiet:
         print_phase("시장 환경")
-        print_loading("코스피/코스닥 지수 수집")
+        markets = "코스피/코스닥"
+        if include_us:
+            markets += " + 나스닥/S&P500"
+        print_loading(f"{markets} 지수 수집")
 
-    market_data = collect_market_data()
+    market_data = collect_market_data(include_us=include_us)
 
     if not quiet:
         regime = market_data.get("regime", {})
@@ -264,15 +313,12 @@ def cmd_analyze(args):
             regime_colors = {"bull": "green", "bear": "red", "sideways": "yellow"}
             rc = regime_colors.get(regime["regime"], "white")
             console.print(f"  [{rc}]📈 시장 레짐: {regime['label']}[/{rc}] — {regime['description']}")
-        for idx_name in ("kospi", "kosdaq"):
+        for idx_name in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = market_data.get(idx_name)
             if idx:
                 console.print(f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)")
         if market_data.get("causal_warning"):
             console.print(f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]")
-
-    # 분석할 종목
-    tickers, _ = collect_tickers(args.tickers, config, portfolio, getattr(args, "screen", False))
 
     if not tickers:
         if is_json:
@@ -402,6 +448,7 @@ def main():
     rm_parser = subparsers.add_parser("remove", help="매도 기록")
     rm_parser.add_argument("ticker", help="종목코드")
     rm_parser.add_argument("--price", "-p", type=float, help="매도가")
+    rm_parser.add_argument("--shares", "-n", type=int, help="매도 수량 (미지정 시 전량)")
     rm_parser.add_argument("--reason", "-r", help="매도 이유")
     rm_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
