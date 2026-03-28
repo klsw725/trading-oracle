@@ -72,7 +72,8 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
     lines = []
     votes = consensus["vote_summary"]
     cc = confidence_colors.get(consensus["confidence"], "white")
-    lines.append(f"[bold]합의도:[/bold] [{cc}]{consensus['consensus_label']}[/{cc}]")
+    weighted_tag = " [dim](가중)[/dim]" if consensus.get("weighted") else ""
+    lines.append(f"[bold]합의도:[/bold] [{cc}]{consensus['consensus_label']}[/{cc}]{weighted_tag}")
     lines.append(f"[bold]투표:[/bold] 매수 {votes.get('BUY', 0)} / 매도 {votes.get('SELL', 0)} / 관망 {votes.get('HOLD', 0)} / N/A {votes.get('N/A', 0)}")
     lines.append("")
 
@@ -282,7 +283,8 @@ def cmd_analyze(args):
             if not quiet:
                 print_phase("다관점 투자 판정", f"{len(signals_data)}개 종목 × 5개 관점 병렬 분석")
             try:
-                multi_results = run_multi_perspective(signals_data, portfolio, market_data, config)
+                use_weights = not getattr(args, "no_weights", False)
+                multi_results = run_multi_perspective(signals_data, portfolio, market_data, config, use_weights=use_weights)
                 if not quiet:
                     for ticker, consensus in multi_results.items():
                         name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)
@@ -362,6 +364,7 @@ def main():
     parser.add_argument("--screen", action="store_true", help="주도주 스크리닝 포함")
     parser.add_argument("--no-llm", action="store_true", help="LLM 분석 생략")
     parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
+    parser.add_argument("--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     args = parser.parse_args()

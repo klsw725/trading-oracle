@@ -32,6 +32,11 @@ uv run scripts/daily.py --screen --json
 uv run scripts/daily.py --no-llm --json
 ```
 
+적응형 가중치 비활성화 (동등 가중치):
+```bash
+uv run scripts/daily.py --no-weights --json
+```
+
 기존 단일 관점 분석 (레거시):
 ```bash
 uv run scripts/daily.py --legacy --json
@@ -127,6 +132,7 @@ uv run scripts/build_causal.py info --json
 | "매크로 관점에서 반도체는?" | `uv run scripts/perspective.py --macro -t 005930 000660 --json` |
 | "인과 그래프 만들어줘" | `uv run scripts/build_causal.py build --json` |
 | "인과 그래프 정보" | `uv run scripts/build_causal.py info --json` |
+| "가중치 없이 분석해줘" | `uv run scripts/daily.py --no-weights --json` |
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
 | "어제 추천 결과는?" | `uv run scripts/performance.py detail 2026-03-27 --json` |
 | "스냅샷 목록" | `uv run scripts/performance.py list --json` |

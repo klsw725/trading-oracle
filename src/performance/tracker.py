@@ -257,6 +257,60 @@ def _compute_summary(evaluations: dict, eval_days: list[int]) -> dict:
     }
 
 
+def compute_perspective_weights(min_snapshots: int = 5, eval_window: int = 5) -> dict | None:
+    """축적된 스냅샷에서 관점별 적중률 기반 가중치를 계산한다.
+
+    5일 윈도우 적중률을 가중치로 사용.
+    min_snapshots 미만이면 None 반환 (cold start → 동등 가중치).
+
+    Returns:
+        {"kwangsoo": 0.7, "ouroboros": 0.5, ...} 또는 None
+    """
+    snapshots = list_snapshots()
+    if len(snapshots) < min_snapshots:
+        return None
+
+    # 관점별 적중/전체 집계
+    stats: dict[str, dict] = {}
+    evaluated_count = 0
+
+    for date_str in snapshots:
+        snapshot = load_snapshot(date_str)
+        if not snapshot:
+            continue
+
+        ev = evaluate_snapshot(snapshot, eval_days=[eval_window])
+        has_eval = False
+
+        for ticker_ev in ev["evaluations"].values():
+            for p_name, p_data in ticker_ev.get("perspective_hits", {}).items():
+                hit = p_data.get(str(eval_window))
+                if hit is not None:
+                    if p_name not in stats:
+                        stats[p_name] = {"total": 0, "hits": 0}
+                    stats[p_name]["total"] += 1
+                    if hit:
+                        stats[p_name]["hits"] += 1
+                    has_eval = True
+
+        if has_eval:
+            evaluated_count += 1
+
+    if evaluated_count < min_snapshots:
+        return None
+
+    # 적중률 → 가중치 (최소 0.1, 데이터 없으면 1.0)
+    weights = {}
+    for name in ("kwangsoo", "ouroboros", "quant", "macro", "value"):
+        s = stats.get(name)
+        if s and s["total"] > 0:
+            weights[name] = max(0.1, round(s["hits"] / s["total"], 3))
+        else:
+            weights[name] = 1.0
+
+    return weights
+
+
 def generate_report(days_back: int = 30, eval_days: list[int] | None = None) -> dict:
     """최근 N일간 스냅샷의 성과 리포트 생성.
 

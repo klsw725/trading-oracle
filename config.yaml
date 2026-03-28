@@ -39,5 +39,5 @@ signals:
 # codex 사용 시: uv run main.py codex-login 으로 먼저 로그인
 llm:
   provider: codex
-  model: gpt-5.1-codex
+  model: gpt-5.4
   max_tokens: 4096

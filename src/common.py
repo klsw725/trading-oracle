@@ -161,11 +161,25 @@ def analyze_tickers(tickers: set[str], config: dict) -> list[dict]:
     return results
 
 
-def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data: dict, config: dict) -> dict:
-    """다관점 분석 실행. ticker → consensus dict 반환."""
+def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data: dict, config: dict, use_weights: bool = True) -> dict:
+    """다관점 분석 실행. ticker → consensus dict 반환.
+
+    Args:
+        use_weights: True면 축적된 성과 데이터에서 가중치 자동 로드.
+                     False면 동등 가중치 (기존 동작).
+    """
     from src.perspectives.base import PerspectiveInput
     from src.consensus.voter import run_all_perspectives
     from src.consensus.scorer import compute_consensus
+
+    # 가중치 로드
+    weights = None
+    if use_weights:
+        try:
+            from src.performance.tracker import compute_perspective_weights
+            weights = compute_perspective_weights()
+        except Exception:
+            pass
 
     positions = portfolio.get("positions", [])
     market_context = {}
@@ -197,7 +211,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         )
 
         results = run_all_perspectives(pi)
-        consensus = compute_consensus(results)
+        consensus = compute_consensus(results, weights=weights)
         multi_results[ticker] = consensus
 
     # 스냅샷 자동 저장
