@@ -25,11 +25,14 @@ from src.performance.tracker import (
     load_snapshot,
     evaluate_snapshot,
     generate_report,
+    compute_perspective_weights,
 )
 
 
 def cmd_report(args):
     report = generate_report(days_back=args.days)
+    weights = compute_perspective_weights()
+    report["current_weights"] = weights
 
     if args.json:
         print(json_dump(report))
@@ -103,6 +106,20 @@ def cmd_report(args):
             table.add_row(labels.get(conf, conf), str(stats["hits"]), str(stats["total"]), f"[{color}]{rate_str}[/{color}]")
         console.print(table)
         console.print()
+
+    # 적응형 가중치
+    if weights:
+        table = Table(title="적응형 관점 가중치 (5일 적중률 기반)", show_header=True)
+        table.add_column("관점", style="bold")
+        table.add_column("가중치", justify="right")
+        for name in ("kwangsoo", "ouroboros", "quant", "macro", "value"):
+            w = weights.get(name, 1.0)
+            color = "green" if w >= 0.6 else "yellow" if w >= 0.4 else "red"
+            table.add_row(name, f"[{color}]{w:.3f}[/{color}]")
+        console.print(table)
+        console.print()
+    else:
+        console.print("[dim]⚙️  적응형 가중치: 스냅샷 5개 이상 축적 시 활성화됩니다.[/dim]\n")
 
 
 def cmd_list(args):
