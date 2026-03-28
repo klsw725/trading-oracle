@@ -17,6 +17,7 @@ from src.perspectives.base import call_llm, extract_json
 CHECKPOINT_PATH = Path("data/causal_checkpoint.json")
 
 ROOT_TOPICS = [
+    # 한국 시장
     {"topic": "매크로경제", "domain": "매크로"},
     {"topic": "반도체", "domain": "반도체"},
     {"topic": "자동차", "domain": "자동차"},
@@ -25,13 +26,23 @@ ROOT_TOPICS = [
     {"topic": "바이오", "domain": "바이오"},
     {"topic": "에너지", "domain": "에너지"},
     {"topic": "소비재", "domain": "소비재"},
+    # 글로벌 시장
+    {"topic": "미국 빅테크", "domain": "빅테크"},
+    {"topic": "AI 반도체", "domain": "AI"},
+    {"topic": "미국 금리와 통화정책", "domain": "글로벌매크로"},
+    {"topic": "원유와 원자재", "domain": "원자재"},
+    {"topic": "글로벌 헬스케어", "domain": "글로벌헬스케어"},
+    {"topic": "클라우드와 SaaS", "domain": "클라우드"},
+    {"topic": "전기차와 자율주행", "domain": "글로벌EV"},
+    {"topic": "미중 무역과 지정학", "domain": "지정학"},
 ]
 
 EXPAND_SYSTEM = """\
-당신은 한국 주식 시장 도메인 전문가입니다. 주어진 토픽에서 관련 하위 토픽을 확장합니다.
+당신은 글로벌 및 한국 주식 시장 도메인 전문가입니다. 주어진 토픽에서 관련 하위 토픽을 확장합니다.
 
 ## 규칙
-- 한국 주식 시장과 직접 관련된 토픽만 생성
+- 글로벌 또는 한국 주식 시장과 직접 관련된 토픽만 생성
+- 크로스마켓 연결 토픽 적극 포함 (예: 미국 금리 → 원화, 글로벌 반도체 수요 → 한국 수출)
 - 각 하위 토픽은 독립적이고 구체적
 - 중복이나 너무 일반적인 토픽 금지
 - 반드시 JSON 형식으로만 응답
@@ -43,10 +54,11 @@ EXPAND_SYSTEM = """\
 """
 
 CAUSAL_SYSTEM = """\
-당신은 한국 주식 시장의 인과관계 전문가입니다. 주어진 토픽에서 인과 관계 진술을 추출합니다.
+당신은 글로벌 및 한국 주식 시장의 인과관계 전문가입니다. 주어진 토픽에서 인과 관계 진술을 추출합니다.
 
 ## 규칙
-- 한국 주식 시장에 직접 적용 가능한 인과관계만
+- 글로벌 또는 한국 주식 시장에 직접 적용 가능한 인과관계만
+- 크로스마켓 인과관계 적극 포함 (예: Fed 금리 인상 → 신흥국 자본 유출)
 - "X가 Y를 야기한다" 형태의 명확한 인과 진술
 - 관계는 increases, decreases, causes, enables, blocks 중 하나
 - 반드시 JSON 형식으로만 응답
@@ -81,7 +93,7 @@ def _load_checkpoint() -> dict | None:
 
 def expand_topic(topic: str, config: dict) -> list[str]:
     """토픽에서 하위 토픽 5개 확장."""
-    prompt = f"토픽: {topic}\n\n이 토픽에서 한국 주식 시장과 관련된 하위 토픽 5개를 생성하세요."
+    prompt = f"토픽: {topic}\n\n이 토픽에서 글로벌/한국 주식 시장과 관련된 하위 토픽 5개를 생성하세요."
     try:
         text = call_llm(EXPAND_SYSTEM, prompt, config, max_tokens=512)
         parsed = extract_json(text)
@@ -94,7 +106,7 @@ def expand_topic(topic: str, config: dict) -> list[str]:
 
 def extract_triples(topic: str, domain: str, config: dict) -> list[dict]:
     """토픽에서 인과 트리플 3개 추출."""
-    prompt = f"토픽: {topic}\n도메인: {domain}\n\n이 토픽에서 한국 주식 시장의 인과관계 트리플 3개를 추출하세요."
+    prompt = f"토픽: {topic}\n도메인: {domain}\n\n이 토픽에서 글로벌/한국 주식 시장의 인과관계 트리플 3개를 추출하세요."
     try:
         text = call_llm(CAUSAL_SYSTEM, prompt, config, max_tokens=512)
         parsed = extract_json(text)
@@ -114,7 +126,7 @@ def expand_all_topics(config: dict, max_topics: int = 500, max_depth: int = 3, o
     """BFS로 토픽 확장. 루트 → depth 3, 최대 max_topics개."""
     root_list = roots or ROOT_TOPICS
     all_topics = [{"topic": r["topic"], "domain": r["domain"], "depth": 0} for r in root_list]
-    seen = {r["topic"] for r in ROOT_TOPICS}
+    seen = {r["topic"] for r in root_list}
     queue = list(all_topics)
 
     while queue and len(all_topics) < max_topics:

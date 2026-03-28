@@ -18,25 +18,47 @@ def _get_causal_context(name: str, ticker: str) -> str:
     """인과 그래프에서 종목 관련 인과 체인 조회. 없으면 빈 문자열."""
     try:
         from src.causal.graph import CausalGraph
+        from src.data.market import is_us_ticker
         graph = CausalGraph.load_if_exists()
         if not graph:
             return ""
 
-        # 종목명, 섹터 키워드로 관련 인과 체인 조회
         keywords = [name]
-        # 종목명에서 키워드 추출 (예: "삼성전자" → "삼성", "전자", "반도체")
-        if "전자" in name or "반도체" in name or "하이닉스" in name:
-            keywords.extend(["반도체", "메모리", "디램"])
-        elif "자동차" in name or "기아" in name or "현대" in name:
-            keywords.extend(["자동차", "전기차"])
-        elif "에어로" in name or "한화" in name:
-            keywords.extend(["방산", "무기"])
-        elif "금융" in name or "은행" in name or "지주" in name:
-            keywords.extend(["금리", "금융"])
-        elif "바이오" in name or "제약" in name:
-            keywords.extend(["바이오", "신약"])
-        elif "에너지" in name or "배터리" in name:
-            keywords.extend(["에너지", "배터리", "2차전지"])
+
+        if is_us_ticker(ticker):
+            # 미국 종목 키워드 매핑
+            name_upper = name.upper()
+            ticker_upper = ticker.upper()
+            if ticker_upper in ("NVDA", "AMD", "INTC", "AVGO", "QCOM", "MU", "TSM") or "SEMICONDUCTOR" in name_upper:
+                keywords.extend(["반도체", "AI 반도체", "메모리", "GPU"])
+            elif ticker_upper in ("AAPL", "MSFT", "GOOGL", "GOOG", "META", "AMZN") or "TECH" in name_upper:
+                keywords.extend(["빅테크", "클라우드", "AI"])
+            elif ticker_upper in ("TSLA", "RIVN", "LCID", "NIO", "LI", "XPEV"):
+                keywords.extend(["전기차", "자율주행", "배터리"])
+            elif ticker_upper in ("JPM", "BAC", "GS", "MS", "C", "WFC"):
+                keywords.extend(["금리", "금융", "미국 금리"])
+            elif ticker_upper in ("XOM", "CVX", "COP", "SLB", "OXY"):
+                keywords.extend(["원유", "에너지", "원자재"])
+            elif ticker_upper in ("JNJ", "PFE", "UNH", "ABBV", "MRK", "LLY"):
+                keywords.extend(["헬스케어", "바이오", "신약"])
+            elif ticker_upper in ("LMT", "RTX", "NOC", "GD", "BA"):
+                keywords.extend(["방산", "지정학"])
+            else:
+                keywords.extend(["미국 금리", "빅테크"])
+        else:
+            # 한국 종목 키워드 매핑
+            if "전자" in name or "반도체" in name or "하이닉스" in name:
+                keywords.extend(["반도체", "메모리", "디램"])
+            elif "자동차" in name or "기아" in name or "현대" in name:
+                keywords.extend(["자동차", "전기차"])
+            elif "에어로" in name or "한화" in name:
+                keywords.extend(["방산", "무기"])
+            elif "금융" in name or "은행" in name or "지주" in name:
+                keywords.extend(["금리", "금융"])
+            elif "바이오" in name or "제약" in name:
+                keywords.extend(["바이오", "신약"])
+            elif "에너지" in name or "배터리" in name:
+                keywords.extend(["에너지", "배터리", "2차전지"])
 
         chains = graph.get_related_chains(keywords, depth=2)
         if not chains:
@@ -130,9 +152,8 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%%, 20일 {idx['change_20d']:+.1f}%%)")
         lines.append("")
 
-    # 인과 그래프 참조 (한국 종목만 — US 인과 그래프는 미구축)
-    from src.data.market import is_us_ticker
-    causal_context = "" if is_us_ticker(data.ticker) else _get_causal_context(data.name, data.ticker)
+    # 인과 그래프 참조 (한국+글로벌 통합 그래프)
+    causal_context = _get_causal_context(data.name, data.ticker)
     if causal_context:
         lines.append("### 인과 그래프 참조 (배경 지식)")
         lines.append(causal_context)
