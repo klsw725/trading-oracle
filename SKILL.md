@@ -49,9 +49,14 @@ uv run scripts/daily.py --legacy --json
 uv run scripts/portfolio.py add <종목코드> <매수가> <수량> --reason "매수 이유" --json
 ```
 
-매도 기록:
+매도 기록 (전량):
 ```bash
 uv run scripts/portfolio.py remove <종목코드> --price <매도가> --reason "매도 이유" --json
+```
+
+분할 매도 (일부 수량):
+```bash
+uv run scripts/portfolio.py remove <종목코드> --price <매도가> --shares <수량> --json
 ```
 
 현금 설정:
@@ -125,6 +130,9 @@ uv run scripts/build_causal.py info --json
 | "주도주 뭐 있어?" | `uv run scripts/screen.py --json` |
 | "삼성전자 20만원에 10주 샀어" | `uv run scripts/portfolio.py add 005930 200000 10 --json` |
 | "SK하이닉스 팔았어" | `uv run scripts/portfolio.py remove 000660 --json` |
+| "삼성전자 5주만 팔아" | `uv run scripts/portfolio.py remove 005930 --shares 5 --json` |
+| "애플 분석해줘" | `uv run scripts/daily.py -t AAPL --json` |
+| "AAPL 200달러에 10주 샀어" | `uv run scripts/portfolio.py add AAPL 200 10 --json` |
 | "현금 천만원 있어" | `uv run scripts/portfolio.py cash 10000000 --json` |
 | "내 포트폴리오 보여줘" | `uv run scripts/portfolio.py show --json` |
 | "거래 내역" | `uv run scripts/portfolio.py history --json` |
@@ -178,6 +186,23 @@ uv run scripts/performance.py detail 2026-03-28 --json
 | 삼성바이오로직스 | 207940 |
 | 두산에너빌리티 | 034020 |
 | 기아 | 000270 |
+
+## 미국 종목 코드 참고
+
+| 종목명 | 코드 |
+|--------|------|
+| Apple | AAPL |
+| Microsoft | MSFT |
+| NVIDIA | NVDA |
+| Tesla | TSLA |
+| Amazon | AMZN |
+| Alphabet (Google) | GOOGL |
+| Meta | META |
+| AMD | AMD |
+| Netflix | NFLX |
+| Broadcom | AVGO |
+
+> 미국 종목은 알파벳 티커 (AAPL, MSFT 등), 한국 종목은 숫자 코드 (005930 등)로 자동 구분됩니다.
 
 ## 합의도 해석
 

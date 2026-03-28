@@ -29,6 +29,7 @@ from src.common import (
     analyze_tickers,
     run_multi_perspective,
     build_signals_json,
+    has_us_tickers,
 )
 from src.portfolio.tracker import load_portfolio, update_positions, get_portfolio_summary
 
@@ -46,11 +47,12 @@ def main():
     config = load_config()
     portfolio = load_portfolio()
 
-    # 시장 데이터
-    market_data = collect_market_data()
-
-    # 분석 종목 수집
+    # 분석 종목 수집 (시장 데이터 전에 US 여부 판단)
     tickers, _ = collect_tickers(args.tickers, config, portfolio, args.screen)
+    include_us = has_us_tickers(tickers, portfolio)
+
+    # 시장 데이터
+    market_data = collect_market_data(include_us=include_us)
     if not tickers:
         if args.json:
             print(json_dump({"status": "error", "message": "분석할 종목이 없습니다"}))
@@ -132,7 +134,7 @@ def main():
             regime_colors = {"bull": "green", "bear": "red", "sideways": "yellow"}
             rc = regime_colors.get(regime["regime"], "white")
             console.print(f"  [{rc}]📈 시장 레짐: {regime['label']}[/{rc}] — {regime['description']}")
-        for idx_name in ("kospi", "kosdaq"):
+        for idx_name in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = market_data.get(idx_name)
             if idx:
                 console.print(f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)")
