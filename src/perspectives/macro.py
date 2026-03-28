@@ -138,6 +138,13 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         lines.append(causal_context)
         lines.append("")
 
+    # 웹 검색 컨텍스트 (Phase 10)
+    if data.web_context:
+        from src.data.web_search import format_web_context_for_prompt
+        web_text = format_web_context_for_prompt(data.web_context, "macro")
+        if web_text:
+            lines.append(web_text)
+
     lines.append("위 데이터를 기반으로 매크로 인과 관점에서 분석하고 JSON으로 응답하세요.")
     lines.append("이 기업의 이익에 가장 큰 영향을 미치는 매크로 변수를 식별하고, 인과 체인을 구성하세요.")
     if causal_context:

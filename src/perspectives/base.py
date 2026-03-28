@@ -24,6 +24,7 @@ class PerspectiveInput:
     position: dict | None  # 포트폴리오 포지션 (미보유 시 None)
     market_context: dict  # {"kospi": {...}, "kosdaq": {...}}
     config: dict
+    web_context: dict = field(default_factory=dict)  # 웹 검색 결과 (Phase 10)
 
 
 @dataclass

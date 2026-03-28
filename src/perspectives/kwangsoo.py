@@ -146,6 +146,14 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         if "div_yield" in f:
             lines.append(f"- 배당수익률: {f['div_yield']}%%")
 
+    # 웹 검색 컨텍스트 (Phase 10)
+    if data.web_context:
+        from src.data.web_search import format_web_context_for_prompt
+        web_text = format_web_context_for_prompt(data.web_context, "kwangsoo")
+        if web_text:
+            lines.append("")
+            lines.append(web_text)
+
     lines.append("")
     lines.append("위 데이터를 이광수 투자 철학에 따라 분석하고, 지정된 JSON 형식으로 응답하세요.")
 
