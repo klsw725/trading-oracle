@@ -2,280 +2,5752 @@
   "metadata": {
     "created_at": null,
     "updated_at": "2026-03-28",
-    "num_topics": 88,
-    "num_triples": 45,
-    "llm_model": "codex/gpt-5.1-codex"
+    "num_topics": 1605,
+    "num_triples": 957,
+    "llm_model": "codex/gpt-5.4"
   },
   "triples": [
     {
       "subject": "한국은행 기준금리 인상",
       "relation": "decreases",
-      "object": "코스피 시장의 유동성",
-      "domain": "매크로"
-    },
-    {
-      "subject": "원화 강세",
-      "relation": "decreases",
-      "object": "한국 수출기업의 원화 환산 이익",
-      "domain": "매크로"
-    },
-    {
-      "subject": "중국 내수 회복",
-      "relation": "increases",
-      "object": "한국 상장 제조업체의 매출",
-      "domain": "매크로"
-    },
-    {
-      "subject": "정부의 방위비 증액",
-      "relation": "increases",
-      "object": "방산주들의 실적",
-      "domain": "방산"
-    },
-    {
-      "subject": "북한과의 군사적 긴장",
-      "relation": "increases",
-      "object": "국내 방산 기업 수주",
-      "domain": "방산"
-    },
-    {
-      "subject": "방산 수출 계약 체결",
-      "relation": "increases",
-      "object": "한국 방산주의 주가",
-      "domain": "방산"
-    },
-    {
-      "subject": "한국은행의 기준금리 인상",
-      "relation": "decreases",
-      "object": "국내 성장주 밸류에이션",
+      "object": "한국 주식 시장의 밸류에이션",
       "domain": "금융"
     },
     {
       "subject": "원/달러 환율 상승",
       "relation": "increases",
-      "object": "수출주 이익 전망",
+      "object": "수출 비중이 높은 한국 상장기업의 실적 기대",
       "domain": "금융"
     },
     {
-      "subject": "대규모 자사주 매입",
+      "subject": "기업 실적 개선",
       "relation": "increases",
-      "object": "해당 기업 주가",
+      "object": "해당 한국 상장기업의 주가",
       "domain": "금융"
     },
     {
-      "subject": "글로벌 반도체 수요 증가",
+      "subject": "국내외 국방예산 증액",
       "relation": "increases",
-      "object": "한국 반도체 기업 실적",
-      "domain": "반도체"
+      "object": "한국 방산업체 수주 기대감",
+      "domain": "방산"
     },
     {
-      "subject": "메모리 반도체 가격 하락",
+      "subject": "대형 방산 수출 계약 체결",
+      "relation": "increases",
+      "object": "한국 방산주 주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "정부의 무기체계 국산화 정책 강화",
+      "relation": "increases",
+      "object": "한국 방산업체 실적 전망",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
       "relation": "decreases",
-      "object": "삼성전자 영업이익",
+      "object": "한국 주식 시장 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "수출 비중이 높은 한국 상장기업의 실적 기대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국제 유가 급등",
+      "relation": "decreases",
+      "object": "한국 주식 시장 전반의 이익 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "메모리 반도체 가격 상승",
+      "relation": "increases",
+      "object": "삼성전자와 SK하이닉스의 실적 기대감",
       "domain": "반도체"
     },
     {
-      "subject": "정부의 반도체 클러스터 투자",
-      "relation": "enables",
-      "object": "국내 소재·장비 기업 수주 확대",
+      "subject": "글로벌 반도체 수요 회복",
+      "relation": "increases",
+      "object": "국내 반도체 업종 주가",
       "domain": "반도체"
+    },
+    {
+      "subject": "미국의 대중 반도체 수출 규제 강화",
+      "relation": "decreases",
+      "object": "국내 반도체 기업의 중국 매출 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "완성차 판매 증가",
+      "relation": "increases",
+      "object": "자동차 부품사 매출",
+      "domain": "자동차"
     },
     {
       "subject": "전기차 보조금 확대",
       "relation": "increases",
-      "object": "한국 자동차 배터리 기업 매출",
+      "object": "국내 배터리 기업 실적",
       "domain": "자동차"
     },
     {
-      "subject": "친환경 규제 강화",
-      "relation": "increases",
-      "object": "국내 자동차 부품주 투자 수요",
+      "subject": "자동차 반도체 공급 부족",
+      "relation": "decreases",
+      "object": "완성차 생산량",
       "domain": "자동차"
-    },
-    {
-      "subject": "국제 유가 하락",
-      "relation": "decreases",
-      "object": "국내 내연기관 자동차 생산 비용",
-      "domain": "자동차"
-    },
-    {
-      "subject": "카드사의 ROE 상승",
-      "relation": "increases",
-      "object": "카드사 주가",
-      "domain": "금융"
-    },
-    {
-      "subject": "카드사의 NIM 축소",
-      "relation": "decreases",
-      "object": "카드사 수익성",
-      "domain": "금융"
-    },
-    {
-      "subject": "카드사 본업 수익성 지표 악화",
-      "relation": "decreases",
-      "object": "카드사 주가",
-      "domain": "금융"
-    },
-    {
-      "subject": "가계의 실질소득 증가",
-      "relation": "increases",
-      "object": "소비재 기업의 매출",
-      "domain": "소비재"
     },
     {
       "subject": "원재료 가격 상승",
       "relation": "decreases",
-      "object": "소비재 기업의 이익률",
+      "object": "국내 소비재 기업의 영업이익률",
       "domain": "소비재"
     },
     {
-      "subject": "정부의 소비진작 정책",
+      "subject": "소비 심리 개선",
       "relation": "increases",
-      "object": "소비재 업종 주가",
+      "object": "국내 소비재 기업의 매출",
       "domain": "소비재"
     },
     {
-      "subject": "국제 유가 상승",
+      "subject": "원/달러 환율 상승",
       "relation": "increases",
-      "object": "한국 정유주의 실적",
+      "object": "수출 비중이 높은 국내 소비재 기업의 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "임상 3상 성공",
+      "relation": "increases",
+      "object": "바이오 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "식품의약품안전처 품목허가 승인",
+      "relation": "causes",
+      "object": "바이오 기업 매출 발생",
+      "domain": "바이오"
+    },
+    {
+      "subject": "대규모 유상증자",
+      "relation": "decreases",
+      "object": "바이오 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "삼성전자 메모리 반도체 영업이익 증가",
+      "relation": "increases",
+      "object": "삼성전자 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM·NAND 가격 상승",
+      "relation": "increases",
+      "object": "삼성전자 메모리 반도체 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 업황 악화",
+      "relation": "decreases",
+      "object": "삼성전자 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 HBM 투자 확대",
+      "relation": "increases",
+      "object": "HBM 장비·소재 공급사의 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 생산능력 증설",
+      "relation": "increases",
+      "object": "국내 반도체 후공정·패키징 관련주의 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 HBM 투자 확대",
+      "relation": "causes",
+      "object": "국내 HBM 밸류체인 수혜주의 주가 관심 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국제유가 상승",
+      "relation": "increases",
+      "object": "한국 정유주 수익성 기대",
       "domain": "에너지"
     },
     {
-      "subject": "정부의 신재생에너지 보조금 확대",
+      "subject": "천연가스 가격 상승",
+      "relation": "increases",
+      "object": "한국 도시가스주 실적 변동성",
+      "domain": "에너지"
+    },
+    {
+      "subject": "전력도매가격 상승",
+      "relation": "increases",
+      "object": "한국 발전주 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 수출주의 이익 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "한국 수입주의 이익 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "increases",
+      "object": "한국 수입주의 수익성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매수 확대",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매도 확대",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 업종지수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSPI 반도체 업종지수의 상승 추세",
       "relation": "enables",
-      "object": "국내 태양광 관련주의 수주 증가",
-      "domain": "에너지"
+      "object": "외국인 순매수 유입 확대",
+      "domain": "반도체"
     },
     {
-      "subject": "석유제품 수출 감소",
-      "relation": "decreases",
-      "object": "한국 정유주의 이익",
-      "domain": "에너지"
-    },
-    {
-      "subject": "국내 바이오기업의 신약 임상 3상 성공",
+      "subject": "원익IPS의 반도체 장비 수주 증가",
       "relation": "increases",
-      "object": "해당 바이오주 주가",
-      "domain": "바이오"
+      "object": "원익IPS의 매출 성장 기대",
+      "domain": "반도체"
     },
     {
-      "subject": "정부의 바이오 규제 강화",
-      "relation": "decreases",
-      "object": "바이오기업들의 투자 심리",
-      "domain": "바이오"
-    },
-    {
-      "subject": "국내 제약사의 글로벌 기술수출 계약 체결",
+      "subject": "주성엔지니어링의 반도체 장비 수주 증가",
       "relation": "increases",
-      "object": "코스닥 바이오 섹터에 대한 외국인 수급",
-      "domain": "바이오"
+      "object": "주성엔지니어링의 실적 개선 기대",
+      "domain": "반도체"
     },
     {
-      "subject": "국내 은행주의 배당성향 확대",
-      "relation": "increases",
-      "object": "은행주 배당수익률",
-      "domain": "금융"
+      "subject": "국내 반도체 업체의 설비투자 확대",
+      "relation": "causes",
+      "object": "원익IPS·주성엔지니어링의 수주 증가",
+      "domain": "반도체"
     },
     {
-      "subject": "금융당국의 자본적정성 규제 강화",
+      "subject": "한국은행 기준금리 인상",
       "relation": "decreases",
-      "object": "국내 은행주의 배당 여력",
-      "domain": "금융"
+      "object": "코스피 건설업종 주가",
+      "domain": "매크로"
     },
     {
-      "subject": "안정적인 배당정책 가이던스 제공",
+      "subject": "한국은행 기준금리 인상",
+      "relation": "decreases",
+      "object": "코스피 증권업종 거래대금",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "increases",
+      "object": "코스피 은행업종 순이자마진 기대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 소재 공급망 차질",
+      "relation": "decreases",
+      "object": "솔브레인·동진쎄미켐의 생산 안정성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "솔브레인·동진쎄미켐의 생산 안정성 악화",
+      "relation": "decreases",
+      "object": "국내 반도체 제조사의 소재 조달 안정성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 제조사의 소재 조달 불안",
+      "relation": "decreases",
+      "object": "반도체 소재주의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "한국 GDP 성장률 전망 상향",
+      "relation": "increases",
+      "object": "경기민감주 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 전망 하향",
+      "relation": "decreases",
+      "object": "경기민감주 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 전망 개선",
       "relation": "enables",
-      "object": "배당 중심 투자전략 실행",
-      "domain": "금융"
+      "object": "경기민감주 비중 확대 전략",
+      "domain": "매크로"
     },
     {
-      "subject": "금융지주의 ESG 경영 평가 개선",
+      "subject": "미국 연준의 금리 인하",
+      "relation": "increases",
+      "object": "외국인 자금의 한국 증시 유입",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 자금의 한국 증시 유입",
+      "relation": "increases",
+      "object": "한국 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 연준의 금리 인상",
       "relation": "decreases",
-      "object": "자금조달 비용",
-      "domain": "금융"
+      "object": "외국인 자금의 한국 증시 유입",
+      "domain": "매크로"
     },
     {
-      "subject": "높은 ESG 리스크",
+      "subject": "현대차·기아의 영업이익 증가",
       "relation": "increases",
-      "object": "금융지주의 조달 금리",
-      "domain": "금융"
+      "object": "현대차·기아 주가",
+      "domain": "자동차"
     },
     {
-      "subject": "ESG 평가 악화",
-      "relation": "blocks",
-      "object": "저금리 채권 발행",
-      "domain": "금융"
-    },
-    {
-      "subject": "정부의 방위비 예산 증가",
+      "subject": "원/달러 환율 상승",
       "relation": "increases",
-      "object": "한화에어로스페이스의 신규 방산 수주",
+      "object": "현대차·기아의 수출 채산성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "글로벌 자동차 수요 둔화",
+      "relation": "decreases",
+      "object": "현대차·기아의 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 소비자물가 상승률 상승",
+      "relation": "decreases",
+      "object": "내수주의 실질 소비여력 기반 매출 성장 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 소비자물가 상승률 상승",
+      "relation": "causes",
+      "object": "원가 부담 확대에 따른 내수주 수익성 악화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 소비자물가 상승률 안정",
+      "relation": "increases",
+      "object": "내수주 실적 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 완성차의 전기차 생산 확대",
+      "relation": "increases",
+      "object": "국내 자동차 부품주의 전동화 부품 수주",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전동화 부품 수주 증가",
+      "relation": "causes",
+      "object": "국내 자동차 부품주의 실적 개선",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 자동차 부품주의 실적 개선",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "완성차 수출 증가",
+      "relation": "increases",
+      "object": "코스피 자동차주의 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "완성차 수출 증가",
+      "relation": "increases",
+      "object": "코스피 자동차주의 영업이익",
+      "domain": "자동차"
+    },
+    {
+      "subject": "코스피 자동차주의 영업이익 증가",
+      "relation": "increases",
+      "object": "코스피 자동차주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "increases",
+      "object": "코스피 은행주의 순이자마진",
+      "domain": "금융"
+    },
+    {
+      "subject": "코스피 은행주의 순이자마진 확대",
+      "relation": "increases",
+      "object": "코스피 은행주의 실적",
+      "domain": "금융"
+    },
+    {
+      "subject": "시장금리 하락",
+      "relation": "decreases",
+      "object": "코스피 은행주의 이자이익 증가율",
+      "domain": "금융"
+    },
+    {
+      "subject": "증권사 브로커리지 수익 증가",
+      "relation": "increases",
+      "object": "국내 증권주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 주식 거래대금 증가",
+      "relation": "increases",
+      "object": "증권사 브로커리지 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "증권사 브로커리지 수익 감소",
+      "relation": "decreases",
+      "object": "국내 증권주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "미국 IRA의 북미 최종조립 및 배터리 원산지 요건 강화",
+      "relation": "decreases",
+      "object": "한국 자동차 완성차 업체의 미국 전기차 세액공제 수혜 가능성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국 자동차 업체의 미국 현지 전기차 생산 확대",
+      "relation": "increases",
+      "object": "한국 자동차 업종의 미국 IRA 세액공제 수혜 가능성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 IRA 수혜 가능성 확대",
+      "relation": "increases",
+      "object": "한국 자동차 업종 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 배터리 3사와 자동차 OEM의 배터리 공급 계약 확대",
+      "relation": "increases",
+      "object": "국내 배터리 소재·부품 협력사의 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "자동차 OEM의 전기차 생산 확대",
+      "relation": "increases",
+      "object": "국내 배터리 3사 밸류체인 수혜주의 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 배터리 3사와 글로벌 자동차 OEM의 합작법인 설립",
+      "relation": "increases",
+      "object": "국내 장비·소재 수혜주의 수주 가능성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 방산 대형주의 수주잔고 증가",
+      "relation": "increases",
+      "object": "향후 매출 가시성",
       "domain": "방산"
     },
     {
-      "subject": "한화에어로스페이스의 방산 수주 증가",
+      "subject": "국내 방산 대형주의 수주잔고 증가",
       "relation": "increases",
-      "object": "한화에어로스페이스의 미래 현금흐름 가시성",
+      "object": "향후 영업실적",
       "domain": "방산"
     },
     {
-      "subject": "방산 기업들의 미래 현금흐름 가시성 향상",
-      "relation": "increases",
-      "object": "주요 방산주의 밸류에이션",
+      "subject": "국내 방산 대형주의 대규모 신규 수주",
+      "relation": "causes",
+      "object": "수주잔고 증가",
       "domain": "방산"
     },
     {
       "subject": "K-방산 수출 확대",
       "relation": "increases",
-      "object": "방산 기업의 매출 규모",
+      "object": "코스피 방산주의 매출 성장 기대",
       "domain": "방산"
     },
     {
-      "subject": "방산 기업 매출 증가",
+      "subject": "코스피 방산주의 매출 성장 기대 확대",
       "relation": "increases",
-      "object": "방산주 이익 개선",
+      "object": "코스피 방산주 밸류에이션",
       "domain": "방산"
     },
     {
-      "subject": "방산주 이익 개선",
-      "relation": "increases",
-      "object": "방산주 주가 상승 기대",
+      "subject": "대규모 해외 방산 수주 확보",
+      "relation": "causes",
+      "object": "코스피 방산주 밸류에이션 상승",
       "domain": "방산"
     },
     {
-      "subject": "인터넷전문은행 상장 추진 기대",
+      "subject": "보험사의 K-ICS 비율 상승",
       "relation": "increases",
-      "object": "인터넷전문은행 관련주 밸류에이션",
+      "object": "보험주 주가 재평가 가능성",
       "domain": "금융"
     },
     {
-      "subject": "플랫폼 기반의 높은 수익 성장",
+      "subject": "금리 하락으로 인한 보험부채 평가액 증가",
+      "relation": "decreases",
+      "object": "보험사의 K-ICS 비율",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험사의 K-ICS 비율 하락",
+      "relation": "causes",
+      "object": "자본확충 우려 확대",
+      "domain": "금융"
+    },
+    {
+      "subject": "한국 상장 금융지주사의 배당성향 상향",
+      "relation": "increases",
+      "object": "주주환원 기대에 따른 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "밸류업 프로그램 참여 공시",
+      "relation": "increases",
+      "object": "금융지주사 저PBR 해소 기대",
+      "domain": "금융"
+    },
+    {
+      "subject": "자사주 소각을 포함한 주주환원정책 강화",
+      "relation": "causes",
+      "object": "주당가치 상승",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융 규제 강화",
+      "relation": "increases",
+      "object": "핀테크 관련 국내 상장사의 컴플라이언스 비용",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융 규제 강화",
+      "relation": "decreases",
+      "object": "핀테크 관련 국내 상장사의 수익성",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융업 인가 취득",
       "relation": "enables",
-      "object": "인터넷전문은행의 높은 상장 밸류에이션",
+      "object": "핀테크 관련 국내 상장사의 신규 금융서비스 출시",
       "domain": "금융"
     },
     {
-      "subject": "금융당국 규제 강화",
-      "relation": "decreases",
-      "object": "인터넷전문은행 상장 성공 가능성",
-      "domain": "금융"
-    },
-    {
-      "subject": "국내 금리 인상",
+      "subject": "중국향 화장품 수출 증가",
       "relation": "increases",
-      "object": "국내 보험주의 운용수익과 이익 전망",
+      "object": "국내 화장품 상장사 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "미국향 화장품 수출 증가",
+      "relation": "increases",
+      "object": "국내 화장품 상장사 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 내 한국 화장품 수요 둔화",
+      "relation": "decreases",
+      "object": "국내 화장품 상장사 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 방산 수출주의 원화 기준 수출 매출",
+      "domain": "방산"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 방산 수출주의 영업이익",
+      "domain": "방산"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "decreases",
+      "object": "한국 방산 수출주의 영업이익",
+      "domain": "방산"
+    },
+    {
+      "subject": "정부 국방예산 증액",
+      "relation": "increases",
+      "object": "국내 방산업체의 부품 발주 규모",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산업체의 부품 발주 규모 증가",
+      "relation": "increases",
+      "object": "국내 방산 부품주의 매출 기대감",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 부품주의 매출 기대감 상승",
+      "relation": "increases",
+      "object": "국내 방산 부품주 주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "소비 경기 둔화",
+      "relation": "decreases",
+      "object": "대형마트 상장사의 기존점 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "필수소비재 중심의 상품 구성",
+      "relation": "enables",
+      "object": "편의점 상장사의 경기 방어적 매출 구조",
+      "domain": "소비재"
+    },
+    {
+      "subject": "객단가가 높은 비필수 품목 판매 비중 확대",
+      "relation": "increases",
+      "object": "대형마트 상장사의 소비 경기 민감도",
+      "domain": "소비재"
+    },
+    {
+      "subject": "전차 부문 수주 경쟁력 강화",
+      "relation": "increases",
+      "object": "전차 관련 국내 상장 방산업체의 매출 성장 가능성",
+      "domain": "방산"
+    },
+    {
+      "subject": "자주포의 해외 수출 확대",
+      "relation": "increases",
+      "object": "자주포 관련 국내 상장 방산업체의 수주잔고",
+      "domain": "방산"
+    },
+    {
+      "subject": "유도무기 체계 기술 경쟁력 열위",
+      "relation": "decreases",
+      "object": "유도무기 관련 국내 상장 방산업체의 수출 수주 가능성",
+      "domain": "방산"
+    },
+    {
+      "subject": "곡물·원당·팜유 등 원재료 가격 상승",
+      "relation": "causes",
+      "object": "음식료 상장사의 원가 부담 확대",
+      "domain": "소비재"
+    },
+    {
+      "subject": "음식료 상장사의 제품 가격 인상",
+      "relation": "increases",
+      "object": "매출액",
+      "domain": "소비재"
+    },
+    {
+      "subject": "제품 가격 인상",
+      "relation": "enables",
+      "object": "음식료 상장사의 수익성 방어",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 관광객 수 증가",
+      "relation": "increases",
+      "object": "면세점 관련 상장사의 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 단체관광 규제 완화",
+      "relation": "causes",
+      "object": "중국인 관광객 수 증가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "면세점 관련 상장사의 매출 증가",
+      "relation": "increases",
+      "object": "면세점 관련 상장사의 영업이익",
+      "domain": "소비재"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 임상 3상 성공 결과 발표",
+      "relation": "increases",
+      "object": "해당 기업의 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 임상 3상 실패 결과 발표",
+      "relation": "decreases",
+      "object": "해당 기업의 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 임상 3상 유효성·안전성 입증",
+      "relation": "enables",
+      "object": "상업화 기대에 따른 주가 상승",
+      "domain": "바이오"
+    },
+    {
+      "subject": "내수 소비 회복",
+      "relation": "increases",
+      "object": "의류·패션 상장사의 재고 회전율",
+      "domain": "소비재"
+    },
+    {
+      "subject": "의류·패션 상장사의 재고 회전율 개선",
+      "relation": "increases",
+      "object": "의류·패션 상장사의 실적 기대감",
+      "domain": "소비재"
+    },
+    {
+      "subject": "의류·패션 상장사의 재고 회전율 악화",
+      "relation": "decreases",
+      "object": "의류·패션 상장사의 수익성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 해외 수출 증가",
+      "relation": "increases",
+      "object": "국내 바이오시밀러 상장사의 매출",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 매출 증가",
+      "relation": "increases",
+      "object": "국내 바이오시밀러 상장사의 영업이익",
+      "domain": "바이오"
+    },
+    {
+      "subject": "해외 주요 시장에서의 바이오시밀러 판매 허가 획득",
+      "relation": "enables",
+      "object": "국내 바이오시밀러 상장사의 수출 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "한국 바이오 기업의 대규모 기술수출 계약 공시",
+      "relation": "increases",
+      "object": "해당 기업의 밸류에이션",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 계약의 선급금 규모 확대",
+      "relation": "increases",
+      "object": "한국 바이오 기업의 기업가치 재평가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 계약 해지 또는 반환 공시",
+      "relation": "decreases",
+      "object": "해당 바이오 기업의 밸류에이션",
+      "domain": "바이오"
+    },
+    {
+      "subject": "D램 가격 상승",
+      "relation": "increases",
+      "object": "삼성전자의 분기별 영업이익 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "D램 가격 하락",
+      "relation": "decreases",
+      "object": "삼성전자의 분기별 영업이익 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 분기별 영업이익 추정치 상향",
+      "relation": "increases",
+      "object": "삼성전자 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSDAQ 바이오 기업의 FDA 허가 승인",
+      "relation": "increases",
+      "object": "해당 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "KOSDAQ 바이오 기업의 EMA 허가 지연",
+      "relation": "decreases",
+      "object": "해당 기업 투자심리",
+      "domain": "바이오"
+    },
+    {
+      "subject": "KOSDAQ 바이오 기업의 FDA·EMA 허가 진행 진전",
+      "relation": "increases",
+      "object": "해당 기업에 대한 투자자 관심",
+      "domain": "바이오"
+    },
+    {
+      "subject": "삼성전자 낸드플래시 출하량 증가",
+      "relation": "increases",
+      "object": "삼성전자 반도체 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 반도체 매출 증가",
+      "relation": "increases",
+      "object": "삼성전자 시가총액",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 시가총액 증가",
+      "relation": "increases",
+      "object": "코스피 내 삼성전자 시가총액 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 CAR-T·유전자치료제 개발 상장사의 임상 성공 가능성이 높은 파이프라인 경쟁력",
+      "relation": "increases",
+      "object": "해당 상장사의 기업가치",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 CAR-T·유전자치료제 개발 상장사의 차별화된 플랫폼 기술 확보",
+      "relation": "increases",
+      "object": "기술이전 계약 체결 가능성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 CAR-T·유전자치료제 개발 상장사의 핵심 파이프라인 임상 실패",
+      "relation": "decreases",
+      "object": "해당 상장사의 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국제유가 상승",
+      "relation": "increases",
+      "object": "국내 정유사의 재고평가이익",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 정유사 실적 개선",
+      "relation": "increases",
+      "object": "정유주 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제유가 하락",
+      "relation": "decreases",
+      "object": "국내 정유사의 정제마진",
+      "domain": "에너지"
+    },
+    {
+      "subject": "메모리 반도체 업황 회복",
+      "relation": "increases",
+      "object": "삼성전자 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 실적 기대감 상승",
+      "relation": "increases",
+      "object": "삼성전자 외국인 매수세",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 업황 회복",
+      "relation": "causes",
+      "object": "삼성전자 외국인 수급 개선",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국제 LNG 가격 상승",
+      "relation": "increases",
+      "object": "한국 LNG 직수입·트레이딩 상장사의 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 LNG 발전 수요 증가",
+      "relation": "increases",
+      "object": "LNG 터미널·저장·기화 관련 상장사의 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "LNG 운반선 발주 증가",
+      "relation": "increases",
+      "object": "한국 조선 상장사의 LNG선 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "SK하이닉스의 메모리 실적 가이던스 상향",
+      "relation": "causes",
+      "object": "삼성전자 메모리 사업부 밸류에이션 재평가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 사업부 밸류에이션 재평가",
+      "relation": "increases",
+      "object": "삼성전자 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 업황 개선 기대",
+      "relation": "increases",
+      "object": "삼성전자와 SK하이닉스의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 부문 CAPEX 확대",
+      "relation": "increases",
+      "object": "국내 반도체 장비주 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 부문 CAPEX 축소",
+      "relation": "decreases",
+      "object": "국내 반도체 장비주 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 부문 CAPEX 확대 기대",
+      "relation": "increases",
+      "object": "국내 반도체 장비주 수주 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "ESS·전력망 투자 확대",
+      "relation": "increases",
+      "object": "국내 전력기기 기업의 수주 증가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 전력기기 기업의 수주 증가",
+      "relation": "increases",
+      "object": "국내 전력기기주 실적 기대감",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 전력기기주 실적 기대감",
+      "relation": "increases",
+      "object": "국내 전력기기주 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "태양광 모듈 제조원가 절감",
+      "relation": "increases",
+      "object": "국내 태양광 모듈 상장기업의 영업이익률",
+      "domain": "에너지"
+    },
+    {
+      "subject": "인버터 고효율·고신뢰성 기술 확보",
+      "relation": "increases",
+      "object": "국내 인버터 상장기업의 수주 경쟁력",
+      "domain": "에너지"
+    },
+    {
+      "subject": "중국산 저가 태양광 모듈 공급 확대",
+      "relation": "decreases",
+      "object": "국내 태양광 모듈 상장기업의 가격 경쟁력",
+      "domain": "에너지"
+    },
+    {
+      "subject": "SK하이닉스의 HBM 증설 CAPEX 확대",
+      "relation": "increases",
+      "object": "국내 반도체 장비주의 수주 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 HBM 생산능력 증설",
+      "relation": "increases",
+      "object": "국내 반도체 장비사의 매출 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 장비사의 수주 증가",
+      "relation": "causes",
+      "object": "국내 반도체 장비주 주가 상승",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 원전 생태계 복원 정책 추진",
+      "relation": "increases",
+      "object": "한국 원자력 관련주의 수주 기대감",
+      "domain": "에너지"
+    },
+    {
+      "subject": "신규 원전 건설 및 정비 물량 확대",
+      "relation": "increases",
+      "object": "국내 원자력 기자재 기업의 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "원전 산업 투자 확대",
+      "relation": "causes",
+      "object": "한국 원자력 관련주 주가 상승",
+      "domain": "에너지"
+    },
+    {
+      "subject": "HBM용 TSV·패키징 공정 투자 확대",
+      "relation": "increases",
+      "object": "국내 소재주의 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 HBM 생산 확대",
+      "relation": "increases",
+      "object": "TSV·패키징 소재 수요",
+      "domain": "반도체"
+    },
+    {
+      "subject": "TSV·패키징용 핵심 소재의 국산화 진전",
+      "relation": "increases",
+      "object": "국내 소재주의 수혜 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 경쟁 심화",
+      "relation": "increases",
+      "object": "삼성전자와 한미반도체 등 국내 HBM 관련주의 주가 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 HBM 경쟁력 강화",
+      "relation": "increases",
+      "object": "삼성전자 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "한미반도체의 HBM 장비 수주 증가",
+      "relation": "increases",
+      "object": "한미반도체 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "AI 서버 메모리 수요 증가",
+      "relation": "increases",
+      "object": "HBM 공급업체의 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "AI 서버 메모리 수요 증가",
+      "relation": "increases",
+      "object": "코스피 반도체 장비업체의 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 출하 확대",
+      "relation": "increases",
+      "object": "코스피 반도체 밸류체인 기업들의 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS의 삼성전자향 반도체 장비 수주 비중 확대",
+      "relation": "increases",
+      "object": "원익IPS의 매출 성장 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS의 SK하이닉스향 반도체 장비 수주 비중 확대",
+      "relation": "increases",
+      "object": "원익IPS의 실적 가시성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS의 삼성전자·SK하이닉스향 반도체 장비 수주 비중 축소",
+      "relation": "decreases",
+      "object": "원익IPS의 주가 투자심리",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM·DRAM 증설 투자 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 반도체 공정 장비 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "주성엔지니어링의 HBM·DRAM 공정 장비 수주 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 매출 성장 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "주성엔지니어링의 반도체 장비 고객사 확대",
+      "relation": "enables",
+      "object": "주성엔지니어링의 HBM·DRAM 공정 장비 수주 확대 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 후공정 테스트·검사 장비 발주 확대",
+      "relation": "increases",
+      "object": "후공정 테스트·검사 장비 상장사의 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 HBM·고대역폭 메모리 생산 확대",
+      "relation": "increases",
+      "object": "후공정 테스트·검사 장비 상장사의 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 설비투자 축소",
+      "relation": "decreases",
+      "object": "후공정 테스트·검사 장비 상장사의 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 강세",
+      "relation": "decreases",
+      "object": "항공·정유·유통 업종의 수입 원가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "항공·정유·유통 업종의 수입 원가 감소",
+      "relation": "increases",
+      "object": "해당 업종 기업의 영업이익",
+      "domain": "매크로"
+    },
+    {
+      "subject": "항공·정유·유통 업종의 영업이익 개선",
+      "relation": "increases",
+      "object": "해당 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 전공정 장비 국산화 확대",
+      "relation": "increases",
+      "object": "원익IPS의 수주 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 전공정 장비 국산화 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 수주 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 국산 장비 채택 확대",
+      "relation": "increases",
+      "object": "원익IPS·주성엔지니어링의 실적 개선 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 CAPEX 확대",
+      "relation": "increases",
+      "object": "원익IPS의 장비 수주와 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 CAPEX 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 장비 수주와 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 CAPEX 축소",
+      "relation": "decreases",
+      "object": "원익IPS·주성엔지니어링의 매출과 영업이익",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "국내 반도체 수출주의 원화 기준 수출 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "국내 자동차 수출주의 원화 기준 수출 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체보다 높은 자동차의 국내 생산·수출 비중",
+      "relation": "causes",
+      "object": "원/달러 환율 상승 시 자동차주의 실적 민감도 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 수주잔고 증가",
+      "relation": "increases",
+      "object": "향후 반도체 장비 매출 가시성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "향후 반도체 장비 매출 가시성 개선",
+      "relation": "increases",
+      "object": "원익IPS·주성엔지니어링의 주가 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 수주잔고 증가",
+      "relation": "causes",
+      "object": "원익IPS·주성엔지니어링의 주가 밸류에이션 재평가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 수출주의 이익 기대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매수 증가",
+      "relation": "increases",
+      "object": "한국 수출주 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매도 증가",
+      "relation": "decreases",
+      "object": "한국 수출주 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "increases",
+      "object": "환헤지 비중이 낮은 코스피 수출기업의 원화 환산 수출매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환헤지 비중 확대",
+      "relation": "decreases",
+      "object": "코스피 수출기업의 원화 약세에 따른 실적 수혜",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환헤지 비중 차이",
+      "relation": "causes",
+      "object": "코스피 수출기업 간 환율 수혜 차별화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "decreases",
+      "object": "원자재 수입 비중이 높은 국내 상장 기업의 분기 영업이익 가이던스",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "increases",
+      "object": "수출 비중이 높은 국내 상장 기업의 원화 기준 매출 가이던스",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환율 변동성 확대",
+      "relation": "causes",
+      "object": "국내 상장 기업의 분기 실적 가이던스 하향 조정",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매수 증가",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수 구성종목 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSPI 반도체 업종지수 구성종목 주가 상승",
+      "relation": "increases",
+      "object": "해당 종목의 외국인 순매수 상위 유지 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매수 상위 종목 변화",
+      "relation": "causes",
+      "object": "KOSPI 반도체 업종지수 내 수급 쏠림 변화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 업종 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 강세",
+      "relation": "enables",
+      "object": "KOSPI 반도체 업종 외국인 자금 유입 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 업황 개선 기대",
+      "relation": "increases",
+      "object": "외국인의 반도체주 현물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인의 코스피200 선물 순매수",
+      "relation": "increases",
+      "object": "한국 반도체 대형주의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 업황 둔화",
+      "relation": "decreases",
+      "object": "외국인의 반도체주 현물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 외국인 지분율 상승",
+      "relation": "increases",
+      "object": "KOSPI 반도체 지수 상승 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 외국인 지분율 상승",
+      "relation": "increases",
+      "object": "KOSPI 반도체 지수 상승 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스 외국인 순매수 확대",
+      "relation": "causes",
+      "object": "KOSPI 반도체 지수 강세",
+      "domain": "반도체"
+    },
+    {
+      "subject": "솔브레인의 반도체 식각액·세정액 공급처 다변화",
+      "relation": "enables",
+      "object": "국내 반도체 고객사의 소재 조달 안정성 강화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 고객사의 소재 조달 안정성 강화",
+      "relation": "increases",
+      "object": "국내 반도체 고객사의 생산 차질 완화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 고객사의 생산 차질 완화",
+      "relation": "increases",
+      "object": "국내 고객사 실적 개선",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 포토레지스트 국산화 진척",
+      "relation": "increases",
+      "object": "삼성전자·SK하이닉스의 동진쎄미켐 포토레지스트 수주 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 동진쎄미켐 포토레지스트 수주 확대",
+      "relation": "increases",
+      "object": "동진쎄미켐의 반도체 소재 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 반도체 소재 매출 증가",
+      "relation": "increases",
+      "object": "동진쎄미켐 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "MSCI 코리아 지수에서 KOSPI 반도체 종목의 편입 비중 확대",
+      "relation": "increases",
+      "object": "해당 KOSPI 반도체 종목에 대한 외국인 패시브 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "MSCI 코리아 지수 리밸런싱에 따른 반도체 종목 신규 편입",
+      "relation": "causes",
+      "object": "리밸런싱일 전후 KOSPI 반도체 업종 외국인 순매수 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "MSCI 코리아 지수에서 KOSPI 반도체 종목의 편출 또는 비중 축소",
+      "relation": "decreases",
+      "object": "해당 KOSPI 반도체 종목에 대한 외국인 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "기준금리 인상",
+      "relation": "increases",
+      "object": "건설·부동산 관련주의 조달금리 부담",
+      "domain": "매크로"
+    },
+    {
+      "subject": "건설·부동산 관련주의 조달금리 부담 증가",
+      "relation": "decreases",
+      "object": "건설·부동산 관련주의 수익성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "건설·부동산 관련주의 수익성 악화",
+      "relation": "decreases",
+      "object": "코스피 건설업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 소재 원재료 가격 상승",
+      "relation": "decreases",
+      "object": "솔브레인의 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 소재 원재료 가격 상승",
+      "relation": "decreases",
+      "object": "동진쎄미켐의 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 소재 원재료 가격 하락",
+      "relation": "increases",
+      "object": "솔브레인·동진쎄미켐의 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 증설 투자 사이클 확대",
+      "relation": "causes",
+      "object": "솔브레인과 동진쎄미켐의 CAPA 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "솔브레인과 동진쎄미켐의 CAPA 확대",
+      "relation": "increases",
+      "object": "실적 성장 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "실적 성장 기대 확대",
+      "relation": "increases",
+      "object": "솔브레인과 동진쎄미켐의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "일본 반도체 소재 수출규제 재부각",
+      "relation": "increases",
+      "object": "솔브레인 주가 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "일본 반도체 소재 수출규제 재부각",
+      "relation": "increases",
+      "object": "동진쎄미켐 주가 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국산 반도체 소재 대체 기대 확대",
+      "relation": "increases",
+      "object": "솔브레인·동진쎄미켐 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "increases",
+      "object": "은행주의 순이자마진",
+      "domain": "매크로"
+    },
+    {
+      "subject": "은행주의 순이자마진 개선",
+      "relation": "increases",
+      "object": "코스피 금융업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "causes",
+      "object": "코스피 금융업종 주가 반응",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한미 금리차 확대",
+      "relation": "increases",
+      "object": "원/달러 환율",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "한국 증시 외국인 순매수",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한미 금리차 확대",
+      "relation": "causes",
+      "object": "한국 증시 외국인 자금 유출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "금리 하락",
+      "relation": "increases",
+      "object": "성장주 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "성장주 밸류에이션 재평가",
+      "relation": "increases",
+      "object": "코스피 IT 업종 수급",
+      "domain": "매크로"
+    },
+    {
+      "subject": "성장주 밸류에이션 재평가",
+      "relation": "increases",
+      "object": "코스피 2차전지 업종 수급",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 기준금리 인상",
+      "relation": "decreases",
+      "object": "원/달러 환율",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "decreases",
+      "object": "코스피 수출주(반도체·자동차) 원화 환산 수출채산성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "코스피 수출주(반도체·자동차) 원화 환산 수출채산성 악화",
+      "relation": "decreases",
+      "object": "코스피 수출주(반도체·자동차) 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 기준금리 인상",
+      "relation": "decreases",
+      "object": "외국인 코스피 순매수",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 기준금리 인하",
+      "relation": "increases",
+      "object": "외국인 코스피 순매수",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한미 금리차 확대",
+      "relation": "causes",
+      "object": "외국인 코스피 순매수 감소",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인상 발표",
+      "relation": "increases",
+      "object": "코스피 배당주의 상대수익률 변동성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행의 매파적 통화정책 신호 강화",
+      "relation": "increases",
+      "object": "유틸리티 업종의 방어주 성격 약화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인하 기대 확대",
+      "relation": "increases",
+      "object": "코스피 배당주와 유틸리티 업종의 방어주 선호",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 국채금리 상승",
+      "relation": "decreases",
+      "object": "코스피·코스닥 성장주 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 국채금리 하락",
+      "relation": "increases",
+      "object": "코스피·코스닥 성장주 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 국채금리 상승",
+      "relation": "causes",
+      "object": "코스피·코스닥 성장주의 할인율 상승",
+      "domain": "매크로"
+    },
+    {
+      "subject": "연준의 양적긴축(QT) 정책",
+      "relation": "causes",
+      "object": "한국 금융주 투자심리 약화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "연준의 양적긴축(QT) 정책",
+      "relation": "causes",
+      "object": "한국 수출주 투자심리 약화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "달러 강세와 글로벌 유동성 축소",
+      "relation": "decreases",
+      "object": "한국 수출주 투자심리",
+      "domain": "매크로"
+    },
+    {
+      "subject": "연준 FOMC 점도표의 매파적 상향",
+      "relation": "causes",
+      "object": "미국 금리 경로 기대 상승",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 금리 경로 기대 상승",
+      "relation": "decreases",
+      "object": "한국 반도체 대형주에 대한 외국인 순매수",
+      "domain": "매크로"
+    },
+    {
+      "subject": "연준 FOMC 점도표의 비둘기파적 하향",
+      "relation": "increases",
+      "object": "한국 반도체 대형주에 대한 외국인 순매수",
+      "domain": "매크로"
+    },
+    {
+      "subject": "소비자물가 상승",
+      "relation": "enables",
+      "object": "식품·음료 기업의 가격 인상",
+      "domain": "매크로"
+    },
+    {
+      "subject": "식품·음료 기업의 가격 인상",
+      "relation": "increases",
+      "object": "원가 전가력이 높은 기업의 매출액",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원가 전가력이 낮은 식품·음료 기업",
+      "relation": "decreases",
+      "object": "소비자물가 상승 구간의 영업이익률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 CPI 상승률 상승",
+      "relation": "causes",
+      "object": "유통주의 원가 부담 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "유통주의 원가 부담 확대",
+      "relation": "decreases",
+      "object": "유통주 마진율",
+      "domain": "매크로"
+    },
+    {
+      "subject": "유통주 마진율 하락",
+      "relation": "decreases",
+      "object": "유통주 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "물가 상승",
+      "relation": "decreases",
+      "object": "백화점 매출 성장률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "실질임금 둔화",
+      "relation": "decreases",
+      "object": "백화점 매출 성장률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "실질임금 둔화",
+      "relation": "decreases",
+      "object": "면세점 매출 성장률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "생활용품·온라인커머스 기업의 가격 인상",
+      "relation": "increases",
+      "object": "기업의 매출액",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 소비 둔화",
+      "relation": "decreases",
+      "object": "생활용품·온라인커머스 기업의 판매량",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 소비 둔화",
+      "relation": "decreases",
+      "object": "생활용품·온라인커머스 기업의 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "increases",
+      "object": "내수 소비재주의 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "decreases",
+      "object": "내수 소비재주의 밸류에이션",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "causes",
+      "object": "가계 이자부담 감소를 통한 내수 소비 회복 기대 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "현대차·기아의 전기차 플랫폼 확대",
+      "relation": "increases",
+      "object": "코스피·코스닥 전기차 부품주의 납품 기회",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전기차 전용 플랫폼 적용 차종 증가",
+      "relation": "increases",
+      "object": "배터리·전장·열관리 부품주의 매출 가시성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 플랫폼 표준화",
+      "relation": "enables",
+      "object": "부품사의 대량 납품 확대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전기차 구동모터 부품 매출 비중 확대",
+      "relation": "increases",
+      "object": "국내 자동차 부품사의 전동화 매출 성장 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전기차 구동모터 부품 수주잔고 증가",
+      "relation": "increases",
+      "object": "국내 자동차 부품사의 향후 실적 가시성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전기차 구동모터 부품 수주잔고 대비 매출 비중이 낮은 상태",
+      "relation": "causes",
+      "object": "국내 자동차 부품사의 향후 매출 인식 확대 기대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 IRA 세액공제 축소 또는 배제",
+      "relation": "decreases",
+      "object": "현대차·기아의 미국 수출 경쟁력",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국의 자동차 관세 인상",
+      "relation": "decreases",
+      "object": "현대차·기아의 대미 수출 비중",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 대미 수출 비중 감소",
+      "relation": "decreases",
+      "object": "코스피 내 자동차주의 밸류에이션",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 분기 영업이익률 개선",
+      "relation": "increases",
+      "object": "현대차·기아 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 ASP 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 분기 영업이익률",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 ASP 하락",
+      "relation": "decreases",
+      "object": "현대차·기아 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "전장부품·파워모듈 국산화 확대",
+      "relation": "increases",
+      "object": "한국 자동차 부품 상장사의 수주 증가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국 자동차 부품 상장사의 수주 증가",
+      "relation": "increases",
+      "object": "한국 자동차 부품 상장사의 실적 개선 기대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "실적 개선 기대 확대",
+      "relation": "increases",
+      "object": "한국 자동차 부품 상장사의 밸류에이션",
+      "domain": "자동차"
+    },
+    {
+      "subject": "북미 IRA 시행",
+      "relation": "increases",
+      "object": "국내 자동차 부품주의 북미향 수출 비중",
+      "domain": "자동차"
+    },
+    {
+      "subject": "유럽 전동화 정책 강화",
+      "relation": "increases",
+      "object": "국내 전기차 부품주의 유럽향 수출 비중",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 자동차 부품주의 수출 비중 확대",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "배터리 열관리 시스템 수요 증가",
+      "relation": "causes",
+      "object": "국내 상장 부품주의 CAPA 증설",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 상장 부품주의 CAPA 증설",
+      "relation": "increases",
+      "object": "배터리 열관리 시스템 관련 매출 성장",
+      "domain": "자동차"
+    },
+    {
+      "subject": "배터리 열관리 시스템 관련 매출 성장",
+      "relation": "increases",
+      "object": "국내 상장 부품주의 영업이익 레버리지",
+      "domain": "자동차"
+    },
+    {
+      "subject": "내수 경기 전망 개선",
+      "relation": "increases",
+      "object": "유통 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "내수 경기 전망 악화",
+      "relation": "decreases",
+      "object": "자동차 업종 내수 판매 기대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "자동차 업종 내수 판매 기대 개선",
+      "relation": "increases",
+      "object": "자동차 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 상향 조정",
+      "relation": "increases",
+      "object": "철강 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 상향 조정",
+      "relation": "increases",
+      "object": "화학 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 하향 조정",
+      "relation": "decreases",
+      "object": "철강·화학 업종 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "전기차 판매 성장률 상승",
+      "relation": "increases",
+      "object": "현대차·기아 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "배터리 조달 안정성 강화",
+      "relation": "increases",
+      "object": "현대차·기아의 전기차 생산량",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 전기차 생산량 증가",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 배당 확대",
+      "relation": "increases",
+      "object": "국내 증시 투자심리",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 자사주 매입 확대",
+      "relation": "increases",
+      "object": "현대차·기아 주가 재평가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 주주환원 정책 강화",
+      "relation": "causes",
+      "object": "현대차·기아 주가 상승",
+      "domain": "자동차"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 원화 기준 수출 채산성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 실적 추정치",
+      "domain": "자동차"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "causes",
+      "object": "현대차·기아 주식에 대한 외국인 순매수 확대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "GDP 성장률 둔화",
+      "relation": "decreases",
+      "object": "건설 업종 실적",
+      "domain": "매크로"
+    },
+    {
+      "subject": "GDP 성장률 둔화",
+      "relation": "decreases",
+      "object": "조선 업종 신규 수주",
+      "domain": "매크로"
+    },
+    {
+      "subject": "조선 업종의 장기 수주잔고",
+      "relation": "enables",
+      "object": "조선 업종 실적 방어",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "자동차 수출기업의 원화 기준 수출매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "자동차 수출기업의 원화 기준 수출매출 증가",
+      "relation": "increases",
+      "object": "자동차 수출주의 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "decreases",
+      "object": "자동차 수출주의 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국은행의 성장률 전망 상향",
+      "relation": "increases",
+      "object": "코스피 경기민감 대형주에 대한 매수세",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행의 성장률 전망 하향",
+      "relation": "decreases",
+      "object": "코스피 경기민감 대형주의 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국은행의 성장률 전망 수정",
+      "relation": "causes",
+      "object": "코스피 경기민감 대형주 순환매",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 상승",
+      "relation": "increases",
+      "object": "반도체 업종 주가 수익률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "한국 GDP 성장률 상승",
+      "relation": "increases",
+      "object": "기계 업종 주가 수익률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 수출 증가",
+      "relation": "causes",
+      "object": "반도체 업종의 GDP 연동성 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "완성차 수출 증가",
+      "relation": "increases",
+      "object": "현대차·기아의 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 매출 증가",
+      "relation": "increases",
+      "object": "현대차·기아의 분기 실적",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 분기 실적 개선",
+      "relation": "increases",
+      "object": "현대차·기아 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "예대금리차 축소",
+      "relation": "decreases",
+      "object": "은행주의 분기 순이자이익",
       "domain": "금융"
     },
     {
-      "subject": "보험사의 장기부채에 맞춘 ALM 강화",
-      "relation": "decreases",
-      "object": "금리 변동으로 인한 보험주 평가손실 변동성",
+      "subject": "은행주의 분기 순이자이익 감소",
+      "relation": "causes",
+      "object": "분기 실적 악화",
       "domain": "금융"
     },
     {
-      "subject": "보험사의 주식 편입 축소",
+      "subject": "분기 실적 악화",
       "relation": "decreases",
-      "object": "국내 주식시장으로의 자금 수요",
+      "object": "은행주의 ROE",
       "domain": "금융"
+    },
+    {
+      "subject": "해상운임·물류비 상승",
+      "relation": "decreases",
+      "object": "자동차주의 영업이익률",
+      "domain": "자동차"
+    },
+    {
+      "subject": "수출 물량 증가",
+      "relation": "increases",
+      "object": "자동차주의 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "해상운임·물류비 상승",
+      "relation": "blocks",
+      "object": "수출 물량 증가의 자동차주 수익성 개선 효과",
+      "domain": "자동차"
+    },
+    {
+      "subject": "북미·유럽 판매 비중 확대",
+      "relation": "increases",
+      "object": "코스피 자동차주의 평균판매단가(ASP)",
+      "domain": "자동차"
+    },
+    {
+      "subject": "코스피 자동차주의 평균판매단가(ASP) 상승",
+      "relation": "increases",
+      "object": "코스피 자동차주의 영업이익률",
+      "domain": "자동차"
+    },
+    {
+      "subject": "코스피 자동차주의 영업이익률 개선",
+      "relation": "increases",
+      "object": "코스피 자동차주 밸류에이션",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "decreases",
+      "object": "KB금융·신한지주·하나금융지주의 순이자마진(NIM)",
+      "domain": "금융"
+    },
+    {
+      "subject": "순이자마진(NIM) 하락",
+      "relation": "decreases",
+      "object": "KB금융·신한지주·하나금융지주의 이자이익",
+      "domain": "금융"
+    },
+    {
+      "subject": "기준금리 인하 수혜 기대가 큰 은행주라는 평가",
+      "relation": "increases",
+      "object": "KB금융·신한지주·하나금융지주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "완성차 수출 증가",
+      "relation": "increases",
+      "object": "국내 자동차 부품사 납품 물량",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 자동차 부품사 납품 물량 증가",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 자동차 부품주 실적 기대감 상승",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "increases",
+      "object": "코스피 은행주의 순이자마진 기대",
+      "domain": "금융"
+    },
+    {
+      "subject": "코스피 은행주의 순이자마진 기대 증가",
+      "relation": "increases",
+      "object": "코스피 은행주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "decreases",
+      "object": "코스피 은행주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "은행주의 배당수익률 상승",
+      "relation": "increases",
+      "object": "금리 하락기 은행주의 투자매력",
+      "domain": "금융"
+    },
+    {
+      "subject": "은행주의 자사주 소각 확대",
+      "relation": "increases",
+      "object": "주당가치",
+      "domain": "금융"
+    },
+    {
+      "subject": "금리 하락",
+      "relation": "increases",
+      "object": "고배당·자사주 소각 은행주에 대한 투자수요",
+      "domain": "금융"
+    },
+    {
+      "subject": "부동산 PF 익스포저 확대",
+      "relation": "increases",
+      "object": "주요 은행의 대손충당금 적립 규모",
+      "domain": "금융"
+    },
+    {
+      "subject": "대손충당금 적립 확대",
+      "relation": "decreases",
+      "object": "주요 은행의 순이익",
+      "domain": "금융"
+    },
+    {
+      "subject": "부동산 PF 관련 대손충당금 적립 확대",
+      "relation": "decreases",
+      "object": "주요 은행주 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "LG에너지솔루션-현대차 북미 배터리 합작공장 투자 확대",
+      "relation": "increases",
+      "object": "국내 배터리 장비주의 수주 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "북미 배터리 합작공장 증설 계획 구체화",
+      "relation": "increases",
+      "object": "국내 장비주의 실적 개선 가능성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "LG에너지솔루션-현대차의 북미 배터리 생산능력 확대",
+      "relation": "causes",
+      "object": "국내 장비주 주가 재평가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "삼성SDI-스텔란티스 협력 확대",
+      "relation": "increases",
+      "object": "국내 배터리 소재주 수주 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 배터리 소재주 수주 기대감 확대",
+      "relation": "increases",
+      "object": "국내 배터리 소재주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "삼성SDI의 배터리 생산능력 확대",
+      "relation": "increases",
+      "object": "양극재·음극재·전해질 등 국내 배터리 소재 수요",
+      "domain": "자동차"
+    },
+    {
+      "subject": "SK온의 포드·현대차 대상 배터리 공급 계약 확대",
+      "relation": "increases",
+      "object": "국내 배터리 부품주의 수주 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 배터리 부품주의 수주 기대감 상승",
+      "relation": "increases",
+      "object": "국내 배터리 부품주 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "포드·현대차의 전기차 생산 확대",
+      "relation": "increases",
+      "object": "국내 배터리 소재·장비 협력사의 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "배터리 3사와 글로벌 OEM의 장기 공급계약 확대",
+      "relation": "increases",
+      "object": "국내 양극재 업체의 수주잔고",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 양극재 업체의 수주잔고 증가",
+      "relation": "increases",
+      "object": "국내 양극재 업체의 매출 가시성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 양극재 업체의 매출 가시성 개선",
+      "relation": "increases",
+      "object": "국내 양극재 업체의 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "코스피·코스닥 거래대금 증가",
+      "relation": "increases",
+      "object": "주요 증권사의 브로커리지 수수료 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "주요 증권사의 브로커리지 수수료 수익 증가",
+      "relation": "increases",
+      "object": "주요 증권사 주가 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "코스피·코스닥 거래대금 감소",
+      "relation": "decreases",
+      "object": "주요 증권사 주가 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 배터리 3사의 미국 현지 배터리 생산 확대",
+      "relation": "increases",
+      "object": "한국 전해액 업체의 미국향 공급 수요",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 배터리 3사의 미국 현지 배터리 공장 증설",
+      "relation": "increases",
+      "object": "한국 분리막 관련주의 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 현지 생산 확대에 따른 현지 공급망 구축",
+      "relation": "enables",
+      "object": "한국 전해액·분리막 업체의 북미 매출 확대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국내 주식 거래대금 증가",
+      "relation": "increases",
+      "object": "국내 증권사의 위탁매매 수수료 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 증권사의 위탁매매 수수료 수익 증가",
+      "relation": "increases",
+      "object": "증권주의 분기 실적",
+      "domain": "금융"
+    },
+    {
+      "subject": "주식시장 거래대금 감소",
+      "relation": "decreases",
+      "object": "증권주의 분기 실적",
+      "domain": "금융"
+    },
+    {
+      "subject": "한국은행 기준금리 인하",
+      "relation": "increases",
+      "object": "증권주 투자심리",
+      "domain": "금융"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "decreases",
+      "object": "증권주 투자심리",
+      "domain": "금융"
+    },
+    {
+      "subject": "증권주 투자심리 개선",
+      "relation": "increases",
+      "object": "브로커리지 수익 기대감",
+      "domain": "금융"
+    },
+    {
+      "subject": "현대차·기아 전기차의 미국 IRA 세액공제 적용",
+      "relation": "increases",
+      "object": "현대차·기아의 미국 전기차 판매 경쟁력",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 미국 전기차 판매 경쟁력 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 실적 기대감 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 국내 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "브로커리지 의존도 상승",
+      "relation": "increases",
+      "object": "거래대금 급증기에 증권사 실적 민감도",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 주식 거래대금 증가",
+      "relation": "increases",
+      "object": "키움증권·미래에셋증권·NH투자증권의 브로커리지 수수료 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "브로커리지 수수료 수익 증가",
+      "relation": "increases",
+      "object": "브로커리지 의존도가 높은 증권사의 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "IRA 첨단제조생산세액공제(AMPC) 확대",
+      "relation": "increases",
+      "object": "LG에너지솔루션·삼성SDI·SK온의 배터리 생산 수익성",
+      "domain": "자동차"
+    },
+    {
+      "subject": "LG에너지솔루션·삼성SDI·SK온의 AMPC 수혜 증가",
+      "relation": "increases",
+      "object": "한국 배터리 관련주의 실적 기대감",
+      "domain": "자동차"
+    },
+    {
+      "subject": "IRA 첨단제조생산세액공제(AMPC) 축소 또는 폐지 우려",
+      "relation": "decreases",
+      "object": "한국 배터리 3사 관련주의 주가",
+      "domain": "자동차"
+    },
+    {
+      "subject": "개인투자자 거래 비중 증가",
+      "relation": "increases",
+      "object": "국내 증권사 브로커리지 수수료 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "주식 거래대금 감소",
+      "relation": "decreases",
+      "object": "국내 증권사 브로커리지 수익",
+      "domain": "금융"
+    },
+    {
+      "subject": "브로커리지 수익 의존도 증가",
+      "relation": "increases",
+      "object": "거래대금 변동에 따른 국내 증권사 실적 변동성",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 밸류업 프로그램",
+      "relation": "causes",
+      "object": "KB금융의 주주환원정책 강화",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 밸류업 프로그램",
+      "relation": "causes",
+      "object": "신한지주의 주주환원정책 강화",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 밸류업 프로그램",
+      "relation": "causes",
+      "object": "하나금융지주·우리금융지주의 주주환원정책 강화",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주사의 배당성향 상향",
+      "relation": "increases",
+      "object": "주주환원 기대감",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주사의 자사주 소각 계획 발표",
+      "relation": "increases",
+      "object": "주당가치",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주사별 주주환원 정책 차별화",
+      "relation": "causes",
+      "object": "주가 재평가",
+      "domain": "금융"
+    },
+    {
+      "subject": "미국 현지 전기차 생산 확대",
+      "relation": "increases",
+      "object": "현대모비스의 북미 전기차 부품 공급 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 현지 전기차 생산 확대",
+      "relation": "increases",
+      "object": "만도의 북미 전기차 부품 수주",
+      "domain": "자동차"
+    },
+    {
+      "subject": "현대차·기아의 미국 현지 전기차 생산 확대",
+      "relation": "causes",
+      "object": "국내 자동차 부품주의 실적 개선 기대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "IRA 원산지 요건 강화",
+      "relation": "blocks",
+      "object": "한국 양극재·분리막 소재주의 미국향 수출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국 양극재·분리막 소재주의 미국향 수출 감소",
+      "relation": "decreases",
+      "object": "한국 양극재·분리막 소재주의 실적 기대",
+      "domain": "자동차"
+    },
+    {
+      "subject": "한국 양극재·분리막 소재주의 실적 기대 약화",
+      "relation": "decreases",
+      "object": "한국 양극재·분리막 소재주의 밸류에이션",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 IRA 정책 수정 가능성 확대",
+      "relation": "increases",
+      "object": "한국 자동차 업종 ETF 투자심리",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 IRA 세액공제 수혜 기대",
+      "relation": "increases",
+      "object": "국내 완성차주 투자심리",
+      "domain": "자동차"
+    },
+    {
+      "subject": "미국 IRA 정책 불확실성 완화",
+      "relation": "increases",
+      "object": "한국 자동차 업종 ETF 자금 유입",
+      "domain": "자동차"
+    },
+    {
+      "subject": "은행의 CET1 비율 상승",
+      "relation": "enables",
+      "object": "배당 확대 여력 확대",
+      "domain": "금융"
+    },
+    {
+      "subject": "배당 확대 여력 확대",
+      "relation": "increases",
+      "object": "은행주 주주환원 기대",
+      "domain": "금융"
+    },
+    {
+      "subject": "은행주 주주환원 기대 상승",
+      "relation": "increases",
+      "object": "한국 주식시장에서 은행주 투자수요",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주의 낮은 PBR 저평가 구간 진입",
+      "relation": "causes",
+      "object": "주가 재평가 기대 확대",
+      "domain": "금융"
+    },
+    {
+      "subject": "밸류업 공시 발표",
+      "relation": "increases",
+      "object": "금융지주 주가 재평가 가능성",
+      "domain": "금융"
+    },
+    {
+      "subject": "주주환원 확대를 포함한 밸류업 계획 공시",
+      "relation": "increases",
+      "object": "금융지주 투자심리 개선",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주사의 분기배당·반기배당 도입",
+      "relation": "increases",
+      "object": "배당 매력도",
+      "domain": "금융"
+    },
+    {
+      "subject": "배당 매력도 상승",
+      "relation": "increases",
+      "object": "외국인 순매수 유입",
+      "domain": "금융"
+    },
+    {
+      "subject": "외국인 순매수 유입",
+      "relation": "increases",
+      "object": "금융지주사 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융거래법 개정으로 인한 핀테크 규제 완화",
+      "relation": "increases",
+      "object": "국내 상장 핀테크사의 신규 서비스 출시와 거래액",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융거래법 개정으로 인한 이용자 보호 의무 강화",
+      "relation": "increases",
+      "object": "국내 상장 핀테크사의 컴플라이언스 비용",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 상장 핀테크사의 컴플라이언스 비용 증가",
+      "relation": "decreases",
+      "object": "국내 상장 핀테크사의 영업이익",
+      "domain": "금융"
+    },
+    {
+      "subject": "선불전자지급수단 규제 강화",
+      "relation": "decreases",
+      "object": "선불전자지급수단·간편결제 사업 비중이 높은 코스닥 상장사의 영업이익",
+      "domain": "금융"
+    },
+    {
+      "subject": "간편결제 수수료 상한 도입",
+      "relation": "decreases",
+      "object": "간편결제 사업 비중이 높은 코스닥 상장사의 매출 성장률",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융업자 자본적정성·충당금 규제 강화",
+      "relation": "increases",
+      "object": "선불전자지급수단 사업 비중이 높은 코스닥 상장사의 규제 민감도",
+      "domain": "금융"
+    },
+    {
+      "subject": "플랫폼 금융 규제 강화",
+      "relation": "decreases",
+      "object": "국내 핀테크 상장사 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 제재 이력 보유",
+      "relation": "decreases",
+      "object": "국내 핀테크 상장사 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 제재 이력 공개",
+      "relation": "causes",
+      "object": "국내 핀테크 상장사 리스크 프리미엄 상승",
+      "domain": "금융"
+    },
+    {
+      "subject": "마이데이터·PG·VAN 사업 인허가 취득",
+      "relation": "enables",
+      "object": "국내 상장사의 해당 사업 매출 발생",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융업·마이데이터 관련 규제 강화",
+      "relation": "increases",
+      "object": "국내 상장사의 컴플라이언스 비용",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 상장사의 컴플라이언스 비용 증가",
+      "relation": "decreases",
+      "object": "영업이익",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-방산 수출 수주잔고 증가",
+      "relation": "increases",
+      "object": "한화에어로스페이스 실적 추정치",
+      "domain": "방산"
+    },
+    {
+      "subject": "K-방산 수출 수주잔고 증가",
+      "relation": "increases",
+      "object": "한국항공우주 실적 추정치",
+      "domain": "방산"
+    },
+    {
+      "subject": "K-방산 수출 수주잔고 증가",
+      "relation": "enables",
+      "object": "한화에어로스페이스·한국항공우주의 중장기 매출 가시성 확대",
+      "domain": "방산"
+    },
+    {
+      "subject": "전자금융 보안·내부통제 강화 의무에 따른 준법·보안 투자 확대",
+      "relation": "decreases",
+      "object": "국내 핀테크 상장사 수익성",
+      "domain": "금융"
+    },
+    {
+      "subject": "전자금융 보안·내부통제 강화 의무",
+      "relation": "increases",
+      "object": "국내 핀테크 상장사의 고정비 부담",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 핀테크 상장사의 고정비 부담 증가",
+      "relation": "decreases",
+      "object": "국내 핀테크 상장사 영업이익률",
+      "domain": "금융"
+    },
+    {
+      "subject": "폴란드·중동 방산 계약 체결",
+      "relation": "increases",
+      "object": "코스피 방산주의 수주잔고 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "코스피 방산주의 수주잔고 가시성 개선",
+      "relation": "increases",
+      "object": "코스피 방산주의 PER·PBR 리레이팅",
+      "domain": "방산"
+    },
+    {
+      "subject": "폴란드·중동 방산 계약 체결",
+      "relation": "causes",
+      "object": "코스피 방산주의 PER·PBR 리레이팅",
+      "domain": "방산"
+    },
+    {
+      "subject": "정부 방산 육성 정책 강화",
+      "relation": "increases",
+      "object": "코스피 방산 대형주의 중장기 밸류에이션",
+      "domain": "방산"
+    },
+    {
+      "subject": "국방예산 증가",
+      "relation": "increases",
+      "object": "코스피 방산 대형주의 수주 기대",
+      "domain": "방산"
+    },
+    {
+      "subject": "코스피 방산 대형주의 수주 기대 증가",
+      "relation": "increases",
+      "object": "코스피 방산 대형주의 중장기 밸류에이션",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 대형주의 수주잔고 증가",
+      "relation": "increases",
+      "object": "향후 매출 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "향후 매출 가시성 개선",
+      "relation": "increases",
+      "object": "방산 대형주 주가 기대감",
+      "domain": "방산"
+    },
+    {
+      "subject": "영업이익률 상승",
+      "relation": "increases",
+      "object": "방산 대형주의 실적 개선 기대",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 계약 공시",
+      "relation": "increases",
+      "object": "한국 방산 대형주의 수주잔고",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국 방산 대형주의 수주잔고 증가",
+      "relation": "causes",
+      "object": "이후 분기 매출 인식 확대",
+      "domain": "방산"
+    },
+    {
+      "subject": "이후 분기 매출 인식 확대",
+      "relation": "increases",
+      "object": "한국 방산 대형주의 분기 실적",
+      "domain": "방산"
+    },
+    {
+      "subject": "원달러 환율 상승",
+      "relation": "increases",
+      "object": "방산 수출 비중이 높은 코스피 상장사의 원화 기준 매출",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 비중이 높은 코스피 상장사의 원화 기준 매출 증가",
+      "relation": "increases",
+      "object": "영업이익률",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 비중이 높은 코스피 상장사의 영업이익률 개선",
+      "relation": "increases",
+      "object": "주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 확대",
+      "relation": "increases",
+      "object": "부품·소재 공급망 수혜",
+      "domain": "방산"
+    },
+    {
+      "subject": "부품·소재 공급망 수혜",
+      "relation": "causes",
+      "object": "코스피 방산 관련 중소형주 주가 차별화",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 확대",
+      "relation": "increases",
+      "object": "코스피 방산 관련 중소형주 실적 기대",
+      "domain": "방산"
+    },
+    {
+      "subject": "K-ICS 비율 상승",
+      "relation": "increases",
+      "object": "국내 상장 보험사 PBR",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-ICS 비율 하락",
+      "relation": "decreases",
+      "object": "국내 상장 보험사 PBR",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-ICS 비율 개선",
+      "relation": "causes",
+      "object": "국내 상장 보험사 밸류에이션 재평가",
+      "domain": "금융"
+    },
+    {
+      "subject": "한국 방산 대형주의 장기 수주잔고 증가",
+      "relation": "increases",
+      "object": "PER",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국 방산 대형주의 장기 수주잔고 증가",
+      "relation": "increases",
+      "object": "PBR",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국 방산 대형주의 장기 수주잔고 증가",
+      "relation": "increases",
+      "object": "주가 밸류에이션",
+      "domain": "방산"
+    },
+    {
+      "subject": "금리 하락",
+      "relation": "causes",
+      "object": "보험부채 할인율 하락",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험부채 할인율 하락",
+      "relation": "increases",
+      "object": "보험부채 현재가치",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험부채 현재가치 증가",
+      "relation": "decreases",
+      "object": "삼성생명·한화생명 등 보험주 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "LIG넥스원의 수주잔고 대비 매출 전환율 상승",
+      "relation": "increases",
+      "object": "LIG넥스원의 단기 매출 성장률",
+      "domain": "방산"
+    },
+    {
+      "subject": "한화에어로스페이스의 수주잔고 대비 매출 전환율 상승",
+      "relation": "increases",
+      "object": "한화에어로스페이스의 실적 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국항공우주의 수주잔고 대비 매출 전환율 하락",
+      "relation": "decreases",
+      "object": "한국항공우주의 단기 매출 인식 속도",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 대형주의 수주잔고에서 해외 수출 비중 확대",
+      "relation": "decreases",
+      "object": "실적 변동성",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 대형주의 해외 수출 수주잔고 증가",
+      "relation": "increases",
+      "object": "실적 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 대형주의 해외 수출 비중 확대",
+      "relation": "increases",
+      "object": "한국 주식시장에서 방산주의 밸류에이션 프리미엄",
+      "domain": "방산"
+    },
+    {
+      "subject": "K-ICS 비율 하락",
+      "relation": "decreases",
+      "object": "국내 상장 보험사의 배당여력",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 상장 보험사의 배당여력 축소",
+      "relation": "decreases",
+      "object": "주주환원 규모",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-ICS 자본규제 강화",
+      "relation": "causes",
+      "object": "국내 상장 보험사의 주주환원 정책 재조정",
+      "domain": "금융"
+    },
+    {
+      "subject": "국방예산 증액",
+      "relation": "increases",
+      "object": "국내 방산 부품 상장사의 수주잔고",
+      "domain": "방산"
+    },
+    {
+      "subject": "국방예산 증액",
+      "relation": "causes",
+      "object": "국내 방산 업체의 무기체계 및 부품 발주 확대",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 업체의 무기체계 및 부품 발주 확대",
+      "relation": "increases",
+      "object": "국내 방산 부품 상장사의 매출 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "보험사의 후순위채·신종자본증권 발행",
+      "relation": "increases",
+      "object": "K-ICS 비율",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-ICS 비율 상승",
+      "relation": "enables",
+      "object": "보험사의 자본규제 방어",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험사의 후순위채·신종자본증권 발행에 따른 이자비용 증가",
+      "relation": "decreases",
+      "object": "주주가치",
+      "domain": "금융"
+    },
+    {
+      "subject": "LIG넥스원·한화에어로스페이스의 수주 증가",
+      "relation": "causes",
+      "object": "공급망 내 코스닥 방산 부품주의 매출 증가",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 부품주의 고정비 비중 확대",
+      "relation": "enables",
+      "object": "매출 증가의 영업이익 레버리지 확대",
+      "domain": "방산"
+    },
+    {
+      "subject": "LIG넥스원·한화에어로스페이스의 생산 확대",
+      "relation": "increases",
+      "object": "코스닥 방산 부품주의 납품 물량",
+      "domain": "방산"
+    },
+    {
+      "subject": "금융당국의 K-ICS 규제 완화",
+      "relation": "increases",
+      "object": "국내 보험주 투자심리",
+      "domain": "금융"
+    },
+    {
+      "subject": "K-ICS 경과조치 변경으로 인한 자본부담 완화",
+      "relation": "increases",
+      "object": "국내 보험주 주가 기대감",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험사의 지급여력비율 개선 전망",
+      "relation": "increases",
+      "object": "국내 보험주 매수세",
+      "domain": "금융"
+    },
+    {
+      "subject": "담배 매출 비중 확대",
+      "relation": "increases",
+      "object": "편의점 상장사의 동일점포 매출 성장률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "주류 매출 비중 확대",
+      "relation": "increases",
+      "object": "편의점 상장사의 동일점포 매출 성장률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "가공식품 매출 비중 확대",
+      "relation": "increases",
+      "object": "편의점 상장사의 동일점포 매출 성장률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 유도무기 수출 확대",
+      "relation": "increases",
+      "object": "유도무기 부품 공급 상장사의 수주 증가",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 레이더 체계 도입 확대",
+      "relation": "increases",
+      "object": "레이더 부품 공급 상장사의 매출 증가",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 항공엔진 국산화 투자 확대",
+      "relation": "increases",
+      "object": "항공엔진 부품 상장사의 수혜 강도",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 방산 부품주의 수출 비중 확대",
+      "relation": "increases",
+      "object": "해외 수주 및 환율 변수에 대한 주가 민감도",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 국방예산 확대",
+      "relation": "increases",
+      "object": "내수 비중이 높은 방산 부품주의 실적 기대",
+      "domain": "방산"
+    },
+    {
+      "subject": "내수 국방예산 확대",
+      "relation": "increases",
+      "object": "국내 방산 부품주의 주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "식품 매출 비중 확대",
+      "relation": "increases",
+      "object": "대형마트 상장사의 소비 경기 둔화 구간 실적 방어력",
+      "domain": "소비재"
+    },
+    {
+      "subject": "비식품 매출 비중 확대",
+      "relation": "decreases",
+      "object": "대형마트 상장사의 소비 경기 둔화 구간 실적 방어력",
+      "domain": "소비재"
+    },
+    {
+      "subject": "소비 경기 둔화",
+      "relation": "causes",
+      "object": "대형마트 상장사의 비식품 매출 감소",
+      "domain": "소비재"
+    },
+    {
+      "subject": "정부 방위력개선비 확대",
+      "relation": "increases",
+      "object": "방산 소재·가공 중소형주의 수주 기대감",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 소재·가공 중소형주의 수주 기대감 증가",
+      "relation": "increases",
+      "object": "방산 소재·가공 중소형주 밸류에이션",
+      "domain": "방산"
+    },
+    {
+      "subject": "정부 방위력개선비 확대",
+      "relation": "causes",
+      "object": "방산 소재·가공 중소형주 밸류에이션 재평가",
+      "domain": "방산"
+    },
+    {
+      "subject": "최저임금 상승",
+      "relation": "decreases",
+      "object": "유통 상장사의 영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "전기요금 상승",
+      "relation": "decreases",
+      "object": "유통 상장사의 영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "물류비 상승",
+      "relation": "decreases",
+      "object": "유통 상장사의 영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "K2 전차 양산 및 수출 확대",
+      "relation": "increases",
+      "object": "현대로템의 매출과 수주잔고",
+      "domain": "방산"
+    },
+    {
+      "subject": "국산 파워팩·변속기 공급 안정화",
+      "relation": "enables",
+      "object": "K2 전차 밸류체인 국내 상장사의 납기 경쟁력 강화",
+      "domain": "방산"
+    },
+    {
+      "subject": "방위산업 예산 확대",
+      "relation": "increases",
+      "object": "K2 전차 밸류체인 국내 상장사의 실적 개선 가능성",
+      "domain": "방산"
+    },
+    {
+      "subject": "K9 자주포 수출 실적 증가",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 매출",
+      "domain": "방산"
+    },
+    {
+      "subject": "K9 자주포 수출 계약 확대",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 영업이익",
+      "domain": "방산"
+    },
+    {
+      "subject": "K9 자주포 수출 실적 부진",
+      "relation": "decreases",
+      "object": "국내 방산 상장사의 실적 기대감",
+      "domain": "방산"
+    },
+    {
+      "subject": "온라인 장보기 침투율 확대",
+      "relation": "decreases",
+      "object": "오프라인 유통 상장사의 기존 점포 효율성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "기존 점포 효율성 하락",
+      "relation": "increases",
+      "object": "오프라인 유통 상장사의 폐점 리스크",
+      "domain": "소비재"
+    },
+    {
+      "subject": "온라인 장보기 침투율 확대",
+      "relation": "causes",
+      "object": "오프라인 유통 상장사의 비효율 점포 구조조정 확대",
+      "domain": "소비재"
+    },
+    {
+      "subject": "편의점·대형마트 상장사의 PB상품 확대",
+      "relation": "increases",
+      "object": "매출총이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "편의점·대형마트 상장사의 PB상품 확대",
+      "relation": "increases",
+      "object": "객단가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "PB상품의 높은 마진 구조",
+      "relation": "causes",
+      "object": "편의점·대형마트 상장사의 매출총이익률 상승",
+      "domain": "소비재"
+    },
+    {
+      "subject": "유도무기 개발 역량 강화",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 신규 수주 증가",
+      "domain": "방산"
+    },
+    {
+      "subject": "수주 잔고 확대",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 향후 매출 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "유도무기 개발 역량 열위",
+      "relation": "decreases",
+      "object": "국내 방산 상장사의 대형 사업 수주 가능성",
+      "domain": "방산"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 방산주의 달러표시 수출 계약의 원화 환산 매출 인식",
+      "domain": "방산"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 방산주의 수출 계약 영업이익률",
+      "domain": "방산"
+    },
+    {
+      "subject": "달러표시 방산 수출 비중 확대",
+      "relation": "increases",
+      "object": "원/달러 환율 상승이 한국 방산주 실적에 미치는 긍정적 효과",
+      "domain": "방산"
+    },
+    {
+      "subject": "폴란드 등 해외 방산 수출 확대",
+      "relation": "increases",
+      "object": "국내 상장 방산주의 수주잔고",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 상장 방산주의 수주잔고 증가",
+      "relation": "increases",
+      "object": "국내 상장 방산주의 실적 기대감",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 상장 방산주의 실적 기대감 상승",
+      "relation": "increases",
+      "object": "국내 상장 방산주 주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "전차·자주포·유도무기 매출 비중 확대",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 기업가치 재평가 가능성",
+      "domain": "방산"
+    },
+    {
+      "subject": "고마진 유도무기 매출 비중 상승",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 수익성",
+      "domain": "방산"
+    },
+    {
+      "subject": "전차·자주포·유도무기 수출 매출 비중 증가",
+      "relation": "increases",
+      "object": "국내 방산 상장사의 실적 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "환헤지 전략 강화",
+      "relation": "decreases",
+      "object": "한화에어로스페이스·LIG넥스원 등 방산 수출주의 분기별 영업이익 변동성",
+      "domain": "방산"
+    },
+    {
+      "subject": "환율 급변에 대한 환헤지 적용",
+      "relation": "blocks",
+      "object": "환차손이 한화에어로스페이스·LIG넥스원 등의 분기 영업이익을 훼손하는 효과",
+      "domain": "방산"
+    },
+    {
+      "subject": "환헤지 비용 증가",
+      "relation": "decreases",
+      "object": "한화에어로스페이스·LIG넥스원 등 방산 수출주의 분기별 영업이익",
+      "domain": "방산"
+    },
+    {
+      "subject": "아모레퍼시픽의 분기별 중국 매출 회복률 상승",
+      "relation": "increases",
+      "object": "아모레퍼시픽 주가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "LG생활건강의 분기별 중국 매출 회복률 상승",
+      "relation": "increases",
+      "object": "LG생활건강 주가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 매출 회복률 부진",
+      "relation": "decreases",
+      "object": "아모레퍼시픽·LG생활건강 주가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "한국 방산기업의 수입 원재료·부품 비용",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국 방산기업의 수입 원재료·부품 비용 상승",
+      "relation": "decreases",
+      "object": "한국 방산주의 수출 마진",
+      "domain": "방산"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "blocks",
+      "object": "환율 상승에 따른 한국 방산주의 수출 마진 개선",
+      "domain": "방산"
+    },
+    {
+      "subject": "국내 인디 화장품 상장사의 미국 아마존 유통 확대",
+      "relation": "increases",
+      "object": "미국향 화장품 수출 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 인디 화장품 상장사의 미국 세포라 유통 확대",
+      "relation": "increases",
+      "object": "미국향 화장품 수출 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "미국향 화장품 수출 실적 증가",
+      "relation": "increases",
+      "object": "국내 인디 화장품 상장사의 매출 성장 기대",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원화 강세 전환",
+      "relation": "decreases",
+      "object": "한국 방산 수출주의 원화 환산 수주잔고 가치",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국 방산 수출주의 원화 환산 수주잔고 가치 감소",
+      "relation": "causes",
+      "object": "향후 매출 인식액 하향 조정",
+      "domain": "방산"
+    },
+    {
+      "subject": "향후 매출 인식액 하향 조정",
+      "relation": "decreases",
+      "object": "한국 방산 수출주의 향후 영업이익 추정치",
+      "domain": "방산"
+    },
+    {
+      "subject": "폴란드·중동 방산 수출 계약의 달러 결제 비중 확대",
+      "relation": "increases",
+      "object": "국내 방산주의 원화 환산 매출과 영업이익",
+      "domain": "방산"
+    },
+    {
+      "subject": "폴란드·중동 방산 수출 계약의 안정적인 결제 통화 구조",
+      "relation": "increases",
+      "object": "국내 방산주의 실적 가시성과 주가 재평가",
+      "domain": "방산"
+    },
+    {
+      "subject": "폴란드·중동 방산 수출 계약의 현지통화 결제 비중 확대",
+      "relation": "decreases",
+      "object": "국내 방산주의 환율 수혜와 실적 안정성",
+      "domain": "방산"
+    },
+    {
+      "subject": "중국 위생허가 절차 완화",
+      "relation": "increases",
+      "object": "국내 화장품 상장사의 중국향 해외 매출 전망",
+      "domain": "소비재"
+    },
+    {
+      "subject": "미국 FDA 규제 강화",
+      "relation": "decreases",
+      "object": "국내 화장품 상장사의 미국향 해외 매출 전망",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 위생허가 지연",
+      "relation": "blocks",
+      "object": "국내 화장품 상장사의 중국 시장 제품 출시",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원재료 수입단가 상승",
+      "relation": "decreases",
+      "object": "국내 음식료 상장사의 영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원재료 수입단가 상승",
+      "relation": "increases",
+      "object": "국내 음식료 상장사의 매출원가율",
+      "domain": "소비재"
+    },
+    {
+      "subject": "제품 가격 인상",
+      "relation": "enables",
+      "object": "국내 음식료 상장사의 영업이익률 방어",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 따이공 수요 둔화",
+      "relation": "decreases",
+      "object": "코스맥스의 화장품 ODM 주문량",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 따이공 수요 둔화",
+      "relation": "decreases",
+      "object": "한국콜마의 화장품 ODM 주문량",
+      "domain": "소비재"
+    },
+    {
+      "subject": "코스맥스·한국콜마의 화장품 ODM 주문량 감소",
+      "relation": "decreases",
+      "object": "코스맥스·한국콜마의 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "라면·제과·유제품 상장사의 제품 가격 인상",
+      "relation": "increases",
+      "object": "매출액",
+      "domain": "소비재"
+    },
+    {
+      "subject": "라면·제과·유제품 상장사의 제품 가격 인상",
+      "relation": "increases",
+      "object": "영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원재료 가격 안정",
+      "relation": "enables",
+      "object": "라면·제과·유제품 상장사의 실적 개선 지속",
+      "domain": "소비재"
+    },
+    {
+      "subject": "K-뷰티의 대미 수출 증가",
+      "relation": "increases",
+      "object": "코스닥 화장품 중소형주의 매출 성장 기대",
+      "domain": "소비재"
+    },
+    {
+      "subject": "코스닥 화장품 중소형주의 매출 성장 기대 확대",
+      "relation": "increases",
+      "object": "코스닥 화장품 중소형주의 밸류에이션",
+      "domain": "소비재"
+    },
+    {
+      "subject": "미국 시장 내 K-뷰티 수요 확대",
+      "relation": "causes",
+      "object": "코스닥 화장품 중소형주에 대한 밸류에이션 재평가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 단체관광 재개",
+      "relation": "increases",
+      "object": "호텔신라 면세점 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 단체관광 재개",
+      "relation": "increases",
+      "object": "신세계 면세점 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "면세점 매출 회복",
+      "relation": "increases",
+      "object": "호텔신라·신세계 주가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국제 곡물 가격 상승",
+      "relation": "decreases",
+      "object": "한국 음식료 기업의 수익성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국제 설탕 가격 상승",
+      "relation": "decreases",
+      "object": "한국 제과·음료 기업의 수익성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국제 팜유 가격 상승",
+      "relation": "decreases",
+      "object": "한국 라면·제과 기업의 수익성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "대형마트에 대한 납품 의존도 증가",
+      "relation": "decreases",
+      "object": "음식료 상장사의 판가 전가력",
+      "domain": "소비재"
+    },
+    {
+      "subject": "편의점 채널 내 독점적 히트상품 보유",
+      "relation": "increases",
+      "object": "음식료 상장사의 판가 전가력",
+      "domain": "소비재"
+    },
+    {
+      "subject": "대형 유통사의 PB상품 확대",
+      "relation": "blocks",
+      "object": "음식료 상장사의 납품가 인상",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "수입 원재료 의존도가 높은 음식료 상장사의 원가 부담",
+      "domain": "소비재"
+    },
+    {
+      "subject": "수입 원재료 의존도가 높은 음식료 상장사의 원가 부담 증가",
+      "relation": "decreases",
+      "object": "음식료 상장사의 영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "음식료 상장사의 가격 인상",
+      "relation": "increases",
+      "object": "가격 전가력이 높은 음식료 상장사의 실적 개선 가능성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "인천국제공항 여객 수 증가",
+      "relation": "increases",
+      "object": "공항면세점 운영 상장사의 면세점 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "인천국제공항 국제선 여객 회복",
+      "relation": "increases",
+      "object": "공항면세점 운영 상장사의 영업이익",
+      "domain": "소비재"
+    },
+    {
+      "subject": "인천국제공항 여객 회복",
+      "relation": "causes",
+      "object": "공항면세점 운영 상장사 실적 개선",
+      "domain": "소비재"
+    },
+    {
+      "subject": "위안화 강세",
+      "relation": "increases",
+      "object": "면세점 관련주 수요",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국 소비심리 회복",
+      "relation": "increases",
+      "object": "면세점 관련주 수요",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 소비여력 확대",
+      "relation": "causes",
+      "object": "면세점 관련주 수요 증가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 미국 품목허가 확대",
+      "relation": "increases",
+      "object": "미국향 바이오시밀러 수출 실적",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 유럽 품목허가 확대",
+      "relation": "increases",
+      "object": "유럽향 바이오시밀러 수출 실적",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 미국·유럽 품목허가 확대",
+      "relation": "causes",
+      "object": "전체 바이오시밀러 수출 실적 증가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "중국인 관광객 수 회복",
+      "relation": "increases",
+      "object": "국내 면세점 상장사의 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 관광객 수 회복",
+      "relation": "increases",
+      "object": "화장품 브랜드 상장사의 국내 면세 채널 판매",
+      "domain": "소비재"
+    },
+    {
+      "subject": "중국인 관광객의 한국 내 소비 증가",
+      "relation": "causes",
+      "object": "면세점 상장사 수혜가 패션 브랜드 상장사보다 크게 나타남",
+      "domain": "소비재"
+    },
+    {
+      "subject": "따이공 규제 강화",
+      "relation": "decreases",
+      "object": "국내 면세점 상장사의 송객수수료율",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 면세점 상장사의 송객수수료율 하락",
+      "relation": "increases",
+      "object": "국내 면세점 상장사의 매출총이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "따이공 매출 비중 축소",
+      "relation": "decreases",
+      "object": "국내 면세점 상장사의 매출 변동성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "바이오시밀러 분기 매출 증가",
+      "relation": "increases",
+      "object": "셀트리온·삼성바이오에피스 관련 상장사의 영업이익",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 판가 하락",
+      "relation": "decreases",
+      "object": "셀트리온·삼성바이오에피스 관련 상장사의 영업이익",
+      "domain": "바이오"
+    },
+    {
+      "subject": "고마진 바이오시밀러 제품 비중 확대",
+      "relation": "increases",
+      "object": "셀트리온·삼성바이오에피스 관련 상장사의 영업이익률",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 3상 실패 발표",
+      "relation": "causes",
+      "object": "코스닥 바이오 종목 하한가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "1차 평가지표 미충족 발표",
+      "relation": "causes",
+      "object": "코스닥 바이오 종목 급락",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 3상 실패 또는 1차 평가지표 미충족 발표",
+      "relation": "decreases",
+      "object": "코스닥 바이오 종목 투자심리",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 CDMO 상장사의 수주 잔고 증가",
+      "relation": "increases",
+      "object": "해당 상장사의 향후 매출 가시성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "원료의약품 공급 상장사의 장기 공급계약 수주 확대",
+      "relation": "increases",
+      "object": "해당 상장사의 실적 안정성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 CDMO·원료의약품 공급 상장사의 수주 잔고 감소",
+      "relation": "decreases",
+      "object": "해당 상장사의 향후 실적 추정치",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 바이오시밀러 상장사의 주요 제품 해외 판매량 증가",
+      "relation": "increases",
+      "object": "해당 상장사의 매출 증가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "미국·유럽 지역 수출 비중 확대",
+      "relation": "increases",
+      "object": "국내 바이오시밀러 상장사의 수익성 개선",
+      "domain": "바이오"
+    },
+    {
+      "subject": "특정 지역의 바이오시밀러 수출 비중 감소",
+      "relation": "decreases",
+      "object": "해당 지역 매출 기여도",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 약가 인하 정책",
+      "relation": "decreases",
+      "object": "국내 바이오시밀러 상장사 수익성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 보험 등재 확대 정책",
+      "relation": "increases",
+      "object": "국내 바이오시밀러 상장사 매출",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오시밀러 보험 등재 확대 정책",
+      "relation": "enables",
+      "object": "국내 바이오시밀러 상장사 처방량 증가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 임상 3상 성공 공시",
+      "relation": "causes",
+      "object": "단기 주가 급등",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 3상 성공에 따른 상용화 기대 확대",
+      "relation": "increases",
+      "object": "코스닥 제약바이오 기업의 단기 매수세",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 단기 매수세 확대",
+      "relation": "increases",
+      "object": "단기 주가 상승률",
+      "domain": "바이오"
+    },
+    {
+      "subject": "백화점 채널 매출 회복",
+      "relation": "increases",
+      "object": "의류 브랜드주의 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "면세점 채널 매출 회복",
+      "relation": "increases",
+      "object": "의류 브랜드주의 실적",
+      "domain": "소비재"
+    },
+    {
+      "subject": "의류 브랜드주의 판매 증가",
+      "relation": "increases",
+      "object": "의류 OEM주의 수주",
+      "domain": "소비재"
+    },
+    {
+      "subject": "기술수출 계약이 있는 코스닥 바이오 기업의 임상 3상 성공 발표",
+      "relation": "increases",
+      "object": "해당 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "파트너사의 기술수출 계약 유지",
+      "relation": "enables",
+      "object": "임상 3상 성공의 주가 상승 반영",
+      "domain": "바이오"
+    },
+    {
+      "subject": "파트너사의 기술수출 계약 해지",
+      "relation": "decreases",
+      "object": "해당 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약바이오 기업의 임상 3상 톱라인 호재 발표",
+      "relation": "increases",
+      "object": "거래량과 주가 변동성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 3상 톱라인 발표 후 주가 급등",
+      "relation": "causes",
+      "object": "한국거래소의 조회공시 요구 가능성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "조회공시 요구 또는 투자경고 지정",
+      "relation": "causes",
+      "object": "단기 수급 변동 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 패션 상장사의 재고자산회전율 상승",
+      "relation": "increases",
+      "object": "영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 패션 상장사의 재고자산회전율 하락",
+      "relation": "decreases",
+      "object": "영업이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국내 패션 상장사의 재고자산회전율 개선",
+      "relation": "causes",
+      "object": "재고평가손실 및 할인판매 부담 감소로 인한 영업이익률 개선",
+      "domain": "소비재"
+    },
+    {
+      "subject": "임상 3상 완료",
+      "relation": "increases",
+      "object": "식품의약품안전처 품목허가 기대감",
+      "domain": "바이오"
+    },
+    {
+      "subject": "식품의약품안전처 품목허가 기대감",
+      "relation": "increases",
+      "object": "코스닥 제약주 밸류에이션",
+      "domain": "바이오"
+    },
+    {
+      "subject": "식품의약품안전처 품목허가 기대감 확대",
+      "relation": "causes",
+      "object": "코스닥 제약주의 허가 성공 가능성 선반영",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA 임상 3상 진입 발표",
+      "relation": "increases",
+      "object": "KOSDAQ 바이오 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA 품목허가 승인 일정 지연",
+      "relation": "decreases",
+      "object": "KOSDAQ 바이오 기업 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA 임상 단계 상향",
+      "relation": "causes",
+      "object": "KOSDAQ 바이오 기업 주가 변동성 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "계절성 재고 부담 증가",
+      "relation": "causes",
+      "object": "의류 상장사의 재고평가손실 확대",
+      "domain": "소비재"
+    },
+    {
+      "subject": "재고평가손실 확대",
+      "relation": "decreases",
+      "object": "의류 상장사의 영업이익",
+      "domain": "소비재"
+    },
+    {
+      "subject": "재고자산 누적",
+      "relation": "decreases",
+      "object": "의류 상장사의 영업현금흐름",
+      "domain": "소비재"
+    },
+    {
+      "subject": "온라인 패션 플랫폼 판매 비중 확대",
+      "relation": "increases",
+      "object": "상장 의류기업의 재고 효율성",
+      "domain": "소비재"
+    },
+    {
+      "subject": "상장 의류기업의 재고 효율성 개선",
+      "relation": "increases",
+      "object": "상장 의류기업의 밸류에이션",
+      "domain": "소비재"
+    },
+    {
+      "subject": "온라인 패션 플랫폼 판매 비중 확대",
+      "relation": "causes",
+      "object": "상장 의류기업의 밸류에이션 재평가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "내수 소비심리지수 개선",
+      "relation": "increases",
+      "object": "패션 상장사의 정가 판매 비중",
+      "domain": "소비재"
+    },
+    {
+      "subject": "패션 상장사의 정가 판매 비중 확대",
+      "relation": "decreases",
+      "object": "할인율",
+      "domain": "소비재"
+    },
+    {
+      "subject": "패션 상장사의 할인율 축소",
+      "relation": "increases",
+      "object": "매출총이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "EMA 품목허가 심사 진행",
+      "relation": "enables",
+      "object": "코스닥 제약·바이오 상장사의 유럽 시장 진출 기대감 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "코스닥 제약·바이오 상장사의 유럽 시장 진출 기대감 확대",
+      "relation": "increases",
+      "object": "해당 종목의 주가 변동성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "EMA 품목허가 승인 지연 또는 불확실성 확대",
+      "relation": "decreases",
+      "object": "코스닥 제약·바이오 상장사의 투자심리",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA·EMA 품목허가 획득",
+      "relation": "increases",
+      "object": "코스닥 바이오 ETF 수급",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA·EMA 허가 모멘텀 부각",
+      "relation": "increases",
+      "object": "관련 바이오 테마주 매수세",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA·EMA 허가 지연 또는 불확실성 확대",
+      "relation": "decreases",
+      "object": "코스닥 바이오 ETF 및 관련 테마주 수급",
+      "domain": "바이오"
+    },
+    {
+      "subject": "미국·유럽 허가 획득",
+      "relation": "increases",
+      "object": "코스닥 바이오 기업의 기술수출 가능성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "미국·유럽 허가 획득",
+      "relation": "increases",
+      "object": "코스닥 바이오 기업의 해외 매출 확대 가능성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "미국·유럽 허가 획득",
+      "relation": "enables",
+      "object": "코스닥 바이오 기업의 해외 판매 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA·EMA 허가 지연",
+      "relation": "decreases",
+      "object": "코스닥 바이오 종목의 밸류에이션",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA 보완요구(CRL) 발생",
+      "relation": "decreases",
+      "object": "코스닥 바이오 종목의 밸류에이션",
+      "domain": "바이오"
+    },
+    {
+      "subject": "FDA·EMA 허가 지연",
+      "relation": "increases",
+      "object": "코스닥 바이오 종목의 불확실성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 계약 공시",
+      "relation": "causes",
+      "object": "코스닥 바이오 종목의 시가총액 재평가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 계약 규모의 확대",
+      "relation": "increases",
+      "object": "코스닥 바이오 종목의 시가총액 재평가 강도",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 계약의 계약금 유입 확정",
+      "relation": "increases",
+      "object": "코스닥 바이오 종목의 기업가치 기대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "대규모 선급금 수취",
+      "relation": "increases",
+      "object": "한국 바이오 상장사의 단기 실적 가시성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "마일스톤 수익의 단계별 인식",
+      "relation": "causes",
+      "object": "한국 바이오 상장사의 이익 변동성 확대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "선급금 중심 계약 확대",
+      "relation": "decreases",
+      "object": "한국 바이오 상장사의 PER 부담",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술반환 공시 발생",
+      "relation": "causes",
+      "object": "바이오 기업 주가 하락",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술반환 공시 발생",
+      "relation": "increases",
+      "object": "바이오 기업 거래대금 증가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "바이오 기업 주가 하락",
+      "relation": "increases",
+      "object": "바이오 기업 거래대금 증가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "삼성전자 D램 고정거래가격 상승률 확대",
+      "relation": "increases",
+      "object": "코스피 반도체 업종 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "D램 고정거래가격 상승",
+      "relation": "causes",
+      "object": "삼성전자 반도체 부문 실적 개선 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 반도체 부문 실적 개선 기대",
+      "relation": "increases",
+      "object": "코스피 반도체 업종 투자심리",
+      "domain": "반도체"
+    },
+    {
+      "subject": "기술수출 공시",
+      "relation": "decreases",
+      "object": "임상 초기 단계 파이프라인의 밸류에이션 할인율",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 단계 진전",
+      "relation": "decreases",
+      "object": "파이프라인 밸류에이션 할인율",
+      "domain": "바이오"
+    },
+    {
+      "subject": "파이프라인 밸류에이션 할인율 하락",
+      "relation": "increases",
+      "object": "증권사 목표주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "메모리 반도체 ASP 상승",
+      "relation": "increases",
+      "object": "삼성전자 분기 매출 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 ASP 상승",
+      "relation": "increases",
+      "object": "삼성전자 분기 영업이익 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 분기 영업이익 추정치 상승",
+      "relation": "increases",
+      "object": "삼성전자 분기 실적 컨센서스",
+      "domain": "반도체"
+    },
+    {
+      "subject": "글로벌 제약사와의 라이선스아웃 계약 체결",
+      "relation": "increases",
+      "object": "한국 바이오 기업의 파이프라인 가치 산정",
+      "domain": "바이오"
+    },
+    {
+      "subject": "글로벌 제약사로부터의 선급금 및 마일스톤 유입",
+      "relation": "increases",
+      "object": "한국 바이오 기업의 파이프라인 상업화 가능성 평가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "글로벌 제약사의 실사 및 계약 검증",
+      "relation": "enables",
+      "object": "한국 바이오 기업 파이프라인의 객관적 가치 재평가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "D램 업황 회복 기대",
+      "relation": "increases",
+      "object": "코스피 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 외국인 순매수 증가",
+      "relation": "increases",
+      "object": "반도체 공급망 종목 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "D램 업황 회복 기대",
+      "relation": "increases",
+      "object": "반도체 공급망 종목 투자심리",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 DS부문 영업이익 추정치 상향",
+      "relation": "causes",
+      "object": "국내 증권사의 삼성전자 목표주가 상향 조정",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 증권사의 삼성전자 목표주가 상향 조정",
+      "relation": "increases",
+      "object": "삼성전자 주가 상승 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 DS부문 실적 개선 기대",
+      "relation": "increases",
+      "object": "삼성전자 밸류에이션 재평가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "CAR-T·유전자치료제 기술수출 계약 규모 확대",
+      "relation": "increases",
+      "object": "코스닥 바이오 상장사의 기업가치 기대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "임상 진전으로 인한 마일스톤 수취 가능성 상승",
+      "relation": "increases",
+      "object": "코스닥 바이오 상장사의 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "기술수출 상대방의 개발 중단 또는 계약 해지",
+      "relation": "decreases",
+      "object": "코스닥 바이오 상장사의 마일스톤 수취 가능성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "CAR-T·유전자치료제 상장사의 후기 임상 파이프라인 비중 확대",
+      "relation": "increases",
+      "object": "상업화 근접도",
+      "domain": "바이오"
+    },
+    {
+      "subject": "상업화 근접도가 높은 파이프라인 보유",
+      "relation": "increases",
+      "object": "국내 바이오 상장사의 기업가치",
+      "domain": "바이오"
+    },
+    {
+      "subject": "초기 임상 단계 파이프라인 편중",
+      "relation": "decreases",
+      "object": "국내 CAR-T·유전자치료제 상장사의 단기 실적 가시성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "D램 가격 상승",
+      "relation": "increases",
+      "object": "SK하이닉스 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 실적 개선",
+      "relation": "increases",
+      "object": "국내 반도체 대형주 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "D램 가격 하락",
+      "relation": "decreases",
+      "object": "국내 반도체 대형주 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 낸드플래시 출하량 증가",
+      "relation": "increases",
+      "object": "삼성전자 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 실적 기대감 증가",
+      "relation": "increases",
+      "object": "삼성전자 시가총액",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 시가총액 증가",
+      "relation": "increases",
+      "object": "코스피200 내 삼성전자 편입 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 상장 CAR-T 개발사의 GMP 생산시설 확보",
+      "relation": "increases",
+      "object": "기업가치",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 상장 CAR-T 개발사의 CDMO 수주 역량 강화",
+      "relation": "increases",
+      "object": "매출 성장 기대",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 상장 CAR-T 개발사의 GMP 생산시설 및 CDMO 역량 보유",
+      "relation": "enables",
+      "object": "상업화 생산 대응",
+      "domain": "바이오"
+    },
+    {
+      "subject": "유상증자",
+      "relation": "increases",
+      "object": "CAR-T·유전자치료제 상장사의 임상 자금조달 안정성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "CB 발행",
+      "relation": "increases",
+      "object": "CAR-T·유전자치료제 상장사의 임상 자금조달 안정성",
+      "domain": "바이오"
+    },
+    {
+      "subject": "반복적인 유상증자·CB 발행 이력",
+      "relation": "causes",
+      "object": "기존 주주 지분 희석 우려",
+      "domain": "바이오"
+    },
+    {
+      "subject": "희귀질환 적응증 중심의 유전자치료제 개발",
+      "relation": "increases",
+      "object": "한국 상장 유전자치료제 기업의 매출 잠재력",
+      "domain": "바이오"
+    },
+    {
+      "subject": "동일 적응증 내 경쟁 상장사 수 증가",
+      "relation": "decreases",
+      "object": "개별 한국 상장 유전자치료제 기업의 가격 결정력",
+      "domain": "바이오"
+    },
+    {
+      "subject": "적응증별 경쟁 강도 심화",
+      "relation": "decreases",
+      "object": "한국 상장 유전자치료제 기업의 영업이익률",
+      "domain": "바이오"
+    },
+    {
+      "subject": "삼성전자 메모리 반도체 실적 전망 상향",
+      "relation": "increases",
+      "object": "삼성전자에 대한 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자에 대한 외국인 순매수",
+      "relation": "increases",
+      "object": "삼성전자 시가총액 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 반도체 실적 전망 하향",
+      "relation": "decreases",
+      "object": "삼성전자에 대한 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 LNG 도입 물량 증가",
+      "relation": "increases",
+      "object": "한국가스공사의 판매 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제 LNG 가격 상승",
+      "relation": "increases",
+      "object": "한국가스공사의 원료비 부담",
+      "domain": "에너지"
+    },
+    {
+      "subject": "도시가스용 LNG 판매량 감소",
+      "relation": "decreases",
+      "object": "한국가스공사의 영업이익",
+      "domain": "에너지"
+    },
+    {
+      "subject": "삼성전자의 낸드 출하 확대",
+      "relation": "increases",
+      "object": "국내 반도체 장비주의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 낸드 출하 확대",
+      "relation": "causes",
+      "object": "코스피 반도체 업종으로의 수급 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 반도체 업종으로의 수급 유입",
+      "relation": "decreases",
+      "object": "코스피 비반도체 업종의 수급",
+      "domain": "반도체"
+    },
+    {
+      "subject": "낸드플래시 ASP 상승",
+      "relation": "increases",
+      "object": "삼성전자 영업이익 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 영업이익 추정치 상향 조정",
+      "relation": "increases",
+      "object": "코스피 내 반도체 업종 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "낸드플래시 ASP 하락",
+      "relation": "decreases",
+      "object": "코스피 내 반도체 업종 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 LNG 저장탱크·기화설비 발주 증가",
+      "relation": "increases",
+      "object": "LNG 저장탱크·기화설비 EPC 상장사의 수주잔고",
+      "domain": "에너지"
+    },
+    {
+      "subject": "LNG 터미널 증설 투자 확대",
+      "relation": "increases",
+      "object": "LNG 저장탱크·기화설비 EPC 상장사의 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "원자재 가격 급등",
+      "relation": "decreases",
+      "object": "LNG 저장탱크·기화설비 EPC 상장사의 수익성",
+      "domain": "에너지"
+    },
+    {
+      "subject": "삼성전자 시가총액 비중 상승",
+      "relation": "increases",
+      "object": "코스피 ETF 및 인덱스펀드의 삼성전자 편입 비중 확대 수요",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 ETF 및 인덱스펀드의 삼성전자 편입 비중 확대 수요",
+      "relation": "causes",
+      "object": "리밸런싱 시 삼성전자 매수 수요 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 시가총액 비중 하락",
+      "relation": "causes",
+      "object": "코스피 ETF 및 인덱스펀드의 삼성전자 비중 축소 리밸런싱 매도 수요",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국제유가 상승",
+      "relation": "increases",
+      "object": "SK이노베이션의 정유 부문 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제유가 상승",
+      "relation": "increases",
+      "object": "S-Oil의 정유 부문 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제유가 상승",
+      "relation": "increases",
+      "object": "GS의 정유 자회사 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "정제마진 상승",
+      "relation": "increases",
+      "object": "국내 정유 4사 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "정제마진 하락",
+      "relation": "decreases",
+      "object": "국내 정유 4사 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "정제마진 개선",
+      "relation": "causes",
+      "object": "국내 정유 4사의 수익성 개선",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 LNG 발전 비중 확대",
+      "relation": "increases",
+      "object": "한국전력 발전자회사 상장사의 LNG 발전 가동률",
+      "domain": "에너지"
+    },
+    {
+      "subject": "LNG 발전 가동률 상승",
+      "relation": "increases",
+      "object": "국내 발전공기업 상장사의 전력판매량",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 발전공기업 상장사의 전력판매량 증가",
+      "relation": "increases",
+      "object": "국내 발전공기업 상장사의 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "글로벌 LNG 운반선 발주 증가",
+      "relation": "increases",
+      "object": "한국 LNG 화물창 기자재 상장사의 수주 증가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 조선사의 LNG 운반선 건조량 증가",
+      "relation": "increases",
+      "object": "LNG 화물창 단열재·기자재 상장사의 매출 증가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "LNG 운반선용 화물창 기술 인증 확보",
+      "relation": "enables",
+      "object": "한국 기자재 상장사의 조선소 납품 확대",
+      "domain": "에너지"
+    },
+    {
+      "subject": "LNG 냉열 활용 수요 증가",
+      "relation": "increases",
+      "object": "도시가스 상장사의 LNG 판매량",
+      "domain": "에너지"
+    },
+    {
+      "subject": "산업체의 연료전환 수요 증가",
+      "relation": "increases",
+      "object": "도시가스 상장사의 공급 물량",
+      "domain": "에너지"
+    },
+    {
+      "subject": "도시가스 상장사의 LNG 판매량 증가",
+      "relation": "increases",
+      "object": "도시가스 상장사 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "국내 정유주의 수출 매출 환산액",
+      "domain": "에너지"
+    },
+    {
+      "subject": "두바이유 가격 상승",
+      "relation": "increases",
+      "object": "국내 정유사의 재고평가이익",
+      "domain": "에너지"
+    },
+    {
+      "subject": "두바이유 가격 급등",
+      "relation": "decreases",
+      "object": "국내 정유주의 정제마진",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제유가 상승 사이클",
+      "relation": "increases",
+      "object": "국내 정유사 배당확대 기대",
+      "domain": "에너지"
+    },
+    {
+      "subject": "정제마진 개선",
+      "relation": "increases",
+      "object": "국내 정유사 주주환원 확대 가능성",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국제유가 하락 사이클",
+      "relation": "decreases",
+      "object": "국내 정유사 배당지속 기대",
+      "domain": "에너지"
+    },
+    {
+      "subject": "유가 급등",
+      "relation": "increases",
+      "object": "정유사의 석유화학 원재료 비용",
+      "domain": "에너지"
+    },
+    {
+      "subject": "석유화학 원재료 비용 증가",
+      "relation": "decreases",
+      "object": "정유사의 석유화학 부문 수익성",
+      "domain": "에너지"
+    },
+    {
+      "subject": "윤활기유 스프레드 확대",
+      "relation": "increases",
+      "object": "정유사 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "DRAM·NAND 가격 반등",
+      "relation": "increases",
+      "object": "삼성전자의 반도체 부문 이익 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 반도체 부문 이익 기대",
+      "relation": "increases",
+      "object": "삼성전자 외국인 순매수 지속성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM·NAND 가격 반등",
+      "relation": "causes",
+      "object": "삼성전자 외국인 순매수 지속성 강화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 재고 정상화 속도 가속",
+      "relation": "increases",
+      "object": "삼성전자 주가의 외국인 보유비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 재고 정상화 지연",
+      "relation": "decreases",
+      "object": "삼성전자 주가의 외국인 보유비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 재고 정상화",
+      "relation": "causes",
+      "object": "삼성전자 실적 개선 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "삼성전자 외국인 순매도",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 업황 회복",
+      "relation": "increases",
+      "object": "삼성전자 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 업황 회복",
+      "relation": "causes",
+      "object": "삼성전자 실적 개선 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 HBM 출하 가이던스 상향",
+      "relation": "increases",
+      "object": "HBM 시장 성장 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 시장 성장 기대감 확대",
+      "relation": "increases",
+      "object": "삼성전자 DS부문 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 DS부문 실적 추정치 상향",
+      "relation": "increases",
+      "object": "삼성전자 목표주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM·NAND ASP 상승 전망",
+      "relation": "increases",
+      "object": "삼성전자 메모리 사업부 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 증권사의 삼성전자 실적 추정치 상향",
+      "relation": "increases",
+      "object": "삼성전자 목표주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM·NAND ASP 하락 전망",
+      "relation": "decreases",
+      "object": "삼성전자 메모리 사업부 영업이익 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 대비 삼성전자의 실적 모멘텀 약화",
+      "relation": "decreases",
+      "object": "삼성전자 외국인 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 대비 삼성전자의 실적 모멘텀 개선",
+      "relation": "increases",
+      "object": "삼성전자 외국인 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 강한 실적 모멘텀 부각",
+      "relation": "blocks",
+      "object": "삼성전자 외국인 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 반도체 업종 비중 확대",
+      "relation": "increases",
+      "object": "삼성전자 중심 외국인 패시브 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 내 삼성전자 비중 확대",
+      "relation": "increases",
+      "object": "외국인 패시브 자금의 삼성전자 매수 수요",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 반도체 업종 비중 확대",
+      "relation": "enables",
+      "object": "외국인 패시브 자금의 삼성전자 중심 포트폴리오 재조정",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 DRAM·NAND CAPEX 축소",
+      "relation": "decreases",
+      "object": "한미반도체의 후공정 장비 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 NAND CAPEX 조정",
+      "relation": "decreases",
+      "object": "테스의 반도체 장비 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 메모리 투자 재개",
+      "relation": "increases",
+      "object": "후공정 장비주의 수주 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업황 회복",
+      "relation": "increases",
+      "object": "삼성전자 메모리 사업부 PBR",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 가격 상승",
+      "relation": "increases",
+      "object": "삼성전자 메모리 사업부 EV/EBITDA",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업황 침체",
+      "relation": "decreases",
+      "object": "삼성전자 메모리 사업부 PBR",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인의 삼성전자 순매수 확대",
+      "relation": "increases",
+      "object": "삼성전자의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인의 SK하이닉스 순매수 확대",
+      "relation": "increases",
+      "object": "SK하이닉스의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 수급의 삼성전자 쏠림",
+      "relation": "increases",
+      "object": "삼성전자와 SK하이닉스의 메모리 밸류에이션 스프레드",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 평택·화성 메모리라인 투자 규모 확대",
+      "relation": "increases",
+      "object": "원익IPS의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 평택·화성 메모리라인 투자 규모 확대",
+      "relation": "increases",
+      "object": "유진테크의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 평택·화성 메모리라인 투자 규모 축소",
+      "relation": "decreases",
+      "object": "원익IPS·유진테크의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 가격 상승",
+      "relation": "increases",
+      "object": "삼성전자와 SK하이닉스의 메모리 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 등 고부가 메모리 제품 비중 확대",
+      "relation": "increases",
+      "object": "SK하이닉스의 메모리 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "파운드리·비메모리 부문의 적자 확대",
+      "relation": "decreases",
+      "object": "삼성전자의 전체 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 메모리 설비투자 재개 신호",
+      "relation": "increases",
+      "object": "국내 반도체 장비주의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 업황 선행지표 개선",
+      "relation": "increases",
+      "object": "국내 반도체 장비주에 대한 매수세",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 투자 집행 확대",
+      "relation": "causes",
+      "object": "국내 반도체 장비업체의 수주 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM용 TSV 절연막·도금 소재의 국산화 확대",
+      "relation": "increases",
+      "object": "국내 관련 소재 상장사의 매출 성장 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 수요 증가",
+      "relation": "increases",
+      "object": "TSV 절연막·도금 소재의 국내 공급 확대 수혜 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 국산 소재 채택 확대",
+      "relation": "increases",
+      "object": "국내 TSV 절연막·도금 소재 상장사의 실적 개선 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 수요 증가",
+      "relation": "increases",
+      "object": "TC본더·언더필 등 HBM 패키징 핵심 소재 공급 국내 기업의 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 기업의 HBM 패키징 핵심 소재 공급 확대",
+      "relation": "causes",
+      "object": "관련 반도체 소재주 투자 매력 부각",
+      "domain": "반도체"
+    },
+    {
+      "subject": "TC본더·언더필 공정용 핵심 소재의 공급 안정성 확보",
+      "relation": "increases",
+      "object": "국내 HBM 밸류체인 관련 기업의 수주 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 CAPEX 감축 발표",
+      "relation": "causes",
+      "object": "코스닥 반도체 장비주의 밸류에이션 디레이팅",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 반도체 투자 축소",
+      "relation": "decreases",
+      "object": "코스닥 반도체 장비주의 수주 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스닥 반도체 장비주의 수주 기대감 약화",
+      "relation": "decreases",
+      "object": "코스닥 반도체 장비주의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 메모리 증설 투자 확대",
+      "relation": "increases",
+      "object": "HPSP·주성엔지니어링·PSK 등 메모리 공정 장비주의 수주 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "고압수소어닐링·전공정 증착·식각 후처리 공정 투자 비중 확대",
+      "relation": "causes",
+      "object": "HPSP·주성엔지니어링·PSK 간 주가 차별화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 메모리 증설 사이클의 지연 또는 축소",
+      "relation": "decreases",
+      "object": "메모리 공정 장비주의 주가 상승 여력",
+      "domain": "반도체"
+    },
+    {
+      "subject": "ESS 연계 전력설비 발주 증가",
+      "relation": "increases",
+      "object": "배전반·차단기 업체의 매출",
+      "domain": "에너지"
+    },
+    {
+      "subject": "배전반·차단기 업체의 ESS 연계 전력설비 공급 증가",
+      "relation": "causes",
+      "object": "관련주의 실적 기대감 확대",
+      "domain": "에너지"
+    },
+    {
+      "subject": "관련주의 실적 기대감 확대",
+      "relation": "increases",
+      "object": "관련주의 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "유리기판 채택 확대",
+      "relation": "increases",
+      "object": "국내 유리기판용 소재주 실적 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "고다층 패키징 전환",
+      "relation": "increases",
+      "object": "국내 반도체 소재주의 고부가 소재 수요",
+      "domain": "반도체"
+    },
+    {
+      "subject": "고다층 패키징용 소재 수요 증가",
+      "relation": "causes",
+      "object": "국내 반도체 소재주 중장기 수혜 가능성 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "북미 전력망 증설 투자 확대",
+      "relation": "increases",
+      "object": "국내 변압기 제조사의 수주 규모",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 변압기 제조사의 북미 수주 확대",
+      "relation": "increases",
+      "object": "국내 변압기 제조사 주가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "북미 전력기기 공급 부족",
+      "relation": "enables",
+      "object": "국내 변압기 제조사의 북미 수주 확대",
+      "domain": "에너지"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 HBM CAPEX 확대",
+      "relation": "increases",
+      "object": "국내 패키징 소재주의 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 생산능력 증설",
+      "relation": "increases",
+      "object": "국내 패키징 소재주의 실적 레버리지",
+      "domain": "반도체"
+    },
+    {
+      "subject": "첨단 패키징용 소재 수요 증가",
+      "relation": "causes",
+      "object": "국내 패키징 소재주의 영업이익 개선",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 적층 수율 개선용 CMP 슬러리 수요 증가",
+      "relation": "increases",
+      "object": "국내 코스닥 CMP 슬러리 소재 기업의 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 적층 수율 개선용 세정 소재 채택 확대",
+      "relation": "increases",
+      "object": "국내 코스닥 반도체 세정 소재 기업의 매출 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "HBM 생산 확대",
+      "relation": "causes",
+      "object": "CMP 슬러리·세정 소재 공급 기업에 대한 한국 주식 시장의 관심 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "평택·용인 반도체 클러스터 투자 일정의 앞당김",
+      "relation": "increases",
+      "object": "원익IPS의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "평택·용인 반도체 클러스터 투자 일정의 앞당김",
+      "relation": "increases",
+      "object": "주성엔지니어링의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "평택·용인 반도체 클러스터 투자 일정의 지연",
+      "relation": "decreases",
+      "object": "원익IPS·주성엔지니어링의 실적 추정치",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 메모리 업체의 DRAM·NAND 공정 전환 투자 확대",
+      "relation": "increases",
+      "object": "국내 반도체 장비주의 수주 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 장비사의 공정 전환 장비 공급 레퍼런스 확보",
+      "relation": "causes",
+      "object": "국내 장비주 밸류에이션 리레이팅",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM·NAND 공정 전환 지연",
+      "relation": "decreases",
+      "object": "국내 반도체 장비주의 실적 가시성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 CAPEX 확대",
+      "relation": "increases",
+      "object": "원익IPS의 매출 증가폭",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 CAPEX 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 매출 증가폭",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 업체의 CAPEX 감축",
+      "relation": "decreases",
+      "object": "원익IPS·주성엔지니어링의 영업이익",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 수주잔고 증가",
+      "relation": "increases",
+      "object": "향후 매출 인식 규모",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 매출 인식 가시성 확대",
+      "relation": "causes",
+      "object": "PER 재평가 가능성 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 장비 수주잔고의 매출 인식 시점 지연",
+      "relation": "decreases",
+      "object": "단기 실적 기대감",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원가율 상승",
+      "relation": "decreases",
+      "object": "반도체 기업의 영업이익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 기업의 영업이익률 하락",
+      "relation": "decreases",
+      "object": "목표주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "수주잔고 증가",
+      "relation": "increases",
+      "object": "반도체 기업의 매출 가시성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 CAPEX 확대",
+      "relation": "increases",
+      "object": "원익IPS의 EBITDA",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 CAPEX 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 EBITDA",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 CAPEX 사이클 개선",
+      "relation": "increases",
+      "object": "원익IPS·주성엔지니어링의 EV/EBITDA 멀티플",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS 신규 수주 공시",
+      "relation": "increases",
+      "object": "원익IPS 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "주성엔지니어링 신규 수주 공시",
+      "relation": "increases",
+      "object": "주성엔지니어링 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 장비업체의 대형 신규 수주 공시",
+      "relation": "increases",
+      "object": "코스닥 반도체 장비주 투자심리",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자와 SK하이닉스의 반도체 설비투자 확대",
+      "relation": "increases",
+      "object": "원익IPS의 반도체 장비 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자와 SK하이닉스의 반도체 설비투자 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 반도체 장비 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자와 SK하이닉스의 반도체 설비투자 축소",
+      "relation": "decreases",
+      "object": "원익IPS와 주성엔지니어링의 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS의 ALD·CVD 장비 매출 비중 확대",
+      "relation": "increases",
+      "object": "원익IPS의 반도체 설비투자 사이클 민감도",
+      "domain": "반도체"
+    },
+    {
+      "subject": "주성엔지니어링의 수주 잔고 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 향후 장비 매출 가시성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "고객사 및 공정별로 분산된 수주 구조",
+      "relation": "decreases",
+      "object": "원익IPS와 주성엔지니어링의 개별 고객 투자 축소에 따른 실적 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 신규 장비 개발력 강화",
+      "relation": "increases",
+      "object": "중장기 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS·주성엔지니어링의 반도체 장비 수출 확대",
+      "relation": "increases",
+      "object": "중장기 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "신규 장비 개발력 강화",
+      "relation": "enables",
+      "object": "반도체 장비 수출 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "DRAM 고객사 투자 확대",
+      "relation": "increases",
+      "object": "원익IPS의 반도체 장비 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "NAND 고객사 설비투자 축소",
+      "relation": "decreases",
+      "object": "주성엔지니어링의 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "파운드리 고객사 노출도 확대",
+      "relation": "increases",
+      "object": "원익IPS·주성엔지니어링의 사업 포트폴리오 안정성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "현대차·기아의 해외판매 매출 원화 환산액",
+      "domain": "매크로"
+    },
+    {
+      "subject": "현대차·기아의 해외판매 매출 원화 환산액 증가",
+      "relation": "increases",
+      "object": "현대차·기아의 원화 기준 실적",
+      "domain": "매크로"
+    },
+    {
+      "subject": "현대차·기아의 원화 기준 실적 개선",
+      "relation": "increases",
+      "object": "현대차·기아 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 전공정 장비 국산화 정책 수혜 강도 확대",
+      "relation": "increases",
+      "object": "원익IPS의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 전공정 장비 국산화 정책 수혜 강도 확대",
+      "relation": "increases",
+      "object": "주성엔지니어링의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원익IPS와 주성엔지니어링의 국산화 정책 수혜 강도 차이",
+      "relation": "causes",
+      "object": "원익IPS와 주성엔지니어링의 밸류에이션 차이",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "삼성전자의 원화 기준 수출 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "SK하이닉스의 원화 기준 수출 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "causes",
+      "object": "삼성전자·SK하이닉스 영업이익률 격차 변화",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "causes",
+      "object": "외국인 순매도 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매도 확대",
+      "relation": "decreases",
+      "object": "반도체 대표주 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매도 확대",
+      "relation": "decreases",
+      "object": "자동차 대표주 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "수출 비중이 높은 업종의 원화 기준 매출과 수익성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "원재료 수입 비중이 높은 업종의 수익성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원재료 수입 비중 확대",
+      "relation": "blocks",
+      "object": "환율 상승에 따른 수출 업종의 수익성 개선 효과",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 보유율 증가",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수 구성종목 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 보유율 감소",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 업종지수 구성종목 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매수 확대",
+      "relation": "causes",
+      "object": "KOSPI 반도체 업종지수 구성종목별 외국인 보유율 증가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "기관 순매수 증가",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수 구성종목의 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSPI 반도체 업종지수 구성종목의 주가 상승",
+      "relation": "increases",
+      "object": "해당 종목의 기관 순매수 상위 진입 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "기관 순매수 상위 종목 변화",
+      "relation": "causes",
+      "object": "KOSPI 반도체 업종 내 수급 쏠림 변화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 업종의 낮은 환헤지 비중",
+      "relation": "increases",
+      "object": "원/달러 환율 변동의 반도체 기업 분기 실적 변동성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "자동차 업종의 높은 환헤지 비중",
+      "relation": "decreases",
+      "object": "원/달러 환율 변동의 자동차 기업 분기 실적 변동성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체와 자동차 업종의 환헤지 전략 차이",
+      "relation": "causes",
+      "object": "업종 간 분기 실적 변동성 격차",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 코스피 순매도 전환",
+      "relation": "causes",
+      "object": "자동차 수출주의 PBR 할인 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 코스피 순매도 전환",
+      "relation": "decreases",
+      "object": "자동차 수출주 수급",
+      "domain": "매크로"
+    },
+    {
+      "subject": "자동차 수출주 수급 악화",
+      "relation": "increases",
+      "object": "자동차 수출주의 PBR 할인 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매수 증가",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수 구성종목의 주가 수익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매도 확대",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 업종지수 구성종목의 주가 수익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 매수세 유입",
+      "relation": "causes",
+      "object": "KOSPI 반도체 업종지수 구성종목 주가 상승",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSPI 반도체 업종지수 정기 변경",
+      "relation": "causes",
+      "object": "외국인 순매수 상위 반도체 종목 재편",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매수 상위 반도체 종목 편입",
+      "relation": "increases",
+      "object": "해당 종목의 수급 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매수 상위 반도체 종목 제외",
+      "relation": "decreases",
+      "object": "해당 종목의 수급 강도",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "반도체 수출 대형주의 원화 기준 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 수출 대형주의 원화 기준 매출 증가",
+      "relation": "increases",
+      "object": "반도체 수출 대형주의 영업이익 추정치",
+      "domain": "매크로"
+    },
+    {
+      "subject": "반도체 수출 대형주의 영업이익 추정치 상향",
+      "relation": "causes",
+      "object": "반도체 수출 대형주의 PER 재평가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 순매수의 대형 반도체주 집중",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종지수의 대형주 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 순매수의 중소형 반도체주 집중",
+      "relation": "increases",
+      "object": "중소형 반도체주의 거래대금 및 주가 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "대형 반도체주로의 외국인 순매수 쏠림",
+      "relation": "decreases",
+      "object": "중소형 반도체주로의 외국인 수급 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "increases",
+      "object": "외화부채 평가손실",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외화부채 평가손실 확대",
+      "relation": "decreases",
+      "object": "국내 상장사 실적 전망",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 상장사의 실적 전망 하향 공시",
+      "relation": "decreases",
+      "object": "해당 상장사 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "외국인 지분율 상승",
+      "relation": "increases",
+      "object": "IT하드웨어 수출주의 EV/EBITDA",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "increases",
+      "object": "IT하드웨어 수출주의 EBITDA",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "decreases",
+      "object": "IT하드웨어 수출주의 EV/EBITDA",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 약세 구간에서 환헤지 비중이 낮은 조선사의 외화표시 수주잔고 가치 상승",
+      "relation": "increases",
+      "object": "해당 조선주의 주가 민감도",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 약세 구간에서 선제적 환헤지 확대",
+      "relation": "decreases",
+      "object": "조선사의 외화표시 수주잔고 가치의 환율 민감도",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환헤지로 환율 이익 반영 폭이 제한",
+      "relation": "decreases",
+      "object": "원화 약세 시 조선주의 주가 상승 탄력",
+      "domain": "매크로"
+    },
+    {
+      "subject": "달러 강세",
+      "relation": "increases",
+      "object": "2차전지 수출주의 원화 기준 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "2차전지 수출주의 원화 기준 매출 증가",
+      "relation": "causes",
+      "object": "실적 기대 상향",
+      "domain": "매크로"
+    },
+    {
+      "subject": "실적 기대 상향 대비 주가 반영 지연",
+      "relation": "causes",
+      "object": "2차전지 수출주의 밸류에이션 괴리",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "increases",
+      "object": "코스피 수출주의 원화 기준 수출 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "causes",
+      "object": "코스피 수출주의 분기 실적 가이던스 상향 조정",
+      "domain": "매크로"
+    },
+    {
+      "subject": "코스피 수출주의 분기 실적 가이던스 상향 조정",
+      "relation": "increases",
+      "object": "해당 상장사 주가",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "IT·반도체 수출 상장사의 원화 기준 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환율 변동성 확대",
+      "relation": "causes",
+      "object": "IT·반도체 상장사의 영업이익 전망 수정",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급락",
+      "relation": "decreases",
+      "object": "IT·반도체 수출 상장사의 매출 환산효과",
+      "domain": "매크로"
+    },
+    {
+      "subject": "미국 반도체 지수 상승",
+      "relation": "increases",
+      "object": "삼성전자·SK하이닉스 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "삼성전자·SK하이닉스 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "enables",
+      "object": "미국 반도체 지수 상승의 삼성전자·SK하이닉스 외국인 순매수 확대 효과",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 급등",
+      "relation": "causes",
+      "object": "KOSPI 반도체 대형주에 대한 외국인 순매도 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 약세에 따른 반도체 수출기업 실적 기대 개선",
+      "relation": "increases",
+      "object": "KOSPI 반도체 대형주 외국인 순매수 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "환율 변동성 확대",
+      "relation": "causes",
+      "object": "외국인의 KOSPI 반도체 대형주 매매 패턴 단기화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승 국면에서 높은 환헤지 비율",
+      "relation": "decreases",
+      "object": "국내 항공·해운 상장사의 환차손 반영 폭",
+      "domain": "매크로"
+    },
+    {
+      "subject": "국내 항공·해운 상장사의 환차손 반영 폭 축소",
+      "relation": "increases",
+      "object": "분기 실적 가이던스 상향 가능성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 변동성이 큰 국면에서 낮은 환헤지 비율",
+      "relation": "causes",
+      "object": "국내 항공·해운 상장사의 분기 실적 가이던스 하향 조정",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등 직후 수출주 상장사의 실적 상향 가이던스 공시",
+      "relation": "increases",
+      "object": "해당 상장사 주가의 단기 상승폭",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원/달러 환율 급등 직후 원재료 수입 의존 상장사의 실적 하향 가이던스 공시",
+      "relation": "decreases",
+      "object": "해당 상장사 주가의 단기 수익률",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환율 급변",
+      "relation": "causes",
+      "object": "국내 상장사의 실적 가이던스 변경 공시 직후 주가 변동성 확대",
+      "domain": "매크로"
+    },
+    {
+      "subject": "환헤지 비용 상승",
+      "relation": "decreases",
+      "object": "외국인의 한국 반도체주 투자 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "환헤지 비용 하락",
+      "relation": "increases",
+      "object": "외국인의 한국 반도체주 투자 비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인의 한국 반도체주 투자 비중 축소",
+      "relation": "decreases",
+      "object": "한국 반도체 업종 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 가격 사이클 반등",
+      "relation": "increases",
+      "object": "반도체 업종에 대한 외국인 현물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 가격 사이클 반등",
+      "relation": "increases",
+      "object": "외국인 반도체 선물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 현물·선물 동시 순매수",
+      "relation": "increases",
+      "object": "반도체 업종 전반으로의 매수 확산",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 실적 가이던스 상향",
+      "relation": "increases",
+      "object": "외국인의 코스피200 선물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 실적 가이던스 하향",
+      "relation": "decreases",
+      "object": "외국인의 코스피200 선물 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인의 코스피200 선물 순매수 확대",
+      "relation": "increases",
+      "object": "코스피200 지수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "한국 수출 반도체 경기 회복",
+      "relation": "increases",
+      "object": "외국인의 KOSPI 반도체주 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "decreases",
+      "object": "외국인의 KOSPI 반도체주 환차익 기대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 약세",
+      "relation": "blocks",
+      "object": "외국인의 KOSPI 반도체주 순매수 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "increases",
+      "object": "원화 자산의 금리 매력도",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 변동성 확대",
+      "relation": "causes",
+      "object": "KOSPI 반도체 업종 외국인 자금 유출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원화 자산의 금리 매력도 상승",
+      "relation": "increases",
+      "object": "KOSPI 반도체 업종 외국인 자금 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원달러 환율 하락",
+      "relation": "increases",
+      "object": "외국인 반도체주 현물 매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 반도체주 현물 매수 증가",
+      "relation": "increases",
+      "object": "코스피200 선물 매도 헤지 거래",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원달러 환율 상승",
+      "relation": "decreases",
+      "object": "외국인 반도체주 현물 매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 업황 둔화 우려",
+      "relation": "increases",
+      "object": "외국인 프로그램 매도",
+      "domain": "반도체"
+    },
+    {
+      "subject": "외국인 프로그램 매도",
+      "relation": "increases",
+      "object": "코스피 반도체주 변동성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "코스피 반도체주 변동성 확대",
+      "relation": "causes",
+      "object": "반도체주 투자심리 위축",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 외국인 지분율 상승",
+      "relation": "increases",
+      "object": "반도체 대형주 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 외국인 지분율 하락",
+      "relation": "decreases",
+      "object": "반도체 대형주 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스 외국인 순매수 확대",
+      "relation": "causes",
+      "object": "반도체 대형주 밸류에이션 리레이팅",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 외국인 순매수 증가",
+      "relation": "increases",
+      "object": "KOSPI 반도체 지수 수익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 외국인 순매수 감소",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 지수 수익률",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자 외국인 순매수 추세의 지속",
+      "relation": "causes",
+      "object": "KOSPI 반도체 지수 수익률의 시차 상승",
+      "domain": "반도체"
+    },
+    {
+      "subject": "엔비디아의 HBM 수요 증가",
+      "relation": "increases",
+      "object": "국내 반도체 대형주에 대한 외국인 순매수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 대형주에 대한 외국인 순매수",
+      "relation": "increases",
+      "object": "코스피200 지수 선물 베이시스",
+      "domain": "반도체"
+    },
+    {
+      "subject": "엔비디아의 HBM 수요 증가",
+      "relation": "causes",
+      "object": "국내 반도체 대형주의 실적 기대 상향",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "삼성전자·SK하이닉스 외국인 보유비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "decreases",
+      "object": "KOSPI 반도체 지수",
+      "domain": "반도체"
+    },
+    {
+      "subject": "원/달러 환율 하락",
+      "relation": "increases",
+      "object": "삼성전자·SK하이닉스 외국인 보유비중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 EUV 포토레지스트 국산화 진전",
+      "relation": "increases",
+      "object": "동진쎄미켐의 반도체 소재 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 ArF 포토레지스트 국산화 확대",
+      "relation": "increases",
+      "object": "동진쎄미켐의 고객사 공급 물량",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 EUV·ArF 포토레지스트 매출 비중 상승",
+      "relation": "causes",
+      "object": "동진쎄미켐의 실적 레버리지 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 동진쎄미켐 포토레지스트 공급 승인",
+      "relation": "enables",
+      "object": "동진쎄미켐 포토레지스트의 삼성전자 반도체 공정 양산 적용",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐 포토레지스트의 삼성전자 양산 적용 확대",
+      "relation": "increases",
+      "object": "동진쎄미켐의 반도체 소재 매출",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 삼성전자 공급처 확정",
+      "relation": "increases",
+      "object": "동진쎄미켐 관련 한국 주식 시장 투자심리",
+      "domain": "반도체"
+    },
+    {
+      "subject": "MSCI 코리아 내 반도체 비중 확대",
+      "relation": "causes",
+      "object": "외국인 패시브 자금의 삼성전자·SK하이닉스 매수 집중",
+      "domain": "반도체"
+    },
+    {
+      "subject": "KOSPI200 정기변경에서 반도체 업종 비중 상향",
+      "relation": "increases",
+      "object": "삼성전자·SK하이닉스에 대한 외국인 수급 유입",
+      "domain": "반도체"
+    },
+    {
+      "subject": "MSCI 코리아 및 KOSPI200 추종 자금의 리밸런싱",
+      "relation": "causes",
+      "object": "외국인 수급이 삼성전자·SK하이닉스에 집중되는 패턴",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자의 외국인 보유한도 대비 잔여 매수 여력 확대",
+      "relation": "increases",
+      "object": "삼성전자 주가의 추가 외국인 수급 유입 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스의 외국인 보유한도 대비 잔여 매수 여력 확대",
+      "relation": "increases",
+      "object": "SK하이닉스 주가의 추가 외국인 수급 유입 가능성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 추가 외국인 수급 유입 가능성 확대",
+      "relation": "increases",
+      "object": "KOSPI 반도체 지수의 탄력성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "솔브레인의 식각액·세정액 공급처 다변화",
+      "relation": "increases",
+      "object": "삼성전자·SK하이닉스의 소재 조달 안정성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "삼성전자·SK하이닉스의 소재 조달 안정성 개선",
+      "relation": "decreases",
+      "object": "반도체 생산 차질 위험",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 생산 차질 위험 감소",
+      "relation": "increases",
+      "object": "솔브레인의 수익성",
+      "domain": "반도체"
+    },
+    {
+      "subject": "반도체 업황 회복",
+      "relation": "increases",
+      "object": "동진쎄미켐의 고객사 신규 수주",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 CAPA 증설",
+      "relation": "enables",
+      "object": "고객사 신규 수주 대응",
+      "domain": "반도체"
+    },
+    {
+      "subject": "고객사 신규 수주 가시화",
+      "relation": "causes",
+      "object": "동진쎄미켐 주가 모멘텀 강화",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 반도체 소재 점유율 상승",
+      "relation": "increases",
+      "object": "동진쎄미켐 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "이엔에프테크놀로지의 반도체 소재 점유율 상승",
+      "relation": "increases",
+      "object": "이엔에프테크놀로지 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "국내 반도체 소재 경쟁 심화",
+      "relation": "causes",
+      "object": "동진쎄미켐·이엔에프테크놀로지 주가 민감도 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스향 포토레지스트 공급 비중 확대",
+      "relation": "increases",
+      "object": "동진쎄미켐의 수주잔고",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 수주잔고 증가",
+      "relation": "increases",
+      "object": "동진쎄미켐의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "SK하이닉스향 포토레지스트 공급 비중 축소",
+      "relation": "decreases",
+      "object": "동진쎄미켐의 밸류에이션",
+      "domain": "반도체"
+    },
+    {
+      "subject": "일본산 포토레지스트 대체율 상승",
+      "relation": "causes",
+      "object": "동진쎄미켐의 반도체 소재 국산화 수혜 기대 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "동진쎄미켐의 반도체 소재 국산화 수혜 기대 확대",
+      "relation": "increases",
+      "object": "동진쎄미켐 주가",
+      "domain": "반도체"
+    },
+    {
+      "subject": "일본산 포토레지스트 대체율 상승",
+      "relation": "increases",
+      "object": "국내 반도체 소재주 주가",
+      "domain": "반도체"
     }
   ]
 }
