@@ -74,6 +74,23 @@ uv run scripts/portfolio.py show --json
 uv run scripts/portfolio.py history --json
 ```
 
+## 종목 추천 (1-step)
+
+BUY 합의 종목 자동 추천 (스크리닝 → 시그널 필터 → 다관점 분석):
+```bash
+uv run scripts/recommend.py --json
+```
+
+미국 시장:
+```bash
+uv run scripts/recommend.py --market US --json
+```
+
+시그널만 (LLM 없이, 빠름):
+```bash
+uv run scripts/recommend.py --no-llm --json
+```
+
 ## 주도주 스크리닝
 
 ```bash
@@ -125,6 +142,8 @@ uv run scripts/build_causal.py info --json
 
 | 사용자 요청 | 실행 명령 |
 |-------------|-----------|
+| "뭐 살까?" | `uv run scripts/recommend.py --json` |
+| "미국주식 뭐 살까?" | `uv run scripts/recommend.py --market US --json` |
 | "오늘 주식 분석해줘" | `uv run scripts/daily.py --json` |
 | "삼성전자 어때?" | `uv run scripts/daily.py -t 005930 --json` |
 | "주도주 뭐 있어?" | `uv run scripts/screen.py --json` |
