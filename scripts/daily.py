@@ -77,6 +77,7 @@ def main():
     # LLM 분석
     multi_results = {}
     analysis_text = None
+    delta = None
 
     if not args.no_llm:
         if args.legacy:
@@ -85,6 +86,14 @@ def main():
         else:
             use_weights = not args.no_weights
             multi_results = run_multi_perspective(signals_data, portfolio, market_data, config, use_weights=use_weights)
+
+            # 일간 변동 계산
+            if multi_results:
+                try:
+                    from src.performance.tracker import compute_delta
+                    delta = compute_delta(multi_results)
+                except Exception:
+                    pass
 
     # 출력
     if args.json:
@@ -101,6 +110,8 @@ def main():
         }
         if multi_results:
             output["multi_perspective"] = multi_results
+        if delta:
+            output["delta"] = delta
         if analysis_text:
             output["analysis"] = analysis_text
         print(json_dump(output))
@@ -144,10 +155,39 @@ def main():
             for ticker, consensus in multi_results.items():
                 name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)
                 _print_consensus_card(name, ticker, consensus)
+
+            # 일간 변동
+            if delta and (delta["changes"] or delta["new_tickers"] or delta["removed_tickers"]):
+                _print_delta(delta)
+            elif delta:
+                console.print(f"\n  [dim]📋 전일({delta['previous_date']}) 대비 변동 없음[/dim]")
         elif analysis_text:
             print_analysis(analysis_text)
 
         print_success("분석 완료")
+
+
+def _print_delta(delta: dict):
+    """일간 변동 사항 터미널 출력"""
+    from src.output.formatter import console
+
+    verdict_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡", "DIVIDED": "🔶"}
+    console.print(f"\n  [bold]📋 전일({delta['previous_date']}) 대비 변동[/bold]")
+
+    for ch in delta["changes"]:
+        prev_e = verdict_emoji.get(ch["previous_verdict"], "⚪")
+        curr_e = verdict_emoji.get(ch["current_verdict"], "⚪")
+        console.print(f"    {prev_e} → {curr_e} [bold]{ch['name']}[/bold]: {ch['previous_verdict']} → {ch['current_verdict']}")
+        for pc in ch.get("perspective_changes", []):
+            console.print(f"      [dim]└ {pc['perspective']}: {pc['previous']} → {pc['current']}[/dim]")
+
+    for nt in delta.get("new_tickers", []):
+        console.print(f"    [green]+ {nt['ticker']} — {nt['verdict']}[/green]")
+
+    for rt in delta.get("removed_tickers", []):
+        console.print(f"    [red]- {rt['name']} ({rt['ticker']})[/red]")
+
+    console.print()
 
 
 def _print_consensus_card(name: str, ticker: str, consensus: dict):
