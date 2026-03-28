@@ -1,0 +1,40 @@
+# Trading Oracle 설정
+# ANTHROPIC_API_KEY는 환경변수로 설정하세요
+
+# 관심 종목 (종목코드)
+# 비어있으면 자동으로 주도주 스크리닝
+watchlist: []
+
+# 투자 성향
+risk_tolerance: moderate  # conservative, moderate, aggressive
+
+# 총 투자 가능 금액 (원)
+total_capital: 10000000
+
+# 최대 종목 수
+max_positions: 3
+
+# 손절매 기준 (%)
+stop_loss_pct: 10
+
+# 추적 손절매 기준 (고점 대비 %)
+trailing_stop_pct: 10
+
+# 기술적 분석 파라미터 (auto-researchtrading 기반)
+signals:
+  ema_fast: 5
+  ema_slow: 20
+  rsi_period: 8
+  rsi_overbought: 69
+  rsi_oversold: 31
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  bb_period: 20
+  momentum_window: 20
+  min_votes: 4  # 6개 시그널 중 최소 동의 수
+
+# LLM 설정
+llm:
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
