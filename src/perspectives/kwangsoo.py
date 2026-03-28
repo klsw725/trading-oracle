@@ -3,16 +3,14 @@
 SPEC §3-1 출력 형식 준수.
 """
 
-import json
-import re
-
 from src.perspectives.base import (
     Perspective,
     PerspectiveInput,
     PerspectiveResult,
+    call_llm,
+    extract_json,
     make_na_result,
 )
-from src.agent.oracle import get_client, _parse_sse_response
 
 
 SYSTEM_PROMPT = """\
@@ -135,46 +133,6 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     return "\n".join(lines)
 
 
-def _extract_json(text: str) -> dict | None:
-    """LLM 응답에서 JSON 추출. 코드블록 내부 또는 raw JSON 모두 처리."""
-    # 코드블록 내부 JSON
-    match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(1).strip())
-        except json.JSONDecodeError:
-            pass
-
-    # raw JSON (첫 번째 { ... } 블록)
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError:
-            pass
-
-    return None
-
-
-def _call_llm(user_prompt: str, config: dict) -> str:
-    """Claude API 호출 → 텍스트 반환. SSE raw string 처리 포함."""
-    client = get_client()
-    llm_config = config.get("llm", {})
-    model = llm_config.get("model", "claude-sonnet-4-20250514")
-    max_tokens = llm_config.get("max_tokens", 2048)
-
-    response = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
-
-    if isinstance(response, str):
-        return _parse_sse_response(response)
-    return response.content[0].text
-
-
 class KwangsooPerspective(Perspective):
     """이광수 관점 — 프로세스 중심 투자, 추적 손절매 + 모멘텀 기반 판정"""
 
@@ -185,19 +143,19 @@ class KwangsooPerspective(Perspective):
 
         # 1차 시도
         try:
-            text = _call_llm(user_prompt, data.config)
+            text = call_llm(SYSTEM_PROMPT, user_prompt, data.config)
         except Exception as e:
             return make_na_result(self.name, f"LLM 호출 실패: {e}")
 
-        parsed = _extract_json(text)
+        parsed = extract_json(text)
 
         # 파싱 실패 → 1회 재시도 (SPEC §4-2)
         if parsed is None:
             try:
-                text = _call_llm(user_prompt, data.config)
+                text = call_llm(SYSTEM_PROMPT, user_prompt, data.config)
             except Exception as e:
                 return make_na_result(self.name, f"LLM 재시도 실패: {e}")
-            parsed = _extract_json(text)
+            parsed = extract_json(text)
 
         if parsed is None:
             return make_na_result(self.name, "JSON 파싱 실패 (2회 시도)")
