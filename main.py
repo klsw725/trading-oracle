@@ -268,6 +268,8 @@ def cmd_analyze(args):
             idx = market_data.get(idx_name)
             if idx:
                 console.print(f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)")
+        if market_data.get("causal_warning"):
+            console.print(f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]")
 
     # 분석할 종목
     tickers, _ = collect_tickers(args.tickers, config, portfolio, getattr(args, "screen", False))

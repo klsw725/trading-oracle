@@ -136,6 +136,8 @@ def main():
             idx = market_data.get(idx_name)
             if idx:
                 console.print(f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)")
+        if market_data.get("causal_warning"):
+            console.print(f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]")
 
         # 시그널
         print_phase("기술적 분석", f"{len(signals_data)}개 종목")
