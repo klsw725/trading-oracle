@@ -1,0 +1,281 @@
+{
+  "metadata": {
+    "created_at": null,
+    "updated_at": "2026-03-28",
+    "num_topics": 88,
+    "num_triples": 45,
+    "llm_model": "codex/gpt-5.1-codex"
+  },
+  "triples": [
+    {
+      "subject": "한국은행 기준금리 인상",
+      "relation": "decreases",
+      "object": "코스피 시장의 유동성",
+      "domain": "매크로"
+    },
+    {
+      "subject": "원화 강세",
+      "relation": "decreases",
+      "object": "한국 수출기업의 원화 환산 이익",
+      "domain": "매크로"
+    },
+    {
+      "subject": "중국 내수 회복",
+      "relation": "increases",
+      "object": "한국 상장 제조업체의 매출",
+      "domain": "매크로"
+    },
+    {
+      "subject": "정부의 방위비 증액",
+      "relation": "increases",
+      "object": "방산주들의 실적",
+      "domain": "방산"
+    },
+    {
+      "subject": "북한과의 군사적 긴장",
+      "relation": "increases",
+      "object": "국내 방산 기업 수주",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 수출 계약 체결",
+      "relation": "increases",
+      "object": "한국 방산주의 주가",
+      "domain": "방산"
+    },
+    {
+      "subject": "한국은행의 기준금리 인상",
+      "relation": "decreases",
+      "object": "국내 성장주 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "원/달러 환율 상승",
+      "relation": "increases",
+      "object": "수출주 이익 전망",
+      "domain": "금융"
+    },
+    {
+      "subject": "대규모 자사주 매입",
+      "relation": "increases",
+      "object": "해당 기업 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "글로벌 반도체 수요 증가",
+      "relation": "increases",
+      "object": "한국 반도체 기업 실적",
+      "domain": "반도체"
+    },
+    {
+      "subject": "메모리 반도체 가격 하락",
+      "relation": "decreases",
+      "object": "삼성전자 영업이익",
+      "domain": "반도체"
+    },
+    {
+      "subject": "정부의 반도체 클러스터 투자",
+      "relation": "enables",
+      "object": "국내 소재·장비 기업 수주 확대",
+      "domain": "반도체"
+    },
+    {
+      "subject": "전기차 보조금 확대",
+      "relation": "increases",
+      "object": "한국 자동차 배터리 기업 매출",
+      "domain": "자동차"
+    },
+    {
+      "subject": "친환경 규제 강화",
+      "relation": "increases",
+      "object": "국내 자동차 부품주 투자 수요",
+      "domain": "자동차"
+    },
+    {
+      "subject": "국제 유가 하락",
+      "relation": "decreases",
+      "object": "국내 내연기관 자동차 생산 비용",
+      "domain": "자동차"
+    },
+    {
+      "subject": "카드사의 ROE 상승",
+      "relation": "increases",
+      "object": "카드사 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "카드사의 NIM 축소",
+      "relation": "decreases",
+      "object": "카드사 수익성",
+      "domain": "금융"
+    },
+    {
+      "subject": "카드사 본업 수익성 지표 악화",
+      "relation": "decreases",
+      "object": "카드사 주가",
+      "domain": "금융"
+    },
+    {
+      "subject": "가계의 실질소득 증가",
+      "relation": "increases",
+      "object": "소비재 기업의 매출",
+      "domain": "소비재"
+    },
+    {
+      "subject": "원재료 가격 상승",
+      "relation": "decreases",
+      "object": "소비재 기업의 이익률",
+      "domain": "소비재"
+    },
+    {
+      "subject": "정부의 소비진작 정책",
+      "relation": "increases",
+      "object": "소비재 업종 주가",
+      "domain": "소비재"
+    },
+    {
+      "subject": "국제 유가 상승",
+      "relation": "increases",
+      "object": "한국 정유주의 실적",
+      "domain": "에너지"
+    },
+    {
+      "subject": "정부의 신재생에너지 보조금 확대",
+      "relation": "enables",
+      "object": "국내 태양광 관련주의 수주 증가",
+      "domain": "에너지"
+    },
+    {
+      "subject": "석유제품 수출 감소",
+      "relation": "decreases",
+      "object": "한국 정유주의 이익",
+      "domain": "에너지"
+    },
+    {
+      "subject": "국내 바이오기업의 신약 임상 3상 성공",
+      "relation": "increases",
+      "object": "해당 바이오주 주가",
+      "domain": "바이오"
+    },
+    {
+      "subject": "정부의 바이오 규제 강화",
+      "relation": "decreases",
+      "object": "바이오기업들의 투자 심리",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 제약사의 글로벌 기술수출 계약 체결",
+      "relation": "increases",
+      "object": "코스닥 바이오 섹터에 대한 외국인 수급",
+      "domain": "바이오"
+    },
+    {
+      "subject": "국내 은행주의 배당성향 확대",
+      "relation": "increases",
+      "object": "은행주 배당수익률",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국의 자본적정성 규제 강화",
+      "relation": "decreases",
+      "object": "국내 은행주의 배당 여력",
+      "domain": "금융"
+    },
+    {
+      "subject": "안정적인 배당정책 가이던스 제공",
+      "relation": "enables",
+      "object": "배당 중심 투자전략 실행",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융지주의 ESG 경영 평가 개선",
+      "relation": "decreases",
+      "object": "자금조달 비용",
+      "domain": "금융"
+    },
+    {
+      "subject": "높은 ESG 리스크",
+      "relation": "increases",
+      "object": "금융지주의 조달 금리",
+      "domain": "금융"
+    },
+    {
+      "subject": "ESG 평가 악화",
+      "relation": "blocks",
+      "object": "저금리 채권 발행",
+      "domain": "금융"
+    },
+    {
+      "subject": "정부의 방위비 예산 증가",
+      "relation": "increases",
+      "object": "한화에어로스페이스의 신규 방산 수주",
+      "domain": "방산"
+    },
+    {
+      "subject": "한화에어로스페이스의 방산 수주 증가",
+      "relation": "increases",
+      "object": "한화에어로스페이스의 미래 현금흐름 가시성",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 기업들의 미래 현금흐름 가시성 향상",
+      "relation": "increases",
+      "object": "주요 방산주의 밸류에이션",
+      "domain": "방산"
+    },
+    {
+      "subject": "K-방산 수출 확대",
+      "relation": "increases",
+      "object": "방산 기업의 매출 규모",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산 기업 매출 증가",
+      "relation": "increases",
+      "object": "방산주 이익 개선",
+      "domain": "방산"
+    },
+    {
+      "subject": "방산주 이익 개선",
+      "relation": "increases",
+      "object": "방산주 주가 상승 기대",
+      "domain": "방산"
+    },
+    {
+      "subject": "인터넷전문은행 상장 추진 기대",
+      "relation": "increases",
+      "object": "인터넷전문은행 관련주 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "플랫폼 기반의 높은 수익 성장",
+      "relation": "enables",
+      "object": "인터넷전문은행의 높은 상장 밸류에이션",
+      "domain": "금융"
+    },
+    {
+      "subject": "금융당국 규제 강화",
+      "relation": "decreases",
+      "object": "인터넷전문은행 상장 성공 가능성",
+      "domain": "금융"
+    },
+    {
+      "subject": "국내 금리 인상",
+      "relation": "increases",
+      "object": "국내 보험주의 운용수익과 이익 전망",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험사의 장기부채에 맞춘 ALM 강화",
+      "relation": "decreases",
+      "object": "금리 변동으로 인한 보험주 평가손실 변동성",
+      "domain": "금융"
+    },
+    {
+      "subject": "보험사의 주식 편입 축소",
+      "relation": "decreases",
+      "object": "국내 주식시장으로의 자금 수요",
+      "domain": "금융"
+    }
+  ]
+}

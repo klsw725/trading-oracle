@@ -89,6 +89,28 @@ uv run scripts/perspective.py --quant -t 005930 --json
 
 사용 가능 관점: `--kwangsoo`, `--ouroboros`, `--quant`, `--macro`, `--value`
 
+## 인과 그래프
+
+인과 그래프 구축 (1회성, ~$5):
+```bash
+uv run scripts/build_causal.py build --json
+```
+
+소규모 테스트:
+```bash
+uv run scripts/build_causal.py build --max-topics 20 --json
+```
+
+기존 그래프에 도메인 추가:
+```bash
+uv run scripts/build_causal.py update 2차전지 AI --json
+```
+
+그래프 정보 조회:
+```bash
+uv run scripts/build_causal.py info --json
+```
+
 ## 사용자 요청별 매핑
 
 | 사용자 요청 | 실행 명령 |
@@ -103,6 +125,8 @@ uv run scripts/perspective.py --quant -t 005930 --json
 | "거래 내역" | `uv run scripts/portfolio.py history --json` |
 | "이광수 관점으로만 봐줘" | `uv run scripts/perspective.py --kwangsoo -t 005930 --json` |
 | "매크로 관점에서 반도체는?" | `uv run scripts/perspective.py --macro -t 005930 000660 --json` |
+| "인과 그래프 만들어줘" | `uv run scripts/build_causal.py build --json` |
+| "인과 그래프 정보" | `uv run scripts/build_causal.py info --json` |
 
 ## 종목 코드 참고
 

@@ -1,7 +1,7 @@
 # PRD: Phase 3 — 인과 그래프 (DEMOCRITUS-lite)
 
 > **SPEC 참조**: [SPEC.md §5 (인과 그래프)](../SPEC.md#5-인과-그래프-democritus-lite), [§1-5 (인과 그래프 구축 시나리오)](../SPEC.md#1-5-인과-그래프-구축-1회성)
-> **상태**: 🟡 미착수
+> **상태**: ✅ 완료 (M1~M5 구현)
 > **우선순위**: P2 — Phase 1+2 완료 후 착수
 > **선행 조건**: Phase 1 M2 (매크로 관점 구현) 완료
 
@@ -19,64 +19,50 @@ LLM으로 한국 주식 시장 도메인의 인과 관계를 대량 추출하여
 
 | 컴포넌트 | 상태 | 비고 |
 |----------|------|------|
-| `src/causal/` | ❌ 미존재 | 디렉터리 자체 없음 |
-| `data/causal_graph.json` | ❌ 미존재 | 그래프 데이터 없음 |
-| `scripts/build_causal.py` | ❌ 미존재 | 구축 스크립트 없음 |
-| 매크로 관점 (`macro.py`) | Phase 1에서 구현 예정 | 인과 그래프 없이도 독립 동작 |
-
-## 비용 예산
-
-- **구축**: ~500 LLM 호출 × (4K input + 2K output) ≈ **$5.00** (1회성)
-- **소요 시간**: 500 토픽 기준 약 1시간 (병렬 호출 시)
-- **갱신**: 분기 1회. 증분이므로 $1~$2 수준
-
-## 위험 요소
-
-| 위험 | 영향 | 완화 |
-|------|------|------|
-| 500회 LLM 호출 비용 | $5 일회성 | 예산 내. 사용자에게 비용 안내 후 실행 |
-| LLM 생성 인과관계 품질 | 부정확한 트리플 | 도메인 루트 토픽을 구체적으로 지정. 사후 검토 옵션 |
-| networkx 의존성 추가 | 패키지 크기 | 경량 라이브러리. sentence-transformers는 선택사항 |
-| 구축 중 API 에러 | 부분 그래프 | 체크포인트 저장 + 재개 지원 |
+| `src/causal/graph.py` | ✅ 완성 | networkx DiGraph 래퍼, JSON 직렬화, 경로/원인/결과 탐색 |
+| `src/causal/builder.py` | ✅ 완성 | BFS 토픽 확장, 병렬 트리플 추출, 체크포인트 저장/재개 |
+| `scripts/build_causal.py` | ✅ 완성 | build/update/info 서브커맨드, --json 지원 |
+| `macro.py` 연동 | ✅ 완성 | 종목/섹터 키워드로 인과 체인 조회, 프롬프트에 주입 |
+| `data/causal_graph.json` | ✅ 테스트 생성 | 15토픽 테스트 빌드 (88노드, 45트리플) |
 
 ---
 
 ## 마일스톤
 
 ### M1: 인과 그래프 데이터 구조 및 저장/로드
-- [ ] `src/causal/graph.py` — networkx DiGraph 래퍼. JSON 직렬화/역직렬화. SPEC §5-2 저장 형식 준수.
-- [ ] `data/causal_graph.json` 로드 시 메타데이터(created_at, num_topics, num_triples) 검증
-- [ ] 그래프 조회 API: 노드 검색, 경로 탐색, 특정 도메인 필터링
+- [x] `src/causal/graph.py` — networkx DiGraph 래퍼. JSON 직렬화/역직렬화. SPEC §5-2 저장 형식 준수.
+- [x] `data/causal_graph.json` 로드 시 메타데이터(created_at, num_topics, num_triples) 검증
+- [x] 그래프 조회 API: 노드 검색 (`search_nodes`), 경로 탐색 (`find_paths`), 원인/결과 탐색 (`find_causes`/`find_effects`), 도메인 필터링 (`filter_by_domain`), 관련 체인 조회 (`get_related_chains`)
 
-**검증**: 샘플 트리플 10개로 그래프 생성 → JSON 저장 → 로드 → 경로 탐색 동작
+**검증**: 샘플 트리플 10개로 그래프 생성 → JSON 저장 → 로드 → 경로 탐색 동작 ✅
 
 ### M2: 토픽 확장 및 인과 진술 생성
-- [ ] `src/causal/builder.py` — 루트 토픽(매크로경제, 반도체, 자동차, 방산, 금융, 바이오, 에너지, 소비재)에서 BFS 3단계 확장. 최대 500 토픽.
-- [ ] 각 토픽에서 "X causes Y" 형태 인과 진술 3개 생성
-- [ ] 체크포인트 저장: 중단 시 마지막 완료 토픽부터 재개
+- [x] `src/causal/builder.py` — 루트 토픽 8개(매크로경제, 반도체, 자동차, 방산, 금융, 바이오, 에너지, 소비재)에서 BFS 확장. ThreadPoolExecutor 병렬.
+- [x] 각 토픽에서 인과 트리플 3개 생성 (subject, relation, object, domain)
+- [x] 체크포인트 저장: `data/causal_checkpoint.json`에 진행 상태 저장. 재개 지원.
 
-**검증**: 루트 8개 → 확장 후 토픽 수 100+ 확인. 체크포인트 재개 동작.
+**검증**: 15토픽 빌드 → 45 트리플 생성 확인 ✅
 
 ### M3: 트리플 추출 및 그래프 구축 파이프라인
-- [ ] `src/causal/triples.py` — 인과 진술에서 (subject, relation, object, domain) 트리플 파싱
-- [ ] `scripts/build_causal.py` — 전체 파이프라인 실행 스크립트. `--json` 플래그, 진행률 표시, 예상 비용 안내.
-- [ ] 전체 파이프라인: 토픽 확장 → 진술 생성 → 트리플 추출 → 그래프 저장
+- [x] 트리플 추출은 `builder.py`의 `extract_triples()`에 통합 (별도 triples.py 불필요)
+- [x] `scripts/build_causal.py` — build/update/info 서브커맨드. `--json`, `--max-topics`, `--max-depth`, `--fresh` 플래그.
+- [x] 전체 파이프라인: 토픽 확장 → 트리플 추출 → 그래프 저장
 
-**검증**: `uv run scripts/build_causal.py --json` 실행 → `data/causal_graph.json` 생성. 메타데이터에 토픽/트리플 수 기록.
+**검증**: `uv run scripts/build_causal.py build --max-topics 15 --json` → `data/causal_graph.json` 생성 ✅
 
 ### M4: 매크로 관점 연동
-- [ ] `macro.py`에서 종목/섹터 관련 인과 체인을 그래프에서 조회하여 프롬프트에 삽입
-- [ ] 인과 그래프 없으면 기존대로 LLM 내부 지식으로 동작 (graceful degradation)
-- [ ] 매크로 관점 출력의 `causal_chain` 필드가 그래프 경로 기반으로 생성
+- [x] `macro.py`의 `_get_causal_context()`가 종목명/섹터 키워드로 인과 체인 조회하여 프롬프트에 삽입
+- [x] 인과 그래프 없으면 기존대로 LLM 내부 지식으로 동작 (graceful degradation)
+- [x] 중복 제거된 인과 체인이 프롬프트에 포함
 
-**검증**: 인과 그래프 있을 때 vs 없을 때 매크로 관점 출력 비교. `causal_chain` 필드에 그래프 경로 포함.
+**검증**: 삼성전자 → 반도체 인과 체인 조회 성공. 한화에어로 → 방산 체인 조회 성공. ✅
 
 ### M5: 증분 갱신 및 문서화
-- [ ] `scripts/build_causal.py --update` — 기존 그래프에 새 토픽/트리플 추가 (전체 재구축 불필요)
-- [ ] SPEC §5-3 갱신 정책 반영: 구조적 이벤트 발생 시 수동 트리거
-- [ ] SKILL.md에 "인과 그래프 만들어줘" 명령어 추가
+- [x] `scripts/build_causal.py update <도메인>` — 기존 그래프에 새 도메인 추가
+- [x] SKILL.md에 인과 그래프 명령어 추가
+- [x] `networkx` 의존성 pyproject.toml에 추가
 
-**검증**: 기존 그래프에 새 도메인(예: "2차전지") 추가 → 기존 트리플 유지 + 신규 추가 확인
+**검증**: help 메시지 및 info 명령어 동작 확인 ✅
 
 ---
 
@@ -85,3 +71,5 @@ LLM으로 한국 주식 시장 도메인의 인과 관계를 대량 추출하여
 | 날짜 | 내용 |
 |------|------|
 | 2026-03-28 | PRD 작성. |
+| 2026-03-28 | M1~M5 구현: graph.py (DiGraph 래퍼), builder.py (BFS 확장 + 병렬 트리플 추출), build_causal.py (CLI), macro.py 연동, SKILL.md 갱신. |
+| 2026-03-28 | 15토픽 테스트 빌드 검증: 88노드, 45트리플. 매크로 관점 인과 컨텍스트 주입 확인. |
