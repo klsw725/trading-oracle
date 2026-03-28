@@ -7,6 +7,7 @@
 | Phase 1 | [phase1-perspectives.md](prds/phase1-perspectives.md) | ✅ 완료 | 5개 투자 관점 + 합의도 시스템 (MAXS-lite) — M1~M5 전체 |
 | Phase 2 | [phase2-scripts.md](prds/phase2-scripts.md) | ✅ 완료 | scripts/ 분리 + shacs-bot 연동 |
 | Phase 3 | [phase3-causal-graph.md](prds/phase3-causal-graph.md) | ✅ 완료 | 인과 그래프 (DEMOCRITUS-lite) |
+| Phase 4 | [phase4-performance.md](prds/phase4-performance.md) | ✅ 완료 | 추천 성과 추적 시스템 |
 
 > 각 PRD는 마일스톤, 검증 기준, 진행 로그를 포함한다. 구현 착수 시 PRD의 마일스톤을 체크리스트로 사용한다.
 
@@ -120,7 +121,8 @@ trading-oracle/
 │   ├── screen.py                    # 주도주 스크리닝
 │   ├── portfolio.py                 # 포트폴리오 CRUD
 │   ├── build_causal.py              # 1회성: 인과 그래프 구축
-│   └── perspective.py               # 단일 관점 분석
+│   ├── perspective.py               # 단일 관점 분석
+│   └── performance.py              # 추천 성과 추적 리포트
 │
 ├── src/
 │   ├── data/
@@ -146,6 +148,8 @@ trading-oracle/
 │   │   ├── builder.py               # 토픽 확장 + 인과 진술 생성
 │   │   ├── triples.py               # 트리플 추출
 │   │   └── graph.py                 # networkx 그래프 관리
+│   ├── performance/                 # 추천 성과 추적 → PRD Phase 4
+│   │   └── tracker.py               # 스냅샷 저장/로드, 적중 평가, 리포트
 │   ├── agent/
 │   │   ├── oracle.py                # Claude API 연동
 │   │   └── prompts.py               # 기존 단일 프롬프트 (하위 호환)
@@ -154,7 +158,8 @@ trading-oracle/
 │
 ├── data/
 │   ├── portfolio.json               # 포트폴리오 상태
-│   └── causal_graph.json            # 인과 그래프
+│   ├── causal_graph.json            # 인과 그래프
+│   └── snapshots/                   # 추천 스냅샷 (일별 자동 저장)
 │
 └── docs/
     └── specs/

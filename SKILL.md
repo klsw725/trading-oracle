@@ -127,6 +127,33 @@ uv run scripts/build_causal.py info --json
 | "매크로 관점에서 반도체는?" | `uv run scripts/perspective.py --macro -t 005930 000660 --json` |
 | "인과 그래프 만들어줘" | `uv run scripts/build_causal.py build --json` |
 | "인과 그래프 정보" | `uv run scripts/build_causal.py info --json` |
+| "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
+| "어제 추천 결과는?" | `uv run scripts/performance.py detail 2026-03-27 --json` |
+| "스냅샷 목록" | `uv run scripts/performance.py list --json` |
+
+## 추천 성과 추적
+
+성과 리포트 (최근 30일):
+```bash
+uv run scripts/performance.py report --json
+```
+
+최근 60일:
+```bash
+uv run scripts/performance.py report --days 60 --json
+```
+
+스냅샷 목록:
+```bash
+uv run scripts/performance.py list --json
+```
+
+특정 날짜 상세:
+```bash
+uv run scripts/performance.py detail 2026-03-28 --json
+```
+
+> 스냅샷은 다관점 분석(`daily.py`) 실행 시 자동 저장됩니다.
 
 ## 종목 코드 참고
 

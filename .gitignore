@@ -11,3 +11,8 @@ wheels/
 -e 
 # OS files
 .DS_Store
+
+# Data files (user-specific)
+data/snapshots/
+data/portfolio.json
+data/fundamentals_cache.json
