@@ -1,68 +1,108 @@
 ---
 name: trading-oracle
-description: "한국 주식 투자 조언 에이전트. 포트폴리오 관리 + 주도주 스크리닝 + 기술적 분석 + LLM 종합 전략 제공."
-metadata: {"shacs-bot":{"emoji":"🔮","requires":{"bins":["uv"],"env":["ANTHROPIC_API_KEY"]}}}
+description: "다관점 한국 주식 투자 조언 에이전트. 5개 관점(이광수/포렌식/퀀트/매크로/가치) + 합의도 시스템. 포트폴리오 관리 + 주도주 스크리닝."
+metadata: {"shacs-bot":{"emoji":"🔮","requires":{"bins":["uv"],"env":[]}}}
 ---
 
-# Trading Oracle — 한국 주식 투자 조언
+# Trading Oracle — 다관점 투자 판정
 
-이광수 투자 철학 기반 일일 투자 조언 에이전트. 6-시그널 앙상블 보팅 + LLM 종합 판단.
+5개 독립 관점(이광수 철학, 포렌식 감사관, 퀀트 시그널, 매크로 인과, 가치 투자)이 병렬 판정 → 합의도 시스템(MAXS-lite)으로 종합.
 
-모든 명령은 이 스킬의 디렉터리에서 실행해야 함. `uv run main.py`가 진입점.
+모든 명령은 이 스킬의 디렉터리에서 실행. `--json` 플래그로 구조화된 JSON 출력.
 
-## 일일 분석 (가장 많이 쓰는 명령)
+## 일일 분석 (핵심 명령)
 
-포트폴리오 기반 분석 — 보유 종목 시그널 + LLM 종합 전략:
+다관점 분석 (5개 관점 + 합의도):
 ```bash
-uv run main.py
+uv run scripts/daily.py --json
 ```
 
-LLM 없이 시그널만:
+특정 종목 분석:
 ```bash
-uv run main.py --no-llm
+uv run scripts/daily.py -t 005930 --json
 ```
 
 주도주 스크리닝 포함:
 ```bash
-uv run main.py --screen
+uv run scripts/daily.py --screen --json
 ```
 
-특정 종목 추가 분석:
+시그널만 (LLM 없이):
 ```bash
-uv run main.py --tickers 005930 000660
+uv run scripts/daily.py --no-llm --json
 ```
 
-JSON 출력 (프로그래밍용):
+기존 단일 관점 분석 (레거시):
 ```bash
-uv run main.py --json
+uv run scripts/daily.py --legacy --json
 ```
 
 ## 포트폴리오 관리
 
 매수 기록:
 ```bash
-uv run main.py add <종목코드> <매수가> <수량> --reason "매수 이유"
+uv run scripts/portfolio.py add <종목코드> <매수가> <수량> --reason "매수 이유" --json
 ```
 
 매도 기록:
 ```bash
-uv run main.py remove <종목코드> --price <매도가> --reason "매도 이유"
+uv run scripts/portfolio.py remove <종목코드> --price <매도가> --reason "매도 이유" --json
 ```
 
 현금 설정:
 ```bash
-uv run main.py cash <금액>
+uv run scripts/portfolio.py cash <금액> --json
 ```
 
 포트폴리오 조회:
 ```bash
-uv run main.py portfolio --json
+uv run scripts/portfolio.py show --json
 ```
 
 거래 내역:
 ```bash
-uv run main.py history
+uv run scripts/portfolio.py history --json
 ```
+
+## 주도주 스크리닝
+
+```bash
+uv run scripts/screen.py --json
+```
+
+상위 N개:
+```bash
+uv run scripts/screen.py --top 10 --json
+```
+
+## 단일 관점 분석
+
+이광수 관점:
+```bash
+uv run scripts/perspective.py --kwangsoo -t 005930 --json
+```
+
+퀀트 관점:
+```bash
+uv run scripts/perspective.py --quant -t 005930 --json
+```
+
+사용 가능 관점: `--kwangsoo`, `--ouroboros`, `--quant`, `--macro`, `--value`
+
+## 사용자 요청별 매핑
+
+| 사용자 요청 | 실행 명령 |
+|-------------|-----------|
+| "오늘 주식 분석해줘" | `uv run scripts/daily.py --json` |
+| "삼성전자 어때?" | `uv run scripts/daily.py -t 005930 --json` |
+| "주도주 뭐 있어?" | `uv run scripts/screen.py --json` |
+| "삼성전자 20만원에 10주 샀어" | `uv run scripts/portfolio.py add 005930 200000 10 --json` |
+| "SK하이닉스 팔았어" | `uv run scripts/portfolio.py remove 000660 --json` |
+| "현금 천만원 있어" | `uv run scripts/portfolio.py cash 10000000 --json` |
+| "내 포트폴리오 보여줘" | `uv run scripts/portfolio.py show --json` |
+| "거래 내역" | `uv run scripts/portfolio.py history --json` |
+| "이광수 관점으로만 봐줘" | `uv run scripts/perspective.py --kwangsoo -t 005930 --json` |
+| "매크로 관점에서 반도체는?" | `uv run scripts/perspective.py --macro -t 005930 000660 --json` |
 
 ## 종목 코드 참고
 
@@ -79,17 +119,13 @@ uv run main.py history
 | 두산에너빌리티 | 034020 |
 | 기아 | 000270 |
 
-## 사용자 요청별 매핑
+## 합의도 해석
 
-| 사용자 요청 | 실행 명령 |
-|-------------|-----------|
-| "오늘 주식 분석해줘" | `uv run main.py` |
-| "내 포트폴리오 보여줘" | `uv run main.py portfolio --json` |
-| "삼성전자 어때?" | `uv run main.py --tickers 005930 --no-llm` |
-| "주도주 뭐 있어?" | `uv run main.py --screen` |
-| "삼성전자 20만원에 10주 샀어" | `uv run main.py add 005930 200000 10` |
-| "SK하이닉스 팔았어" | `uv run main.py remove 000660` |
-| "현금 천만원 있어" | `uv run main.py cash 10000000` |
+- **만장일치** (very high): 5/5 동일 → 높은 확신
+- **강한 합의** (high): 4/5 동일 → 소수 의견 참고
+- **약한 합의** (moderate): 3/5 동일 → 신중하게
+- **분기** (low): 관점 충돌 → 양측 근거 제시, 사용자 선택
+- **판정 보류** (insufficient): 유효 관점 부족 → 데이터 확인 필요
 
 ## 핵심 투자 원칙 (사용자에게 전달 시)
 
@@ -97,13 +133,4 @@ uv run main.py history
 - 손절매는 반드시 설정 — 매수 시 10% 손절 기본
 - 주도주를 쫓아가라 — 발명하지 말고 시장이 선택한 종목
 - 3~5종목 집중 — 종목 수 늘리면 관리 불가
-- 10시 전 매수 금지 — 변동성 큰 시간대 회피
 - 현금은 기회의 실탄 — 변동성 장에서 현금 비중 유지
-
-## 응답 포맷
-
-trading-oracle의 출력을 사용자에게 전달할 때:
-1. 핵심 결론부터 (매수/매도/관망)
-2. 가격과 수량은 구체적으로
-3. 손절가 항상 명시
-4. 이광수 철학 기반 한 줄 조언 포함
