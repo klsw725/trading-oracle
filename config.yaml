@@ -35,6 +35,9 @@ signals:
   min_votes: 4  # 6개 시그널 중 최소 동의 수
 
 # LLM 설정
+# provider: anthropic (기본) 또는 codex (OpenAI Codex, OAuth 필요)
+# codex 사용 시: uv run main.py codex-login 으로 먼저 로그인
 llm:
-  model: claude-sonnet-4-20250514
+  provider: codex
+  model: gpt-5.4-codex
   max_tokens: 4096

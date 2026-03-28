@@ -1,8 +1,7 @@
-"""LLM Agent — Claude API를 통한 투자 분석"""
+"""LLM Agent — 투자 분석 (Anthropic / Codex provider 지원)"""
 
 import json
 import os
-import re
 
 from anthropic import Anthropic
 
@@ -40,13 +39,13 @@ def _parse_sse_response(raw: str) -> str:
     return "".join(text_parts)
 
 
-def analyze(
+def _analyze_anthropic(
     market_data: dict,
     signals_data: list[dict],
     portfolio: dict,
     config: dict,
 ) -> str:
-    """시장 데이터 + 시그널 + 포트폴리오 → LLM 분석 결과"""
+    """Anthropic Claude API로 분석."""
     client = get_client()
     user_prompt = build_analysis_prompt(market_data, signals_data, portfolio, config)
 
@@ -61,8 +60,42 @@ def analyze(
         messages=[{"role": "user", "content": user_prompt}],
     )
 
-    # Handle both parsed response objects and raw SSE strings
     if isinstance(response, str):
         return _parse_sse_response(response)
 
     return response.content[0].text
+
+
+def _analyze_codex(
+    market_data: dict,
+    signals_data: list[dict],
+    portfolio: dict,
+    config: dict,
+) -> str:
+    """OpenAI Codex Responses API로 분석."""
+    from src.agent.codex import generate
+
+    user_prompt = build_analysis_prompt(market_data, signals_data, portfolio, config)
+    llm_config = config.get("llm", {})
+    model = llm_config.get("model", "gpt-5.1-codex")
+
+    return generate(SYSTEM_PROMPT, user_prompt, model=model)
+
+
+def analyze(
+    market_data: dict,
+    signals_data: list[dict],
+    portfolio: dict,
+    config: dict,
+) -> str:
+    """시장 데이터 + 시그널 + 포트폴리오 → LLM 분석 결과
+
+    config.llm.provider로 provider 선택:
+      - "anthropic" (기본): Claude API
+      - "codex": OpenAI Codex Responses API (OAuth)
+    """
+    provider = config.get("llm", {}).get("provider", "anthropic")
+
+    if provider == "codex":
+        return _analyze_codex(market_data, signals_data, portfolio, config)
+    return _analyze_anthropic(market_data, signals_data, portfolio, config)
