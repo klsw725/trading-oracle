@@ -11,6 +11,9 @@
 - **시장 레짐 감지**: 코스피 EMA+모멘텀 기반 bull/bear/sideways 자동 분류
 - **일간 변동 리포트**: 어제 vs 오늘 추천 비교 (판정 전환 + 관점별 변동)
 - **인과 그래프**: LLM 기반 한국 주식 시장 인과 관계 957트리플 구축
+- **웹 검색 보강**: DuckDuckGo로 최신 뉴스/공시/수급 수집 → LLM 프롬프트에 자동 삽입 (OUROBOROS Triple-Gate 검증)
+- **시그널 엔진 v2**: ATR 기반 변동성 정규화 임계값 + 레짐 필터
+- **백테스트**: 시그널 적중률 + 전략 성과 검증 인프라
 - **한국 + 미국 시장**: 티커 포맷 자동 판별 (숫자=KR, 알파벳=US)
 
 ## 빠른 시작
@@ -51,15 +54,17 @@ trading-oracle/
 │   ├── portfolio.py                 # 포트폴리오 CRUD
 │   ├── perspective.py               # 단일 관점 분석
 │   ├── performance.py               # 성과 리포트
+│   ├── backtest.py                  # 시그널 백테스트
 │   └── build_causal.py              # 인과 그래프 구축
 │
 ├── src/
 │   ├── common.py                    # 공유 유틸리티
 │   ├── data/
 │   │   ├── market.py                # OHLCV, 지수, 시총 (pykrx + FDR)
-│   │   └── fundamentals.py          # PER/PBR (네이버 + yfinance)
+│   │   ├── fundamentals.py          # PER/PBR (네이버 + yfinance)
+│   │   └── web_search.py            # DuckDuckGo 웹 검색 + OUROBOROS 검증
 │   ├── signals/
-│   │   └── technical.py             # 6-시그널 앙상블 보팅
+│   │   └── technical.py             # 6-시그널 앙상블 보팅 (v2: ATR 임계값)
 │   ├── perspectives/                # 5개 투자 관점
 │   │   ├── base.py                  # ABC + 공유 LLM 호출
 │   │   ├── kwangsoo.py              # 이광수 + systrader79 철학
@@ -94,7 +99,7 @@ trading-oracle/
 └── docs/
     └── specs/multi-perspective/
         ├── SPEC.md                  # 시스템 사양서
-        └── prds/                    # Phase 1~8 PRD
+        └── prds/                    # Phase 1~10 PRD
 ```
 
 ## 사용자 요청별 명령 매핑
@@ -133,6 +138,20 @@ trading-oracle/
 ```
 
 스냅샷 5개 이상 축적 시 **적응형 가중치** 활성화 — 적중률 높은 관점에 더 높은 가중치 부여.
+
+## 웹 검색
+
+DuckDuckGo 기반 무료 웹 검색으로 LLM에 최신 정보 제공. OUROBOROS 프레임워크의 Triple-Gate 검증 적용.
+
+`config.yaml`:
+```yaml
+web_search:
+  enabled: true           # false로 끄면 기존 동작
+  max_news: 7
+  cache_ttl_hours: 12
+```
+
+`--no-search` 플래그로 CLI에서도 비활성화 가능.
 
 ## LLM 설정
 
