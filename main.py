@@ -480,6 +480,9 @@ def main():
     # codex-login
     subparsers.add_parser("codex-login", help="OpenAI Codex OAuth 로그인")
 
+    # help (전체 명령 가이드)
+    subparsers.add_parser("guide", help="전체 명령 가이드")
+
     # 기본 분석 옵션
     parser.add_argument("--tickers", "-t", nargs="+", help="추가 분석 종목")
     parser.add_argument("--screen", action="store_true", help="주도주 스크리닝 포함")
@@ -491,10 +494,72 @@ def main():
 
     args = parser.parse_args()
 
+    def cmd_guide(_args):
+        guide = """\
+🔮 Trading Oracle — 전체 명령 가이드
+
+━━━ 분석 ━━━
+  uv run main.py                              다관점 분석 (포트폴리오 종목)
+  uv run main.py -t 005930 AAPL               특정 종목 분석
+  uv run main.py --screen                     주도주 스크리닝 포함
+  uv run main.py --no-llm                     시그널만 (LLM 없이)
+  uv run main.py --no-search                  웹 검색 비활성화
+  uv run main.py --legacy                     기존 단일 관점 분석
+
+━━━ 종목 추천 ━━━
+  uv run scripts/recommend.py                 BUY 합의 종목 추천
+  uv run scripts/recommend.py --market US     미국 시장 추천
+  uv run scripts/recommend.py --no-llm        시그널만 (빠른 스캔)
+
+━━━ 포트폴리오 ━━━
+  uv run main.py add 005930 55000 10          매수 기록
+  uv run main.py remove 005930                전량 매도
+  uv run main.py remove 005930 -n 5           5주 분할 매도
+  uv run main.py cash 10000000                현금 설정
+  uv run main.py portfolio                    포트폴리오 조회
+  uv run main.py history                      거래 내역
+
+━━━ 스크리닝 ━━━
+  uv run scripts/screen.py                    주도주 스크리닝
+  uv run scripts/screen.py --top 10           상위 10개
+
+━━━ 단일 관점 ━━━
+  uv run scripts/perspective.py --kwangsoo -t 005930
+  uv run scripts/perspective.py --quant -t AAPL
+  (사용 가능: --kwangsoo, --ouroboros, --quant, --macro, --value)
+
+━━━ 성과 추적 ━━━
+  uv run scripts/performance.py report        성과 리포트
+  uv run scripts/performance.py list          스냅샷 목록
+  uv run scripts/performance.py detail 2026-03-28
+
+━━━ 백테스트 ━━━
+  uv run scripts/backtest.py 005930 AAPL      시그널 백테스트
+  uv run scripts/backtest.py --days 450       기간 지정
+
+━━━ 인과 그래프 ━━━
+  uv run scripts/build_causal.py build        전체 구축 (~$5)
+  uv run scripts/build_causal.py update 2차전지 AI
+  uv run scripts/build_causal.py info         현재 그래프 정보
+
+━━━ 관리 ━━━
+  uv run main.py reset --all                  전체 초기화 (포트폴리오 제외)
+  uv run main.py reset --snapshots            스냅샷만 초기화
+  uv run main.py reset --causal               인과 그래프 초기화
+  uv run main.py codex-login                  Codex OAuth 로그인
+
+━━━ 공통 옵션 ━━━
+  --json          JSON 출력 (shacs-bot 연동)
+  --no-weights    적응형 가중치 비활성화
+  --no-search     웹 검색 비활성화
+"""
+        print(guide)
+
     cmds = {
         "add": cmd_add, "remove": cmd_remove, "cash": cmd_cash,
         "portfolio": cmd_portfolio, "history": cmd_history,
         "reset": cmd_reset, "codex-login": cmd_codex_login,
+        "guide": cmd_guide,
     }
     handler = cmds.get(args.command)
     if handler:
