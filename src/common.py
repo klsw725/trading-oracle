@@ -356,6 +356,105 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
     return results
 
 
+def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filter: bool = True, use_llm: bool = True) -> dict:
+    """1-step 종목 추천 파이프라인.
+
+    스크리닝 → 시그널 필터(Bull 4/6+) → 다관점 분석 → BUY 합의 필터.
+
+    Args:
+        market: "ALL", "KOSPI", "KOSDAQ", "US", "NASDAQ", "NYSE"
+        top_n: 스크리닝 후보 수
+        signal_filter: True면 Bull 4/6+ 종목만 LLM 분석 (비용 절감)
+        use_llm: False면 시그널까지만 (LLM 없이)
+
+    Returns:
+        {"date", "market", "regime", "screened", "signal_filtered", "analyzed",
+         "recommendations": [...], "no_recommendation_reason": str|None}
+    """
+    include_us = market in ("US", "NASDAQ", "NYSE")
+    market_data = collect_market_data(include_us=include_us)
+    min_votes = config.get("signals", {}).get("min_votes", 4)
+
+    # 1단계: 스크리닝
+    candidates = screen_leading_stocks(market=market, top_n=top_n)
+    if not candidates:
+        return {
+            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
+            "screened": 0, "signal_filtered": 0, "analyzed": 0,
+            "recommendations": [], "no_recommendation_reason": "스크리닝 실패",
+        }
+
+    # 기술적 분석
+    tickers = {c["ticker"] for c in candidates}
+    signals_data = analyze_tickers(tickers, config)
+
+    if not signals_data:
+        return {
+            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
+            "screened": len(candidates), "signal_filtered": 0, "analyzed": 0,
+            "recommendations": [], "no_recommendation_reason": "시그널 분석 실패",
+        }
+
+    # 2단계: 시그널 필터
+    if signal_filter:
+        bull_data = [s for s in signals_data if s["signals"]["bull_votes"] >= min_votes]
+    else:
+        bull_data = signals_data
+
+    if not use_llm:
+        # LLM 없이 시그널 Bull 종목만 반환
+        recs = []
+        for s in bull_data:
+            recs.append({
+                "ticker": s["ticker"], "name": s["name"], "price": s["signals"]["current_price"],
+                "score": next((c["score"] for c in candidates if c["ticker"] == s["ticker"]), 0),
+                "signals": {"verdict": s["signals"]["verdict"], "bull_votes": s["signals"]["bull_votes"], "bear_votes": s["signals"]["bear_votes"]},
+                "consensus": None,
+            })
+        recs.sort(key=lambda x: x["score"], reverse=True)
+        return {
+            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
+            "screened": len(candidates), "signal_filtered": len(bull_data), "analyzed": 0,
+            "recommendations": recs, "no_recommendation_reason": None if recs else "시그널 Bull 종목 없음",
+        }
+
+    if not bull_data:
+        return {
+            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
+            "screened": len(candidates), "signal_filtered": 0, "analyzed": 0,
+            "recommendations": [], "no_recommendation_reason": "시그널 Bull 종목 없음",
+        }
+
+    # 3단계: 다관점 분석 (Bull 종목만)
+    portfolio = load_portfolio()
+    multi_results = run_multi_perspective(bull_data, portfolio, market_data, config)
+
+    # 4단계: BUY 합의 필터
+    recs = []
+    for ticker, consensus in multi_results.items():
+        if consensus["consensus_verdict"] == "BUY":
+            item = next((s for s in bull_data if s["ticker"] == ticker), None)
+            if item:
+                recs.append({
+                    "ticker": ticker, "name": item["name"], "price": item["signals"]["current_price"],
+                    "score": next((c["score"] for c in candidates if c["ticker"] == ticker), 0),
+                    "signals": {"verdict": item["signals"]["verdict"], "bull_votes": item["signals"]["bull_votes"], "bear_votes": item["signals"]["bear_votes"]},
+                    "consensus": consensus,
+                })
+
+    recs.sort(key=lambda x: x["score"], reverse=True)
+
+    reason = None
+    if not recs:
+        reason = "BUY 합의 종목 없음"
+
+    return {
+        "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
+        "screened": len(candidates), "signal_filtered": len(bull_data), "analyzed": len(multi_results),
+        "recommendations": recs, "no_recommendation_reason": reason,
+    }
+
+
 def build_signals_json(signals_data: list[dict]) -> list[dict]:
     """시그널 데이터를 JSON 출력용으로 변환."""
     return [
