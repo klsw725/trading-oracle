@@ -1,11 +1,17 @@
-"""네이버 금융에서 PER/PBR/배당수익률 스크래핑"""
+"""네이버 금융에서 PER/PBR/배당수익률 스크래핑 + 7일 TTL 캐시"""
 
+import json
 import re
+from datetime import datetime
+from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
 
 
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+_CACHE_PATH = Path("data/fundamentals_cache.json")
+_CACHE_TTL_DAYS = 7
 
 
 def fetch_naver_fundamentals(ticker: str) -> dict:
@@ -51,6 +57,54 @@ def fetch_naver_fundamentals(ticker: str) -> dict:
             break
 
     return result
+
+
+def _load_cache() -> dict:
+    if _CACHE_PATH.exists():
+        try:
+            return json.loads(_CACHE_PATH.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def _save_cache(cache: dict):
+    _CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _CACHE_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
+
+
+def _is_cache_valid(entry: dict) -> bool:
+    cached_at = entry.get("cached_at")
+    if not cached_at:
+        return False
+    cached_date = datetime.fromisoformat(cached_at)
+    return (datetime.now() - cached_date).days < _CACHE_TTL_DAYS
+
+
+def fetch_fundamentals_cached(ticker: str) -> dict:
+    """네이버 금융에서 PER/PBR 가져오기. 실패 시 7일 캐시 사용.
+
+    Returns dict with fundamentals + optional "cache_date" key if from cache.
+    """
+    result = fetch_naver_fundamentals(ticker)
+
+    cache = _load_cache()
+
+    if result:
+        # 스크래핑 성공 → 캐시 갱신
+        cache[ticker] = {**result, "cached_at": datetime.now().isoformat()}
+        _save_cache(cache)
+        return result
+
+    # 스크래핑 실패 → 캐시 조회
+    entry = cache.get(ticker)
+    if entry and _is_cache_valid(entry):
+        cached = {k: v for k, v in entry.items() if k != "cached_at"}
+        cached["cache_date"] = entry["cached_at"][:10]
+        return cached
+
+    # 캐시도 만료 또는 없음
+    return {}
 
 
 def fetch_fundamentals_batch(tickers: list[str]) -> dict[str, dict]:
