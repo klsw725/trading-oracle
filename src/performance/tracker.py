@@ -311,6 +311,78 @@ def compute_perspective_weights(min_snapshots: int = 5, eval_window: int = 5) ->
     return weights
 
 
+def compute_delta(current_results: dict, previous_date: str | None = None) -> dict | None:
+    """현재 분석 결과를 이전 스냅샷과 비교하여 변동 사항을 반환한다.
+
+    Args:
+        current_results: run_multi_perspective() 결과 (ticker → consensus dict)
+        previous_date: 비교할 스냅샷 날짜. None이면 가장 최근 스냅샷 사용.
+
+    Returns:
+        {"previous_date": "...", "changes": [...], "new_tickers": [...], "removed_tickers": [...]}
+        또는 이전 스냅샷 없으면 None
+    """
+    if previous_date is None:
+        snapshots = list_snapshots()
+        if not snapshots:
+            return None
+        previous_date = snapshots[-1]
+
+    prev = load_snapshot(previous_date)
+    if not prev:
+        return None
+
+    prev_recs = prev.get("recommendations", {})
+    changes = []
+
+    for ticker, consensus in current_results.items():
+        curr_verdict = consensus["consensus_verdict"]
+        curr_label = consensus["consensus_label"]
+
+        if ticker not in prev_recs:
+            continue
+
+        prev_rec = prev_recs[ticker]
+        prev_verdict = prev_rec["consensus_verdict"]
+
+        if curr_verdict != prev_verdict:
+            # 관점별 변동 추적
+            perspective_changes = []
+            prev_perspectives = {p["perspective"]: p["verdict"] for p in prev_rec.get("perspectives", [])}
+            for p in consensus.get("perspectives", []):
+                p_name = p["perspective"]
+                p_verdict = p["verdict"]
+                prev_p_verdict = prev_perspectives.get(p_name)
+                if prev_p_verdict and p_verdict != prev_p_verdict:
+                    perspective_changes.append({
+                        "perspective": p_name,
+                        "previous": prev_p_verdict,
+                        "current": p_verdict,
+                    })
+
+            changes.append({
+                "ticker": ticker,
+                "name": prev_rec.get("name", ticker),
+                "previous_verdict": prev_verdict,
+                "current_verdict": curr_verdict,
+                "previous_label": prev_rec.get("consensus_label", ""),
+                "current_label": curr_label,
+                "perspective_changes": perspective_changes,
+            })
+
+    current_tickers = set(current_results.keys())
+    prev_tickers = set(prev_recs.keys())
+    new_tickers = [{"ticker": t, "name": current_results[t].get("perspectives", [{}])[0].get("name", t) if current_results[t].get("perspectives") else t, "verdict": current_results[t]["consensus_verdict"]} for t in current_tickers - prev_tickers]
+    removed_tickers = [{"ticker": t, "name": prev_recs[t].get("name", t)} for t in prev_tickers - current_tickers]
+
+    return {
+        "previous_date": previous_date,
+        "changes": changes,
+        "new_tickers": new_tickers,
+        "removed_tickers": removed_tickers,
+    }
+
+
 def generate_report(days_back: int = 30, eval_days: list[int] | None = None) -> dict:
     """최근 N일간 스냅샷의 성과 리포트 생성.
 

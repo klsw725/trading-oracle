@@ -267,6 +267,7 @@ def cmd_analyze(args):
     use_legacy = getattr(args, "legacy", False)
     analysis_text = None
     multi_results = {}
+    delta = None
 
     if not no_llm:
         if use_legacy:
@@ -290,6 +291,12 @@ def cmd_analyze(args):
             try:
                 use_weights = not getattr(args, "no_weights", False)
                 multi_results = run_multi_perspective(signals_data, portfolio, market_data, config, use_weights=use_weights)
+                if multi_results:
+                    try:
+                        from src.performance.tracker import compute_delta
+                        delta = compute_delta(multi_results)
+                    except Exception:
+                        pass
                 if not quiet:
                     for ticker, consensus in multi_results.items():
                         name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)
@@ -313,6 +320,8 @@ def cmd_analyze(args):
         }
         if multi_results:
             output["multi_perspective"] = multi_results
+        if delta:
+            output["delta"] = delta
         if analysis_text:
             output["analysis"] = analysis_text
         print(json_dump(output))
