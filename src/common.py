@@ -236,12 +236,27 @@ def has_us_tickers(tickers: set[str] | list[str], portfolio: dict | None = None)
 
 
 def analyze_tickers(tickers: set[str], config: dict) -> list[dict]:
-    """여러 종목 분석. 성공한 것만 반환."""
+    """여러 종목 병렬 분석. 성공한 것만 반환."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if len(tickers) <= 1:
+        results = []
+        for ticker in tickers:
+            result = analyze_ticker(ticker, config)
+            if result:
+                results.append(result)
+        return results
+
     results = []
-    for ticker in tickers:
-        result = analyze_ticker(ticker, config)
-        if result:
-            results.append(result)
+    with ThreadPoolExecutor(max_workers=min(len(tickers), 6)) as executor:
+        futures = {executor.submit(analyze_ticker, ticker, config): ticker for ticker in tickers}
+        for future in as_completed(futures):
+            try:
+                result = future.result()
+                if result:
+                    results.append(result)
+            except Exception:
+                pass
     return results
 
 
@@ -274,13 +289,11 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
     if "regime" in market_data:
         market_context["regime"] = market_data["regime"]
 
-    multi_results = {}
-    for item in signals_data:
+    def _analyze_one(item: dict) -> tuple[str, dict]:
         ticker = item["ticker"]
         pos = next((p for p in positions if p["ticker"] == ticker), None)
         fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
 
-        # _ohlcv가 있으면 재사용, 없으면 fetch (하위 호환)
         ohlcv = item.get("_ohlcv")
         if ohlcv is None or ohlcv.empty:
             ohlcv = fetch_ohlcv(ticker, days_back=120)
@@ -298,7 +311,23 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
 
         results = run_all_perspectives(pi)
         consensus = compute_consensus(results, weights=weights)
-        multi_results[ticker] = consensus
+        return ticker, consensus
+
+    multi_results = {}
+    if len(signals_data) <= 1:
+        for item in signals_data:
+            ticker, consensus = _analyze_one(item)
+            multi_results[ticker] = consensus
+    else:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        with ThreadPoolExecutor(max_workers=min(len(signals_data), 4)) as executor:
+            futures = {executor.submit(_analyze_one, item): item["ticker"] for item in signals_data}
+            for future in as_completed(futures):
+                try:
+                    ticker, consensus = future.result()
+                    multi_results[ticker] = consensus
+                except Exception:
+                    pass
 
     # 스냅샷 자동 저장
     if multi_results:
