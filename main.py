@@ -185,6 +185,52 @@ def cmd_codex_login(args):
     codex_login()
 
 
+def cmd_reset(args):
+    """데이터 초기화"""
+    import shutil
+    from pathlib import Path
+
+    targets = []
+    if args.snapshots or args.all:
+        targets.append(("스냅샷", "data/snapshots"))
+    if args.causal or args.all:
+        targets.append(("인과 그래프", "data/causal_graph.json"))
+        targets.append(("인과 체크포인트", "data/causal_checkpoint.json"))
+    if args.cache or args.all:
+        targets.append(("펀더멘털 캐시", "data/fundamentals_cache.json"))
+    if args.portfolio:
+        targets.append(("포트폴리오", "data/portfolio.json"))
+
+    if not targets:
+        if getattr(args, "json", False):
+            print(json_dump({"status": "error", "message": "초기화 대상을 지정하세요 (--snapshots, --causal, --cache, --all, --portfolio)"}))
+        else:
+            print_error("초기화 대상을 지정하세요: --snapshots, --causal, --cache, --all, --portfolio")
+        return
+
+    deleted = []
+    for name, path_str in targets:
+        p = Path(path_str)
+        if p.is_dir():
+            count = len(list(p.glob("*.json")))
+            if count > 0:
+                shutil.rmtree(p)
+                p.mkdir(parents=True, exist_ok=True)
+                deleted.append(f"{name} ({count}개 파일)")
+        elif p.is_file():
+            p.unlink()
+            deleted.append(name)
+
+    if getattr(args, "json", False):
+        print(json_dump({"status": "ok", "deleted": deleted}))
+    else:
+        if deleted:
+            for d in deleted:
+                print_success(f"초기화 완료: {d}")
+        else:
+            console.print("[dim]삭제할 데이터가 없습니다.[/dim]")
+
+
 def cmd_history(args):
     portfolio = load_portfolio()
     if getattr(args, "json", False):
@@ -370,6 +416,15 @@ def main():
     hist_parser = subparsers.add_parser("history", help="거래 내역")
     hist_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
+    # reset
+    reset_parser = subparsers.add_parser("reset", help="데이터 초기화")
+    reset_parser.add_argument("--snapshots", action="store_true", help="추천 스냅샷 초기화")
+    reset_parser.add_argument("--causal", action="store_true", help="인과 그래프 초기화")
+    reset_parser.add_argument("--cache", action="store_true", help="펀더멘털 캐시 초기화")
+    reset_parser.add_argument("--portfolio", action="store_true", help="포트폴리오 초기화 (주의: 실제 투자 기록 삭제)")
+    reset_parser.add_argument("--all", action="store_true", help="전체 초기화 (포트폴리오 제외)")
+    reset_parser.add_argument("--json", action="store_true", help="JSON 출력")
+
     # codex-login
     subparsers.add_parser("codex-login", help="OpenAI Codex OAuth 로그인")
 
@@ -385,7 +440,8 @@ def main():
 
     cmds = {
         "add": cmd_add, "remove": cmd_remove, "cash": cmd_cash,
-        "portfolio": cmd_portfolio, "history": cmd_history, "codex-login": cmd_codex_login,
+        "portfolio": cmd_portfolio, "history": cmd_history,
+        "reset": cmd_reset, "codex-login": cmd_codex_login,
     }
     handler = cmds.get(args.command)
     if handler:
