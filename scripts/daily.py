@@ -61,7 +61,8 @@ def main():
         sys.exit(1)
 
     # 기술적 분석
-    signals_data = analyze_tickers(tickers, config)
+    regime = market_data.get("regime", {}).get("regime")
+    signals_data = analyze_tickers(tickers, config, regime=regime)
     if not signals_data:
         if args.json:
             print(json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"}))

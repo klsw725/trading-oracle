@@ -165,7 +165,7 @@ def collect_market_data(include_us: bool = False) -> dict:
     return market_data
 
 
-def analyze_ticker(ticker: str, config: dict) -> dict | None:
+def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict | None:
     """종목 기술적 분석 + 펀더멘털. 실패 시 None."""
     name = get_ticker_name(ticker)
     if not name:
@@ -175,7 +175,7 @@ def analyze_ticker(ticker: str, config: dict) -> dict | None:
     if ohlcv.empty or len(ohlcv) < 60:
         return None
 
-    signals = compute_signals(ohlcv, config)
+    signals = compute_signals(ohlcv, config, regime=regime)
     if "error" in signals:
         return None
 
@@ -235,21 +235,21 @@ def has_us_tickers(tickers: set[str] | list[str], portfolio: dict | None = None)
     return False
 
 
-def analyze_tickers(tickers: set[str], config: dict) -> list[dict]:
+def analyze_tickers(tickers: set[str], config: dict, regime: str | None = None) -> list[dict]:
     """여러 종목 병렬 분석. 성공한 것만 반환."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     if len(tickers) <= 1:
         results = []
         for ticker in tickers:
-            result = analyze_ticker(ticker, config)
+            result = analyze_ticker(ticker, config, regime=regime)
             if result:
                 results.append(result)
         return results
 
     results = []
     with ThreadPoolExecutor(max_workers=min(len(tickers), 6)) as executor:
-        futures = {executor.submit(analyze_ticker, ticker, config): ticker for ticker in tickers}
+        futures = {executor.submit(analyze_ticker, ticker, config, regime): ticker for ticker in tickers}
         for future in as_completed(futures):
             try:
                 result = future.result()

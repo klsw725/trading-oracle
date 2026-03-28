@@ -12,6 +12,8 @@
 | Phase 6 | [phase6-regime.md](prds/phase6-regime.md) | ✅ 완료 | 시장 레짐 감지 (bull/bear/sideways) |
 | Phase 7 | [phase7-daily-delta.md](prds/phase7-daily-delta.md) | ✅ 완료 | 일간 변동 리포트 (어제 vs 오늘) |
 | Phase 8 | [phase8-recommend.md](prds/phase8-recommend.md) | ✅ 완료 | 1-step 종목 추천 파이프라인 |
+| Phase 9 | [phase9-signal-v2.md](prds/phase9-signal-v2.md) | ✅ 완료 | 시그널 엔진 v2 (ATR 임계값 + 레짐 필터 + 정보 필드) |
+| Phase 10 | [phase10-web-search.md](prds/phase10-web-search.md) | 📋 PRD 작성 | DuckDuckGo 웹 검색 + OUROBOROS 검증 |
 
 > 각 PRD는 마일스톤, 검증 기준, 진행 로그를 포함한다. 구현 착수 시 PRD의 마일스톤을 체크리스트로 사용한다.
 

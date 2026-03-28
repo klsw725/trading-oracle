@@ -331,7 +331,8 @@ def cmd_analyze(args):
     if not quiet:
         print_phase("기술적 분석", f"{len(tickers)}개 종목 앙상블 보팅")
 
-    signals_data = analyze_tickers(tickers, config)
+    regime = market_data.get("regime", {}).get("regime")
+    signals_data = analyze_tickers(tickers, config, regime=regime)
     if not quiet:
         for item in signals_data:
             print_signal_card(item)
