@@ -90,16 +90,24 @@ SYSTEM_PROMPT = """\
 
 
 def _build_user_prompt(data: PerspectiveInput) -> str:
+    from src.data.market import is_us_ticker
+    is_us = is_us_ticker(data.ticker)
+    c = "$" if is_us else ""
+    u = "" if is_us else "원"
+    fmt = ",.2f" if is_us else ",.0f"
+
     lines = []
     lines.append(f"## 종목: {data.name} ({data.ticker})")
+    if is_us:
+        lines.append("(미국 시장 종목)")
     lines.append("")
 
     sig = data.signals
     lines.append(f"### 시장 데이터")
-    lines.append(f"- 현재가: {sig['current_price']:,.0f}원")
+    lines.append(f"- 현재가: {c}{sig['current_price']:{fmt}}{u}")
     lines.append(f"- 20일 수익률: {sig['change_20d']:+.2f}%%")
     lines.append(f"- 5일 수익률: {sig['change_5d']:+.2f}%%")
-    lines.append(f"- 52주 고가: {sig['high_52w']:,.0f}원 / 저가: {sig['low_52w']:,.0f}원")
+    lines.append(f"- 52주 고가: {c}{sig['high_52w']:{fmt}}{u} / 저가: {c}{sig['low_52w']:{fmt}}{u}")
     lines.append("")
 
     if data.fundamentals:
@@ -116,14 +124,15 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         regime = data.market_context.get("regime")
         if regime:
             lines.append(f"- **시장 레짐: {regime['label']}** ({regime['description']})")
-        for key in ("kospi", "kosdaq"):
+        for key in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = data.market_context.get(key)
             if idx:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%%, 20일 {idx['change_20d']:+.1f}%%)")
         lines.append("")
 
-    # 인과 그래프 참조
-    causal_context = _get_causal_context(data.name, data.ticker)
+    # 인과 그래프 참조 (한국 종목만 — US 인과 그래프는 미구축)
+    from src.data.market import is_us_ticker
+    causal_context = "" if is_us_ticker(data.ticker) else _get_causal_context(data.name, data.ticker)
     if causal_context:
         lines.append("### 인과 그래프 참조 (배경 지식)")
         lines.append(causal_context)
