@@ -81,8 +81,36 @@ def get_index_summary(index_code: str, name: str) -> dict:
     }
 
 
+def _detect_regime(index_data: dict, ohlcv_closes: np.ndarray | None = None) -> dict:
+    """코스피 지수 데이터에서 시장 레짐을 분류한다.
+
+    판정 기준:
+      bull: 20일 수익률 > 3% AND 종가 > EMA(20)
+      bear: 20일 수익률 < -3% AND 종가 < EMA(20)
+      sideways: 그 외
+
+    Returns:
+        {"regime": "bull"|"bear"|"sideways", "label": "상승 추세"|..., "description": "..."}
+    """
+    change_20d = index_data.get("change_20d", 0)
+
+    # EMA(20) 비교 (OHLCV 데이터 있을 때만)
+    above_ema = None
+    if ohlcv_closes is not None and len(ohlcv_closes) >= 20:
+        from src.signals.technical import ema
+        ema20 = ema(ohlcv_closes[-30:], 20)
+        above_ema = ohlcv_closes[-1] > ema20[-1]
+
+    if change_20d > 3 and above_ema is not False:
+        return {"regime": "bull", "label": "상승 추세", "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 상회"}
+    elif change_20d < -3 and above_ema is not True:
+        return {"regime": "bear", "label": "하락 추세", "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 하회"}
+    else:
+        return {"regime": "sideways", "label": "횡보", "description": f"코스피 20일 {change_20d:+.1f}%, 방향성 부재"}
+
+
 def collect_market_data() -> dict:
-    """코스피/코스닥 지수 수집"""
+    """코스피/코스닥 지수 수집 + 시장 레짐 감지"""
     market_data = {"date": datetime.now().strftime("%Y-%m-%d")}
     kospi = get_index_summary("KS11", "코스피")
     kosdaq = get_index_summary("KQ11", "코스닥")
@@ -90,6 +118,15 @@ def collect_market_data() -> dict:
         market_data["kospi"] = kospi
     if kosdaq:
         market_data["kosdaq"] = kosdaq
+
+    # 레짐 감지 (코스피 기준)
+    if kospi:
+        kospi_ohlcv = fetch_index_ohlcv("KS11", days_back=60)
+        closes = kospi_ohlcv["close"].values.astype(float) if not kospi_ohlcv.empty else None
+        market_data["regime"] = _detect_regime(kospi, closes)
+    else:
+        market_data["regime"] = {"regime": "unknown", "label": "판정 불가", "description": "코스피 데이터 부족"}
+
     return market_data
 
 
@@ -187,6 +224,8 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         market_context["kospi"] = market_data["kospi"]
     if "kosdaq" in market_data:
         market_context["kosdaq"] = market_data["kosdaq"]
+    if "regime" in market_data:
+        market_context["regime"] = market_data["regime"]
 
     multi_results = {}
     for item in signals_data:
@@ -240,6 +279,8 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
         market_context["kospi"] = market_data["kospi"]
     if "kosdaq" in market_data:
         market_context["kosdaq"] = market_data["kosdaq"]
+    if "regime" in market_data:
+        market_context["regime"] = market_data["regime"]
 
     results = {}
     for item in signals_data:

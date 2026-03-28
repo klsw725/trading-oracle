@@ -94,6 +94,9 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     if data.market_context:
         lines.append("")
         lines.append("### 시장 환경")
+        regime = data.market_context.get("regime")
+        if regime:
+            lines.append(f"- **시장 레짐: {regime['label']}** ({regime['description']})")
         for key in ("kospi", "kosdaq"):
             idx = data.market_context.get(key)
             if idx:

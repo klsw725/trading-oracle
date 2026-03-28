@@ -116,6 +116,11 @@ def main():
 
         # 시장 현황
         print_phase("시장 환경", market_data["date"])
+        regime = market_data.get("regime", {})
+        if regime.get("regime"):
+            regime_colors = {"bull": "green", "bear": "red", "sideways": "yellow"}
+            rc = regime_colors.get(regime["regime"], "white")
+            console.print(f"  [{rc}]📈 시장 레짐: {regime['label']}[/{rc}] — {regime['description']}")
         for idx_name in ("kospi", "kosdaq"):
             idx = market_data.get(idx_name)
             if idx:

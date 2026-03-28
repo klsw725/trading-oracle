@@ -9,6 +9,7 @@
 | Phase 3 | [phase3-causal-graph.md](prds/phase3-causal-graph.md) | ✅ 완료 | 인과 그래프 (DEMOCRITUS-lite) |
 | Phase 4 | [phase4-performance.md](prds/phase4-performance.md) | ✅ 완료 | 추천 성과 추적 시스템 |
 | Phase 5 | [phase5-adaptive-weights.md](prds/phase5-adaptive-weights.md) | ✅ 완료 | 성과 기반 적응형 관점 가중치 |
+| Phase 6 | [phase6-regime.md](prds/phase6-regime.md) | ✅ 완료 | 시장 레짐 감지 (bull/bear/sideways) |
 
 > 각 PRD는 마일스톤, 검증 기준, 진행 로그를 포함한다. 구현 착수 시 PRD의 마일스톤을 체크리스트로 사용한다.
 
