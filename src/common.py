@@ -117,6 +117,7 @@ def analyze_ticker(ticker: str, config: dict) -> dict | None:
         "signals": signals,
         "fundamentals": fund,
         "market_cap": market_cap,
+        "_ohlcv": ohlcv,  # 메모리 내 재사용 (JSON 직렬화 대상 아님)
     }
 
 
@@ -179,10 +180,15 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         pos = next((p for p in positions if p["ticker"] == ticker), None)
         fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
 
+        # _ohlcv가 있으면 재사용, 없으면 fetch (하위 호환)
+        ohlcv = item.get("_ohlcv")
+        if ohlcv is None or ohlcv.empty:
+            ohlcv = fetch_ohlcv(ticker, days_back=120)
+
         pi = PerspectiveInput(
             ticker=ticker,
             name=item["name"],
-            ohlcv=fetch_ohlcv(ticker, days_back=120),
+            ohlcv=ohlcv,
             signals=item["signals"],
             fundamentals=fund,
             position=pos,
@@ -193,6 +199,14 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         results = run_all_perspectives(pi)
         consensus = compute_consensus(results)
         multi_results[ticker] = consensus
+
+    # 스냅샷 자동 저장
+    if multi_results:
+        try:
+            from src.performance.tracker import save_snapshot
+            save_snapshot(market_data.get("date", ""), market_data, multi_results, signals_data)
+        except Exception:
+            pass  # 스냅샷 저장 실패는 분석을 중단시키지 않음
 
     return multi_results
 
@@ -219,10 +233,14 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
         pos = next((p for p in positions if p["ticker"] == ticker), None)
         fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
 
+        ohlcv = item.get("_ohlcv")
+        if ohlcv is None or ohlcv.empty:
+            ohlcv = fetch_ohlcv(ticker, days_back=120)
+
         pi = PerspectiveInput(
             ticker=ticker,
             name=item["name"],
-            ohlcv=fetch_ohlcv(ticker, days_back=120),
+            ohlcv=ohlcv,
             signals=item["signals"],
             fundamentals=fund,
             position=pos,
