@@ -59,18 +59,26 @@ SYSTEM_PROMPT = """\
 
 
 def _build_user_prompt(data: PerspectiveInput) -> str:
+    from src.data.market import is_us_ticker
+    is_us = is_us_ticker(data.ticker)
+    c = "$" if is_us else ""
+    u = "" if is_us else "원"
+    fmt = ",.2f" if is_us else ",.0f"
+
     lines = []
     lines.append(f"## 종목: {data.name} ({data.ticker})")
+    if is_us:
+        lines.append("(미국 시장 종목)")
     lines.append("")
 
     sig = data.signals
-    lines.append(f"### 현재가: {sig['current_price']:,.0f}원")
+    lines.append(f"### 현재가: {c}{sig['current_price']:{fmt}}{u}")
     lines.append(f"- 20일 수익률: {sig['change_20d']:+.2f}%")
     lines.append(f"- 5일 수익률: {sig['change_5d']:+.2f}%")
-    lines.append(f"- 52주 고가: {sig['high_52w']:,.0f}원 / 저가: {sig['low_52w']:,.0f}원")
-    lines.append(f"- 20일 고가: {sig['high_20d']:,.0f}원")
-    lines.append(f"- 추적 손절매 (고점-10%%): {sig['trailing_stop_10pct']:,.0f}원")
-    lines.append(f"- ATR 손절매: {sig['trailing_stop_atr']:,.0f}원")
+    lines.append(f"- 52주 고가: {c}{sig['high_52w']:{fmt}}{u} / 저가: {c}{sig['low_52w']:{fmt}}{u}")
+    lines.append(f"- 20일 고가: {c}{sig['high_20d']:{fmt}}{u}")
+    lines.append(f"- 추적 손절매 (고점-10%%): {c}{sig['trailing_stop_10pct']:{fmt}}{u}")
+    lines.append(f"- ATR 손절매: {c}{sig['trailing_stop_atr']:{fmt}}{u}")
     lines.append("")
 
     # 시그널
@@ -89,12 +97,12 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     if data.position:
         pos = data.position
         lines.append("### 보유 포지션")
-        lines.append(f"- 매수가: {pos['entry_price']:,.0f}원 × {pos['shares']}주")
-        lines.append(f"- 손절가: {pos['stop_loss']:,.0f}원")
-        lines.append(f"- 고점: {pos.get('peak_price', pos['entry_price']):,.0f}원")
+        lines.append(f"- 매수가: {c}{pos['entry_price']:{fmt}}{u} × {pos['shares']}주")
+        lines.append(f"- 손절가: {c}{pos['stop_loss']:{fmt}}{u}")
+        lines.append(f"- 고점: {c}{pos.get('peak_price', pos['entry_price']):{fmt}}{u}")
         trailing = pos.get("trailing_stop")
         if trailing:
-            lines.append(f"- 추적 손절매: {trailing:,.0f}원")
+            lines.append(f"- 추적 손절매: {c}{trailing:{fmt}}{u}")
         pnl = pos.get("pnl_pct")
         if pnl is not None:
             lines.append(f"- 현재 수익률: {pnl:+.2f}%%")
@@ -110,7 +118,7 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         regime = data.market_context.get("regime")
         if regime:
             lines.append(f"- **시장 레짐: {regime['label']}** ({regime['description']})")
-        for key in ("kospi", "kosdaq"):
+        for key in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = data.market_context.get(key)
             if idx:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%%, 20일 {idx['change_20d']:+.1f}%%)")

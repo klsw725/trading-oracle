@@ -55,16 +55,24 @@ SYSTEM_PROMPT = """\
 
 
 def _build_user_prompt(data: PerspectiveInput) -> str:
+    from src.data.market import is_us_ticker
+    is_us = is_us_ticker(data.ticker)
+    c = "$" if is_us else ""
+    u = "" if is_us else "원"
+    fmt = ",.2f" if is_us else ",.0f"
+
     lines = []
     lines.append(f"## 종목: {data.name} ({data.ticker})")
+    if is_us:
+        lines.append("(미국 시장 종목)")
     lines.append("")
 
     sig = data.signals
     lines.append(f"### 시장 데이터")
-    lines.append(f"- 현재가: {sig['current_price']:,.0f}원")
+    lines.append(f"- 현재가: {c}{sig['current_price']:{fmt}}{u}")
     lines.append(f"- 20일 수익률: {sig['change_20d']:+.2f}%%")
     lines.append(f"- 5일 수익률: {sig['change_5d']:+.2f}%%")
-    lines.append(f"- 52주 고가: {sig['high_52w']:,.0f}원 / 저가: {sig['low_52w']:,.0f}원")
+    lines.append(f"- 52주 고가: {c}{sig['high_52w']:{fmt}}{u} / 저가: {c}{sig['low_52w']:{fmt}}{u}")
     lines.append(f"- 시그널 판정: {sig['verdict']} (Bull {sig['bull_votes']}/6, Bear {sig['bear_votes']}/6)")
     lines.append("")
 
@@ -84,7 +92,7 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     if data.position:
         pos = data.position
         lines.append("### 보유 포지션")
-        lines.append(f"- 매수가: {pos['entry_price']:,.0f}원 × {pos['shares']}주")
+        lines.append(f"- 매수가: {c}{pos['entry_price']:{fmt}}{u} × {pos['shares']}주")
         pnl = pos.get("pnl_pct")
         if pnl is not None:
             lines.append(f"- 현재 수익률: {pnl:+.2f}%%")
@@ -97,7 +105,7 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         regime = data.market_context.get("regime")
         if regime:
             lines.append(f"- **시장 레짐: {regime['label']}** ({regime['description']})")
-        for key in ("kospi", "kosdaq"):
+        for key in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = data.market_context.get(key)
             if idx:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (20일 {idx['change_20d']:+.1f}%%)")

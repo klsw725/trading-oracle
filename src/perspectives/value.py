@@ -21,7 +21,7 @@ SYSTEM_PROMPT = """\
 
 1. **PER 분석**: 업종 평균 대비 위치. 15 이하 저평가, 15-25 적정, 25+ 고평가 (업종별 상이)
 2. **PBR 분석**: 1.0 이하 자산 대비 저평가, 1.0-2.0 적정, 2.0+ 고평가
-3. **배당수익률**: 시장금리(3.5%%) 대비 비교. 3%% 이상이면 배당 매력
+3. **배당수익률**: 시장금리 대비 비교 (한국 3.5%%, 미국 4.5%%). 시장금리 이상이면 배당 매력
 4. **PEG 비율**: PER / 이익성장률. 1.0 이하 = 성장 대비 저평가
 5. **동종 비교**: 같은 섹터 내 밸류에이션 상대 비교
 6. "다소", "일부" 금지 → 수치 기반 판단만
@@ -48,13 +48,19 @@ SYSTEM_PROMPT = """\
 
 
 def _build_user_prompt(data: PerspectiveInput) -> str:
+    from src.data.market import is_us_ticker
+    is_us = is_us_ticker(data.ticker)
+    currency = "달러" if is_us else "원"
+
     lines = []
     lines.append(f"## 종목: {data.name} ({data.ticker})")
+    if is_us:
+        lines.append("(미국 시장 종목)")
     lines.append("")
 
     sig = data.signals
-    lines.append(f"### 현재가: {sig['current_price']:,.0f}원")
-    lines.append(f"- 52주 고가: {sig['high_52w']:,.0f}원 / 저가: {sig['low_52w']:,.0f}원")
+    lines.append(f"### 현재가: {sig['current_price']:,.2f}{currency}" if is_us else f"### 현재가: {sig['current_price']:,.0f}{currency}")
+    lines.append(f"- 52주 고가: {sig['high_52w']:,.2f}{currency} / 저가: {sig['low_52w']:,.2f}{currency}" if is_us else f"- 52주 고가: {sig['high_52w']:,.0f}{currency} / 저가: {sig['low_52w']:,.0f}{currency}")
     lines.append("")
 
     lines.append("### 펀더멘털 데이터")
@@ -71,7 +77,7 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     if data.position:
         pos = data.position
         lines.append("### 보유 포지션")
-        lines.append(f"- 매수가: {pos['entry_price']:,.0f}원")
+        lines.append(f"- 매수가: {pos['entry_price']:,.2f}{currency}" if is_us else f"- 매수가: {pos['entry_price']:,.0f}{currency}")
         pnl = pos.get("pnl_pct")
         if pnl is not None:
             lines.append(f"- 현재 수익률: {pnl:+.2f}%%")
