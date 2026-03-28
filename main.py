@@ -1,10 +1,11 @@
-"""Trading Oracle — 이광수 투자 철학 기반 일일 투자 조언 에이전트
+"""Trading Oracle — 다관점 투자 판정 에이전트
 
 사용법:
-    uv run main.py                                    # 포트폴리오 기반 일일 분석
+    uv run main.py                                    # 다관점 분석 (5개 관점 + 합의도)
     uv run main.py --tickers 005930 000660             # 추가 종목도 함께 분석
     uv run main.py --screen                            # 주도주 스크리닝 포함
     uv run main.py --no-llm                            # 시그널만 (LLM 없이)
+    uv run main.py --legacy                            # 기존 단일 관점 분석
     uv run main.py --json                              # JSON 출력 (shacs-bot 연동용)
 
     uv run main.py add 005930 55000 10                 # 매수 기록: 종목 매수가 수량
@@ -32,7 +33,7 @@ from src.data.market import (
     fetch_ohlcv,
     get_ticker_name,
 )
-from src.data.fundamentals import fetch_naver_fundamentals
+from src.data.fundamentals import fetch_naver_fundamentals, fetch_fundamentals_cached
 from src.signals.technical import compute_signals
 from src.screener.leading import screen_leading_stocks
 from src.portfolio.tracker import (
@@ -124,6 +125,36 @@ def analyze_ticker(ticker: str, config: dict, quiet: bool = False) -> dict | Non
         "fundamentals": fund,
         "market_cap": market_cap,
     }
+
+
+def _print_consensus_card(name: str, ticker: str, consensus: dict):
+    """다관점 합의 결과를 터미널에 출력"""
+    from rich.panel import Panel
+
+    verdict_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡", "N/A": "⚪", "DIVIDED": "🔶", "INSUFFICIENT": "⚫"}
+    confidence_colors = {"very_high": "bold green", "high": "green", "moderate": "yellow", "low": "red", "insufficient": "dim"}
+
+    lines = []
+    votes = consensus["vote_summary"]
+    lines.append(f"[bold]합의도:[/bold] [{confidence_colors.get(consensus['confidence'], 'white')}]{consensus['consensus_label']}[/{confidence_colors.get(consensus['confidence'], 'white')}]")
+    lines.append(f"[bold]투표:[/bold] 매수 {votes.get('BUY', 0)} / 매도 {votes.get('SELL', 0)} / 관망 {votes.get('HOLD', 0)} / N/A {votes.get('N/A', 0)}")
+    lines.append("")
+
+    for p in consensus.get("perspectives", []):
+        emoji = verdict_emoji.get(p["verdict"], "⚪")
+        lines.append(f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')[:60]}")
+
+    if consensus.get("majority_reasoning"):
+        lines.append("")
+        for r in consensus["majority_reasoning"][:3]:
+            lines.append(f"  [dim]{r[:80]}[/dim]")
+
+    verdict_style = {"BUY": "green", "SELL": "red", "HOLD": "yellow", "DIVIDED": "magenta", "INSUFFICIENT": "dim"}.get(consensus["consensus_verdict"], "white")
+    console.print(Panel(
+        "\n".join(lines),
+        title=f"📊 {name} ({ticker}) — [{verdict_style}]{consensus['consensus_verdict']}[/{verdict_style}]",
+        style=verdict_style,
+    ))
 
 
 def run_screening(config: dict, quiet: bool = False) -> list[str]:
@@ -262,6 +293,11 @@ def cmd_portfolio(args):
             console.print("\n[dim]종목 추가: uv run main.py add <종목코드> <매수가> <수량>[/dim]")
 
 
+def cmd_codex_login(args):
+    from src.agent.codex import codex_login
+    codex_login()
+
+
 def cmd_history(args):
     portfolio = load_portfolio()
     if getattr(args, "json", False):
@@ -369,28 +405,84 @@ def cmd_analyze(args):
 
     # LLM 분석
     no_llm = getattr(args, "no_llm", False)
+    use_legacy = getattr(args, "legacy", False)
     analysis_text = None
+    multi_results = {}  # ticker → consensus dict
 
     if not no_llm:
-        if not quiet:
-            print_phase("투자 오라클 분석", "이광수 철학 기반 포트폴리오 종합 전략")
-            print_loading("Claude API 호출")
-        try:
-            from src.agent.oracle import analyze
-            analysis_text = analyze(market_data, signals_data, portfolio, config)
+        if use_legacy:
+            # 기존 단일 관점 분석
             if not quiet:
-                print_analysis(analysis_text)
-        except RuntimeError as e:
-            if is_json:
-                analysis_text = f"LLM 오류: {e}"
-            else:
-                print_error(str(e))
-                console.print("[dim]--no-llm 옵션으로 시그널만 확인할 수 있습니다[/dim]")
-        except Exception as e:
-            if is_json:
-                analysis_text = f"LLM 오류: {e}"
-            else:
-                print_error(f"LLM 분석 실패: {e}")
+                print_phase("투자 오라클 분석", "이광수 철학 기반 포트폴리오 종합 전략")
+                print_loading("Claude API 호출")
+            try:
+                from src.agent.oracle import analyze
+                analysis_text = analyze(market_data, signals_data, portfolio, config)
+                if not quiet:
+                    print_analysis(analysis_text)
+            except RuntimeError as e:
+                if is_json:
+                    analysis_text = f"LLM 오류: {e}"
+                else:
+                    print_error(str(e))
+                    console.print("[dim]--no-llm 옵션으로 시그널만 확인할 수 있습니다[/dim]")
+            except Exception as e:
+                if is_json:
+                    analysis_text = f"LLM 오류: {e}"
+                else:
+                    print_error(f"LLM 분석 실패: {e}")
+        else:
+            # 다관점 분석 (기본)
+            if not quiet:
+                print_phase("다관점 투자 판정", f"{len(signals_data)}개 종목 × 5개 관점 병렬 분석")
+            try:
+                from src.perspectives.base import PerspectiveInput
+                from src.consensus.voter import run_all_perspectives
+                from src.consensus.scorer import compute_consensus
+
+                market_context = {}
+                if "kospi" in market_data:
+                    market_context["kospi"] = market_data["kospi"]
+                if "kosdaq" in market_data:
+                    market_context["kosdaq"] = market_data["kosdaq"]
+
+                for item in signals_data:
+                    ticker = item["ticker"]
+                    if not quiet:
+                        print_loading(f"{item['name']}({ticker}) 5개 관점 분석")
+
+                    pos = next((p for p in positions if p["ticker"] == ticker), None)
+                    fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
+
+                    pi = PerspectiveInput(
+                        ticker=ticker,
+                        name=item["name"],
+                        ohlcv=fetch_ohlcv(ticker, days_back=120),
+                        signals=item["signals"],
+                        fundamentals=fund,
+                        position=pos,
+                        market_context=market_context,
+                        config=config,
+                    )
+
+                    results = run_all_perspectives(pi)
+                    consensus = compute_consensus(results)
+                    multi_results[ticker] = consensus
+
+                    if not quiet:
+                        _print_consensus_card(item["name"], ticker, consensus)
+
+            except RuntimeError as e:
+                if is_json:
+                    analysis_text = f"LLM 오류: {e}"
+                else:
+                    print_error(str(e))
+                    console.print("[dim]--no-llm 또는 --legacy 옵션을 사용할 수 있습니다[/dim]")
+            except Exception as e:
+                if is_json:
+                    analysis_text = f"LLM 오류: {e}"
+                else:
+                    print_error(f"다관점 분석 실패: {e}")
 
     # JSON 출력
     if is_json:
@@ -421,12 +513,14 @@ def cmd_analyze(args):
                 for s in signals_data
             ],
         }
+        if multi_results:
+            output["multi_perspective"] = multi_results
         if analysis_text:
             output["analysis"] = analysis_text
         print(_json_dump(output))
         return
 
-    if not no_llm and not analysis_text:
+    if not no_llm and not analysis_text and not multi_results:
         return
 
     print_success("분석 완료")
@@ -469,10 +563,14 @@ def main():
     hist_parser = subparsers.add_parser("history", help="거래 내역")
     hist_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
+    # codex-login
+    subparsers.add_parser("codex-login", help="OpenAI Codex OAuth 로그인")
+
     # 기본 분석 옵션
     parser.add_argument("--tickers", "-t", nargs="+", help="추가 분석 종목")
     parser.add_argument("--screen", action="store_true", help="주도주 스크리닝 포함")
     parser.add_argument("--no-llm", action="store_true", help="LLM 분석 생략")
+    parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     args = parser.parse_args()
@@ -487,6 +585,8 @@ def main():
         cmd_portfolio(args)
     elif args.command == "history":
         cmd_history(args)
+    elif args.command == "codex-login":
+        cmd_codex_login(args)
     else:
         cmd_analyze(args)
 

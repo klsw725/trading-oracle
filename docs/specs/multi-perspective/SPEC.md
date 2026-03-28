@@ -4,7 +4,7 @@
 
 | Phase | PRD | 상태 | 설명 |
 |-------|-----|------|------|
-| Phase 1 | [phase1-perspectives.md](prds/phase1-perspectives.md) | 🟡 미착수 | 5개 투자 관점 + 합의도 시스템 (MAXS-lite) |
+| Phase 1 | [phase1-perspectives.md](prds/phase1-perspectives.md) | ✅ 완료 | 5개 투자 관점 + 합의도 시스템 (MAXS-lite) — M1~M5 전체 |
 | Phase 2 | [phase2-scripts.md](prds/phase2-scripts.md) | 🟡 미착수 | scripts/ 분리 + shacs-bot 연동 |
 | Phase 3 | [phase3-causal-graph.md](prds/phase3-causal-graph.md) | 🟡 미착수 | 인과 그래프 (DEMOCRITUS-lite) |
 
