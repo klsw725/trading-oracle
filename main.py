@@ -302,10 +302,7 @@ def cmd_analyze(args):
     # 시장 현황
     if not quiet:
         print_phase("시장 환경")
-        markets = "코스피/코스닥"
-        if include_us:
-            markets += " + 나스닥/S&P500"
-        print_loading(f"{markets} 지수 수집")
+        print_loading("코스피/코스닥 + 나스닥/S&P500 지수 수집")
 
     market_data = collect_market_data(include_us=include_us)
 
@@ -538,7 +535,7 @@ def main():
   uv run scripts/backtest.py --days 450       기간 지정
 
 ━━━ 인과 그래프 ━━━
-  uv run scripts/build_causal.py build        전체 구축 (~$5)
+  uv run scripts/build_causal.py build        전체 구축 (~$10, 한국+글로벌)
   uv run scripts/build_causal.py update 2차전지 AI
   uv run scripts/build_causal.py info         현재 그래프 정보
 

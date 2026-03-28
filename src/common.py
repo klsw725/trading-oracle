@@ -129,7 +129,11 @@ def _check_causal_graph_age() -> dict | None:
 
 
 def collect_market_data(include_us: bool = False) -> dict:
-    """지수 수집 + 시장 레짐 감지 + 인과 그래프 나이 체크"""
+    """지수 수집 + 시장 레짐 감지 + 인과 그래프 나이 체크
+
+    나스닥/S&P500은 항상 수집 (한국 종목도 미국 지수 영향 받음).
+    include_us는 미국 종목 데이터 수집 여부와 레짐 감지 폴백에만 영향.
+    """
     market_data = {"date": datetime.now().strftime("%Y-%m-%d")}
     kospi = get_index_summary("KS11", "코스피")
     kosdaq = get_index_summary("KQ11", "코스닥")
@@ -138,14 +142,13 @@ def collect_market_data(include_us: bool = False) -> dict:
     if kosdaq:
         market_data["kosdaq"] = kosdaq
 
-    # 미국 지수
-    if include_us:
-        nasdaq = get_index_summary("IXIC", "나스닥")
-        sp500 = get_index_summary("US500", "S&P 500")
-        if nasdaq:
-            market_data["nasdaq"] = nasdaq
-        if sp500:
-            market_data["sp500"] = sp500
+    # 미국 지수 (항상 수집 — 크로스마켓 인과 분석에 필요)
+    nasdaq = get_index_summary("IXIC", "나스닥")
+    sp500 = get_index_summary("US500", "S&P 500")
+    if nasdaq:
+        market_data["nasdaq"] = nasdaq
+    if sp500:
+        market_data["sp500"] = sp500
 
     # 레짐 감지 (코스피 기준, 없으면 나스닥)
     regime_source = kospi or (market_data.get("nasdaq") if include_us else None)
@@ -301,10 +304,9 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
 
     positions = portfolio.get("positions", [])
     market_context = {}
-    if "kospi" in market_data:
-        market_context["kospi"] = market_data["kospi"]
-    if "kosdaq" in market_data:
-        market_context["kosdaq"] = market_data["kosdaq"]
+    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
+        if _idx_key in market_data:
+            market_context[_idx_key] = market_data[_idx_key]
     if "regime" in market_data:
         market_context["regime"] = market_data["regime"]
     if "web_macro" in market_data:
@@ -373,10 +375,9 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
 
     positions = portfolio.get("positions", [])
     market_context = {}
-    if "kospi" in market_data:
-        market_context["kospi"] = market_data["kospi"]
-    if "kosdaq" in market_data:
-        market_context["kosdaq"] = market_data["kosdaq"]
+    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
+        if _idx_key in market_data:
+            market_context[_idx_key] = market_data[_idx_key]
     if "regime" in market_data:
         market_context["regime"] = market_data["regime"]
 
