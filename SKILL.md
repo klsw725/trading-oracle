@@ -136,6 +136,9 @@ uv run scripts/build_causal.py info --json
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
 | "어제 추천 결과는?" | `uv run scripts/performance.py detail 2026-03-27 --json` |
 | "스냅샷 목록" | `uv run scripts/performance.py list --json` |
+| "데이터 초기화" | `uv run main.py reset --all --json` |
+| "스냅샷 초기화" | `uv run main.py reset --snapshots --json` |
+| "인과 그래프 초기화" | `uv run main.py reset --causal --json` |
 
 ## 추천 성과 추적
 
