@@ -104,7 +104,7 @@ def _code_verdict_to_perspective(sig: dict) -> tuple[str, float]:
 def _build_signals_dict(sig: dict) -> dict:
     """시그널 상세 dict 구성"""
     s = sig["signals"]
-    return {
+    d = {
         "momentum": "bull" if s["momentum"]["bull"] else "bear" if s["momentum"]["bear"] else "neutral",
         "short_momentum": "bull" if s["short_momentum"]["bull"] else "bear" if s["short_momentum"]["bear"] else "neutral",
         "ema": "bull" if s["ema_crossover"]["bull"] else "bear",
@@ -112,6 +112,11 @@ def _build_signals_dict(sig: dict) -> dict:
         "macd": "bull" if s["macd"]["bull"] else "bear",
         "bb": "compressed" if s["bb_compression"]["compressed"] else "expanded",
     }
+    if "bb_position" in s:
+        d["bb_position"] = round(s["bb_position"]["value"], 2)
+    if "volume" in s:
+        d["volume_ratio"] = round(s["volume"]["ratio"], 2)
+    return d
 
 
 class QuantPerspective(Perspective):

@@ -65,8 +65,33 @@ def calc_atr(highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, lookback: 
     return np.mean(tr)
 
 
-def compute_signals(df: pd.DataFrame, config: dict) -> dict:
+def calc_bb_position(closes: np.ndarray, period: int = 20) -> float:
+    """현재가의 볼린저 밴드 내 위치 (0.0~1.0). 상단=1, 하단=0."""
+    if len(closes) < period:
+        return 0.5
+    window = closes[-period:]
+    sma = np.mean(window)
+    std = np.std(window)
+    if std < 1e-10:
+        return 0.5
+    upper = sma + 2 * std
+    lower = sma - 2 * std
+    band_width = upper - lower
+    if band_width < 1e-10:
+        return 0.5
+    return float(np.clip((closes[-1] - lower) / band_width, 0.0, 1.0))
+
+
+def compute_signals(df: pd.DataFrame, config: dict, regime: str | None = None) -> dict:
     """OHLCV DataFrame에서 6-시그널 앙상블 보팅 계산.
+
+    v2: ATR 기반 변동성 정규화 임계값 + 레짐 필터.
+    BB 위치/볼륨은 정보 필드로 제공 (투표에는 미참여, LLM 관점이 참조).
+
+    Args:
+        df: OHLCV DataFrame (columns: open, high, low, close, volume)
+        config: signals 설정 dict
+        regime: 시장 레짐 ("bull"/"bear"/"sideways"/None). None이면 필터 안 함.
 
     Returns dict with signal details and final verdict.
     """
@@ -76,6 +101,7 @@ def compute_signals(df: pd.DataFrame, config: dict) -> dict:
     closes = df["close"].values.astype(float)
     highs = df["high"].values.astype(float)
     lows = df["low"].values.astype(float)
+    volumes = df["volume"].values.astype(float) if "volume" in df.columns else None
 
     cfg = config.get("signals", {})
     ema_fast_period = cfg.get("ema_fast", 5)
@@ -89,12 +115,17 @@ def compute_signals(df: pd.DataFrame, config: dict) -> dict:
     bb_period = cfg.get("bb_period", 20)
     mom_window = cfg.get("momentum_window", 20)
     min_votes = cfg.get("min_votes", 4)
+    mom_atr_mult = cfg.get("momentum_threshold_atr_mult", 1.0)
 
     current_price = closes[-1]
 
+    # ATR 기반 동적 임계값 (v2 — 변동성 정규화)
+    atr = calc_atr(highs, lows, closes)
+    atr_pct = atr / current_price if current_price > 0 else 0.02
+    threshold = max(atr_pct * mom_atr_mult, 0.01)
+
     # Signal 1: Momentum (mom_window일 수익률)
     ret_mom = (closes[-1] - closes[-mom_window]) / closes[-mom_window]
-    threshold = 0.03  # 일봉에서는 3% 기준
     mom_bull = ret_mom > threshold
     mom_bear = ret_mom < -threshold
 
@@ -123,7 +154,7 @@ def compute_signals(df: pd.DataFrame, config: dict) -> dict:
     bb_pctile = calc_bb_width_percentile(closes, bb_period)
     bb_compressed = bb_pctile < 80
 
-    # Voting
+    # Voting (6 시그널 — v1 구조 유지)
     bull_votes = sum([mom_bull, short_bull, ema_bull, rsi_bull, macd_bull_sig, bb_compressed])
     bear_votes = sum([mom_bear, short_bear, ema_bear, rsi_bear, macd_bear_sig, bb_compressed])
 
@@ -134,8 +165,22 @@ def compute_signals(df: pd.DataFrame, config: dict) -> dict:
     else:
         verdict = "NEUTRAL"
 
+    # 레짐 필터 (v2 — 역방향 시그널 기준 상향)
+    if regime is not None:
+        regime_min = min_votes + 1
+        if regime == "bear" and verdict == "BULLISH" and bull_votes < regime_min:
+            verdict = "NEUTRAL"
+        elif regime == "bull" and verdict == "BEARISH" and bear_votes < regime_min:
+            verdict = "NEUTRAL"
+
+    # 정보 필드: BB 위치, 볼륨 (투표 미참여, LLM 관점 참조용)
+    bb_pos = calc_bb_position(closes, bb_period)
+    vol_ratio = 1.0
+    if volumes is not None and len(volumes) >= 20:
+        vol_avg = np.mean(volumes[-20:])
+        vol_ratio = float(volumes[-1] / vol_avg) if vol_avg > 0 else 1.0
+
     # ATR for stop loss calculation
-    atr = calc_atr(highs, lows, closes)
     trailing_stop = current_price - 3.0 * atr  # 일봉은 ATR 3배
 
     # 고점/저점
@@ -158,8 +203,11 @@ def compute_signals(df: pd.DataFrame, config: dict) -> dict:
             "rsi": {"value": rsi, "bull": rsi_bull, "bear": rsi_bear, "overbought": rsi > rsi_ob, "oversold": rsi < rsi_os},
             "macd": {"histogram": macd_hist, "bull": macd_bull_sig, "bear": macd_bear_sig},
             "bb_compression": {"percentile": bb_pctile, "compressed": bb_compressed},
+            "bb_position": {"value": bb_pos},
+            "volume": {"ratio": vol_ratio},
         },
         "atr": atr,
+        "threshold_used": round(threshold * 100, 2),
         "trailing_stop_atr": trailing_stop,
         "trailing_stop_10pct": trailing_stop_10pct,
         "high_52w": high_52w,
