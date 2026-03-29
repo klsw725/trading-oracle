@@ -19,6 +19,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "rich>=14.3.3",
     "setuptools<81",
+    "statsmodels>=0.14.6",
     "yfinance>=0.2.40",
 ]
 

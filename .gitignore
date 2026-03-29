@@ -25,3 +25,5 @@ docs/refs/
 .sisyphus/
 .omc/
 data/macro_series.parquet
+data/causal_graph_verified.json
+data/node_series_map.json

@@ -152,10 +152,34 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
                 lines.append(f"- {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%%, 20일 {idx['change_20d']:+.1f}%%)")
         lines.append("")
 
-    # 인과 그래프 참조 (한국+글로벌 통합 그래프)
+    # 검증된 인과 체인 (Phase 12 — Granger 검증 통과 트리플 우선)
+    try:
+        from src.causal.verifier import get_verified_chains
+        keywords = [data.name]
+        if "전자" in data.name or "하이닉스" in data.name:
+            keywords.extend(["반도체", "금리", "환율"])
+        elif "에어로" in data.name:
+            keywords.extend(["방산", "금리"])
+        elif "금융" in data.name or "은행" in data.name:
+            keywords.extend(["금리", "금융"])
+        verified = get_verified_chains(keywords, min_confidence=0.5)
+        if verified:
+            lines.append("### 인과 체인 (데이터 검증됨 — Granger test)")
+            seen = set()
+            for t in verified[:5]:
+                v = t["verification"]
+                key = (t["subject"], t["object"])
+                if key not in seen:
+                    seen.add(key)
+                    lines.append(f"- {t['subject']} →(lag {v['lag']}일, p={v['p_value']:.4f})→ {t['object']}")
+            lines.append("")
+    except Exception:
+        pass
+
+    # 미검증 인과 그래프 (참고용)
     causal_context = _get_causal_context(data.name, data.ticker)
     if causal_context:
-        lines.append("### 인과 그래프 참조 (배경 지식)")
+        lines.append("### 인과 그래프 참조 (참고용 — 미검증)")
         lines.append(causal_context)
         lines.append("")
 
