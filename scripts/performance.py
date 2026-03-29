@@ -202,6 +202,71 @@ def cmd_detail(args):
         console.print()
 
 
+def cmd_patterns(args):
+    from src.performance.pattern_analyzer import analyze_hit_patterns
+
+    result = analyze_hit_patterns(min_snapshots=2)  # 개발 중 2로 낮춤, 프로덕션은 30
+
+    if not result:
+        if args.json:
+            print(json_dump({"status": "error", "message": "스냅샷 부족. 최소 30개 필요."}))
+        else:
+            print("스냅샷 부족. 최소 30개 필요합니다.")
+        return
+
+    if args.json:
+        print(json_dump(result))
+        return
+
+    from src.output.formatter import console
+    from rich.table import Table
+
+    meta = result["metadata"]
+    console.print(f"\n[bold]📊 적중 패턴 분석[/bold] (스냅샷 {meta['snapshots_analyzed']}개, 레코드 {meta['total_records']}개)\n")
+    console.print(f"  레짐 분포: {meta['regime_distribution']}\n")
+
+    # 전체 적중률
+    overall = result.get("overall", {})
+    if overall:
+        table = Table(title="전체 관점별 적중률", show_header=True)
+        table.add_column("관점", style="bold")
+        table.add_column("적중", justify="right")
+        table.add_column("전체", justify="right")
+        table.add_column("적중률", justify="right")
+        table.add_column("추세", justify="center")
+        for name in ("kwangsoo", "ouroboros", "quant", "macro", "value"):
+            stats = overall.get(name)
+            if not stats:
+                continue
+            rate_str = f"{stats['rate']}%" if stats["rate"] is not None else "-"
+            color = "green" if stats.get("rate", 0) and stats["rate"] >= 60 else "red" if stats.get("rate") is not None else "dim"
+            trend = result.get("trend", {}).get(name, {})
+            trend_str = "📈" if trend.get("improving") else "📉" if trend.get("slope", 0) < -0.01 else "→"
+            table.add_row(name, str(stats["hits"]), str(stats["total"]), f"[{color}]{rate_str}[/{color}]", trend_str)
+        console.print(table)
+        console.print()
+
+    # 레짐별 적중률
+    by_regime = result.get("by_regime", {})
+    if by_regime:
+        table = Table(title="레짐별 관점 적중률", show_header=True)
+        table.add_column("관점", style="bold")
+        for regime in ("bull", "bear", "sideways"):
+            table.add_column(regime, justify="right")
+        for name in ("kwangsoo", "ouroboros", "quant", "macro", "value"):
+            row = [name]
+            for regime in ("bull", "bear", "sideways"):
+                stats = by_regime.get(regime, {}).get(name)
+                if stats and stats["rate"] is not None:
+                    color = "green" if stats["rate"] >= 60 else "red"
+                    row.append(f"[{color}]{stats['rate']}%[/{color}] ({stats['total']})")
+                else:
+                    row.append("[dim]-[/dim]")
+            table.add_row(*row)
+        console.print(table)
+        console.print()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Trading Oracle — 추천 성과 추적")
     subparsers = parser.add_subparsers(dest="command")
@@ -220,13 +285,17 @@ def main():
     detail_parser.add_argument("date", help="날짜 (YYYY-MM-DD)")
     detail_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
+    # patterns (Phase 14)
+    patterns_parser = subparsers.add_parser("patterns", help="적중 패턴 분석 (레짐별 성적표)")
+    patterns_parser.add_argument("--json", action="store_true", help="JSON 출력")
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         sys.exit(1)
 
-    cmds = {"report": cmd_report, "list": cmd_list, "detail": cmd_detail}
+    cmds = {"report": cmd_report, "list": cmd_list, "detail": cmd_detail, "patterns": cmd_patterns}
     cmds[args.command](args)
 
 

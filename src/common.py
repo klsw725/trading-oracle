@@ -302,14 +302,24 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
     from src.consensus.voter import run_all_perspectives
     from src.consensus.scorer import compute_consensus
 
-    # 가중치 로드
+    # 가중치 로드 (Phase 15: 레짐별 → Phase 5: 전체 → 동등)
     weights = None
     if use_weights:
-        try:
-            from src.performance.tracker import compute_perspective_weights
-            weights = compute_perspective_weights()
-        except Exception:
-            pass
+        # Phase 15: 레짐별 가중치 우선
+        regime = market_data.get("regime", {}).get("regime")
+        if regime:
+            try:
+                from src.performance.pattern_analyzer import compute_regime_weights
+                weights = compute_regime_weights(regime)
+            except Exception:
+                pass
+        # Phase 5: 전체 가중치 폴백
+        if weights is None:
+            try:
+                from src.performance.tracker import compute_perspective_weights
+                weights = compute_perspective_weights()
+            except Exception:
+                pass
 
     positions = portfolio.get("positions", [])
     market_context = {}
