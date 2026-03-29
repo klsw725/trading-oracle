@@ -344,6 +344,16 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
 
         results = run_all_perspectives(pi)
         consensus = compute_consensus(results, weights=weights)
+
+        # 숙의 합의 (Phase 13) — 분기/약한 합의 시 발동
+        if config.get("deliberation", {}).get("enabled", True):
+            try:
+                from src.consensus.deliberator import should_deliberate, deliberate
+                if should_deliberate(consensus):
+                    consensus = deliberate(consensus, pi)
+            except Exception:
+                pass
+
         return ticker, consensus
 
     multi_results = {}

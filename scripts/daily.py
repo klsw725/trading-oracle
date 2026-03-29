@@ -42,12 +42,15 @@ def main():
     parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
     parser.add_argument("--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)")
     parser.add_argument("--no-search", action="store_true", help="웹 검색 비활성화")
+    parser.add_argument("--no-deliberation", action="store_true", help="숙의 합의 비활성화")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
     args = parser.parse_args()
 
     config = load_config()
     if args.no_search:
         config.setdefault("web_search", {})["enabled"] = False
+    if args.no_deliberation:
+        config.setdefault("deliberation", {})["enabled"] = False
     portfolio = load_portfolio()
 
     # 분석 종목 수집 (시장 데이터 전에 US 여부 판단)

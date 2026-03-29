@@ -1,7 +1,7 @@
 # PRD: Phase 13 — 숙의 합의 시스템 (MAXS-deliberation)
 
 > **SPEC 참조**: [SPEC.md §5 (숙의 합의 시스템)](../SPEC.md#5-숙의-합의-시스템-maxs-deliberation--phase-13)
-> **상태**: 🔲 미착수
+> **상태**: ✅ 완료 (M1~M5 구현)
 > **우선순위**: P2 — Phase 11과 병렬 착수 가능
 > **선행 조건**: 없음 (독립 착수 가능. Phase 12 완료 시 시너지.)
 
