@@ -10,6 +10,70 @@ metadata: {"shacs-bot":{"emoji":"🔮","requires":{"bins":["uv"],"env":[]}}}
 
 모든 명령은 이 스킬의 디렉터리에서 실행. `--json` 플래그로 구조화된 JSON 출력.
 
+---
+
+## ⚡ 워크플로우 (처음 사용자를 위한 순서 가이드)
+
+### 1단계: 초기 설정 (1회)
+
+```bash
+# 의존성 설치
+uv sync
+
+# LLM 로그인 (Codex 사용 시)
+uv run main.py codex-login
+
+# 보유 현금 설정
+uv run scripts/portfolio.py cash 10000000 --json
+
+# 보유 종목 등록 (있으면)
+uv run scripts/portfolio.py add 005930 55000 10 --reason "반도체" --json
+```
+
+### 2단계: 매일 아침 루틴
+
+```bash
+# 다관점 분석 실행 (스냅샷 자동 저장됨)
+uv run scripts/daily.py --json
+```
+> **매일 실행이 중요합니다.** 실행할 때마다 스냅샷이 축적되고, 5개 이상 쌓이면 적응형 가중치가 활성화되며, 30개 이상이면 자가 학습(레짐별 가중치)이 작동합니다.
+
+### 3단계: 종목 추천 (필요 시)
+
+```bash
+# "뭐 살까?" — BUY 합의 종목 자동 추천
+uv run scripts/recommend.py --json
+```
+
+### 4단계: 성과 확인 (주간)
+
+```bash
+# 추천 적중률 리포트
+uv run scripts/performance.py report --json
+
+# 관점별 × 레짐별 성적표 (스냅샷 30개+ 이후)
+uv run scripts/performance.py patterns --json
+```
+
+### 5단계: 인과 그래프 갱신 (분기 1회)
+
+```bash
+# 인과 그래프 재구축 (~$5, 90일 경과 시 시스템이 경고)
+uv run scripts/build_causal.py build --fresh --json
+
+# Granger 인과 검증 (구축 후 1회)
+uv run scripts/verify_causal.py --json
+```
+
+### 6단계: 데이터 이상 시 초기화
+
+```bash
+# 오염 데이터 초기화 (포트폴리오 제외)
+uv run main.py reset --all --json
+```
+
+---
+
 ## 일일 분석 (핵심 명령)
 
 다관점 분석 (5개 관점 + 합의도):
