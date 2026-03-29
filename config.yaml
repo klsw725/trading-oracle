@@ -42,6 +42,33 @@ llm:
   model: gpt-5.4
   max_tokens: 4096
 
+# 포지션 사이징 설정
+position_sizing:
+  # BUY: 합의 강도별 자산 대비 리스크 허용치 (%)
+  risk_per_trade:
+    very_high: 3    # 만장일치
+    high: 2         # 강한 합의
+    moderate: 1     # 약한 합의
+  # BUY: 분할 매수 1차 비율 (%)
+  first_tranche:
+    very_high: 50
+    high: 33
+    moderate: 25
+  # SELL: 합의 강도별 매도 비율 (%)
+  sell_ratio:
+    very_high: 100  # 전량
+    high: 67        # 2/3
+    moderate: 33    # 1/3
+  # 종목당 최대 비중 (%)
+  max_weight_pct: 33
+  # 포트폴리오 총 손실 한도 (%) — 초과 시 강제 감축
+  portfolio_loss_limit: -10
+  # 현금 비중 하한 (%) — 레짐별
+  cash_floor:
+    bull: 20
+    bear: 30
+    sideways: 25
+
 # 웹 검색 설정 (DuckDuckGo 기반, API 키 불필요)
 web_search:
   enabled: true           # false로 끄면 검색 없이 기존 동작
