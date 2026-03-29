@@ -481,18 +481,33 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
     portfolio = load_portfolio()
     multi_results = run_multi_perspective(bull_data, portfolio, market_data, config)
 
-    # 4단계: BUY 합의 필터
+    # 4단계: BUY 합의 필터 + action_plan 부착
+    from src.portfolio.sizer import check_portfolio_health, compute_action_plan
+    regime_str = market_data.get("regime", {}).get("regime", "sideways")
+    pf_check = check_portfolio_health(portfolio, regime_str, config)
+
     recs = []
     for ticker, consensus in multi_results.items():
         if consensus["consensus_verdict"] == "BUY":
             item = next((s for s in bull_data if s["ticker"] == ticker), None)
             if item:
-                recs.append({
-                    "ticker": ticker, "name": item["name"], "price": item["signals"]["current_price"],
+                stop_price = item["signals"]["trailing_stop_10pct"]
+                current_price = item["signals"]["current_price"]
+                plan = compute_action_plan(
+                    ticker, current_price, stop_price,
+                    consensus["consensus_verdict"],
+                    consensus["confidence"],
+                    portfolio, pf_check, config,
+                )
+                rec_entry = {
+                    "ticker": ticker, "name": item["name"], "price": current_price,
                     "score": next((c["score"] for c in candidates if c["ticker"] == ticker), 0),
                     "signals": {"verdict": item["signals"]["verdict"], "bull_votes": item["signals"]["bull_votes"], "bear_votes": item["signals"]["bear_votes"]},
                     "consensus": consensus,
-                })
+                }
+                if plan:
+                    rec_entry["action_plan"] = plan
+                recs.append(rec_entry)
 
     recs.sort(key=lambda x: x["score"], reverse=True)
 

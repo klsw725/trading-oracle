@@ -67,6 +67,12 @@ from src.output.formatter import (
 def _print_consensus_card(name: str, ticker: str, consensus: dict):
     """다관점 합의 결과를 터미널에 출력"""
     from rich.panel import Panel
+    from src.data.market import is_us_ticker
+
+    is_us = is_us_ticker(ticker)
+    c = "$" if is_us else ""
+    u = "" if is_us else "원"
+    fmt = ",.2f" if is_us else ",.0f"
 
     verdict_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡", "N/A": "⚪", "DIVIDED": "🔶", "INSUFFICIENT": "⚫"}
     confidence_colors = {"very_high": "bold green", "high": "green", "moderate": "yellow", "low": "red", "insufficient": "dim"}
@@ -87,6 +93,39 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
         lines.append("")
         for r in consensus["majority_reasoning"][:3]:
             lines.append(f"  [dim]{r[:80]}[/dim]")
+
+    # 매매 전략 (action_plan)
+    plan = consensus.get("action_plan")
+    if plan:
+        lines.append("")
+        if plan["type"] == "buy":
+            tranche_label = f"분할 매수 1차 / {plan['first_tranche_pct']}%"
+            lines.append(f"  [bold green]💰 매수 전략 ({tranche_label})[/bold green]")
+            lines.append(f"    매수가: {c}{plan['entry_price']:{fmt}}{u}")
+            lines.append(f"    1차 수량: {plan['first_tranche_shares']}주 (목표 {plan['target_shares']}주)")
+            lines.append(f"    투자금: {c}{plan['investment']:{fmt}}{u}")
+            lines.append(f"    손절가: {c}{plan['stop_loss']:{fmt}}{u}")
+            lines.append(f"    최대 손실: {c}{plan['risk_amount']:{fmt}}{u} (자산의 {plan['risk_pct']}%%)")
+            lines.append(f"    매수 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)")
+            if plan.get("note"):
+                lines.append(f"    [dim]ℹ️  {plan['note']}[/dim]")
+        elif plan["type"] == "sell":
+            ratio_label = f"{plan['sell_ratio']}%% 매도" if plan["sell_ratio"] < 100 else "전량 매도"
+            lines.append(f"  [bold red]🔴 매도 전략 ({ratio_label})[/bold red]")
+            lines.append(f"    매도가: {c}{plan['sell_price']:{fmt}}{u} (현재가)")
+            lines.append(f"    매도 수량: {plan['sell_shares']}주 (보유 {plan['total_shares']}주)")
+            pnl_color = "green" if plan["expected_pnl"] >= 0 else "red"
+            lines.append(f"    예상 손익: [{pnl_color}]{c}{plan['expected_pnl']:+{fmt}}{u} ({plan['expected_pnl_pct']:+.1f}%%)[/{pnl_color}]")
+            if plan["remaining_shares"] > 0:
+                lines.append(f"    매도 후 잔여: {plan['remaining_shares']}주")
+            lines.append(f"    매도 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)")
+            lines.append(f"    [dim]{plan['sell_reason']}[/dim]")
+            if plan["urgency"] == "immediate":
+                lines.append(f"    [bold red]⚡ 즉시 실행 권고[/bold red]")
+        elif plan["type"] == "buy_blocked":
+            lines.append(f"  [dim]💤 매수 차단: {plan['reason']}[/dim]")
+        elif plan["type"] == "sell_blocked":
+            lines.append(f"  [dim]💤 {plan['reason']}[/dim]")
 
     vs = {"BUY": "green", "SELL": "red", "HOLD": "yellow", "DIVIDED": "magenta", "INSUFFICIENT": "dim"}.get(consensus["consensus_verdict"], "white")
     console.print(Panel("\n".join(lines), title=f"📊 {name} ({ticker}) — [{vs}]{consensus['consensus_verdict']}[/{vs}]", style=vs))
@@ -391,6 +430,34 @@ def cmd_analyze(args):
                         delta = compute_delta(multi_results)
                     except Exception:
                         pass
+
+                    # 포지션 사이징: action_plan 부착
+                    from src.portfolio.sizer import check_portfolio_health, compute_action_plan
+                    regime_str = market_data.get("regime", {}).get("regime", "sideways")
+                    pf_check = check_portfolio_health(portfolio, regime_str, config)
+
+                    if not quiet and pf_check["portfolio_health"] == "danger":
+                        for fs in pf_check.get("forced_sell_tickers", []):
+                            print_alert(f"포트폴리오 손실 {pf_check['total_pnl_pct']:.1f}%% — {fs['name']}({fs['ticker']}) 감축 권고 (손익 {fs['pnl_pct']:+.1f}%%)")
+                    if not quiet and not pf_check["can_buy"] and pf_check["buy_block_reason"]:
+                        if pf_check["portfolio_health"] != "danger":
+                            console.print(f"  [yellow]⚠️  매수 제한: {pf_check['buy_block_reason']}[/yellow]")
+
+                    for ticker, consensus in multi_results.items():
+                        sig_item = next((s for s in signals_data if s["ticker"] == ticker), None)
+                        if sig_item:
+                            stop_price = sig_item["signals"]["trailing_stop_10pct"]
+                            current_price = sig_item["signals"]["current_price"]
+                            plan = compute_action_plan(
+                                ticker, current_price, stop_price,
+                                consensus["consensus_verdict"],
+                                consensus["confidence"],
+                                portfolio, pf_check, config,
+                            )
+                            if plan:
+                                consensus["action_plan"] = plan
+                            consensus["portfolio_check"] = pf_check
+
                 if not quiet:
                     for ticker, consensus in multi_results.items():
                         name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)

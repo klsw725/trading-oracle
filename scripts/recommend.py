@@ -80,6 +80,21 @@ def main():
                 emoji = verdict_emoji.get(p["verdict"], "⚪")
                 lines.append(f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')[:60]}")
 
+        # 매수 전략
+        plan = rec.get("action_plan")
+        if plan and plan.get("type") == "buy":
+            lines.append("")
+            lines.append(f"  [bold green]💰 매수 전략 (분할 매수 1차 / {plan['first_tranche_pct']}%%)[/bold green]")
+            lines.append(f"    1차 수량: {plan['first_tranche_shares']}주 (목표 {plan['target_shares']}주)")
+            lines.append(f"    투자금: {plan['investment']:,.0f}원")
+            lines.append(f"    손절가: {plan['stop_loss']:,.0f}원")
+            lines.append(f"    최대 손실: {plan['risk_amount']:,.0f}원 (자산의 {plan['risk_pct']}%%)")
+            if plan.get("note"):
+                lines.append(f"    [dim]ℹ️  {plan['note']}[/dim]")
+        elif plan and plan.get("type") == "buy_blocked":
+            lines.append("")
+            lines.append(f"  [dim]💤 매수 차단: {plan['reason']}[/dim]")
+
         console.print(Panel(
             "\n".join(lines),
             title=f"🟢 {rec['name']} ({rec['ticker']}) — {rec['price']:,.0f}원",
