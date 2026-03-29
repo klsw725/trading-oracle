@@ -608,6 +608,11 @@ def main():
   uv run scripts/build_causal.py build        전체 구축 (~$10, 한국+글로벌)
   uv run scripts/build_causal.py update 2차전지 AI
   uv run scripts/build_causal.py info         현재 그래프 정보
+  uv run scripts/verify_causal.py             Granger 인과 검증
+  uv run scripts/verify_causal.py --detail    검증된 트리플 상세
+
+━━━ 자가 학습 (v3) ━━━
+  uv run scripts/performance.py patterns      적중 패턴 분석 (레짐별 성적표)
 
 ━━━ 관리 ━━━
   uv run main.py reset --all                  전체 초기화 (포트폴리오 제외)
@@ -619,6 +624,7 @@ def main():
   --json          JSON 출력 (shacs-bot 연동)
   --no-weights    적응형 가중치 비활성화
   --no-search     웹 검색 비활성화
+  --no-deliberation  숙의 합의 비활성화
 """
         print(guide)
 

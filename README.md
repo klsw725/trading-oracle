@@ -18,6 +18,7 @@
 - **매크로 정량 시계열**: 11개 매크로 변수 (금리, 환율, 원자재, 지수) 자동 수집 + parquet 캐시
 - **Granger 인과 검증**: 인과 그래프 트리플을 실제 시계열 데이터로 통계 검증 (p-value, lag 태깅)
 - **숙의 합의**: 분기/약한 합의 시 소수 측에 다수 근거 제시 → 재판정 → 합의 수렴
+- **자가 학습**: 적중 패턴 분석 → 레짐별 가중치 자동 조정 → 프롬프트 자가 튜닝 제안
 - **한국 + 미국 시장**: 티커 포맷 자동 판별 (숫자=KR, 알파벳=US)
 
 ## 빠른 시작
@@ -87,7 +88,9 @@ trading-oracle/
 │   │   ├── graph.py                 # networkx 그래프 관리
 │   │   └── verifier.py              # Granger 인과추론 검증
 │   ├── performance/
-│   │   └── tracker.py               # 스냅샷, 적중 평가, 가중치
+│   │   ├── tracker.py               # 스냅샷, 적중 평가, 가중치
+│   │   ├── pattern_analyzer.py      # 적중 패턴 분석 (레짐별 성적표)
+│   │   └── prompt_tuner.py          # 프롬프트 자가 튜닝
 │   ├── screener/
 │   │   └── leading.py               # 주도주 스크리닝
 │   ├── portfolio/
@@ -112,6 +115,9 @@ trading-oracle/
     └── specs/v2/
         ├── SPEC.md                  # v2 사양서
         └── prds/                    # Phase 11~13 PRD
+    └── specs/v3/
+        ├── SPEC.md                  # v3 사양서
+        └── prds/                    # Phase 14~16 PRD
 ```
 
 ## 사용자 요청별 명령 매핑
@@ -127,6 +133,9 @@ trading-oracle/
 | "삼성전자 5주만 팔아" | `uv run scripts/portfolio.py remove 005930 --shares 5 --json` |
 | "포트폴리오 보여줘" | `uv run scripts/portfolio.py show --json` |
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
+| "적중 패턴 분석" | `uv run scripts/performance.py patterns --json` |
+| "인과 그래프 검증" | `uv run scripts/verify_causal.py --json` |
+| "전체 명령 가이드" | `uv run main.py guide` |
 | "데이터 초기화" | `uv run main.py reset --all --json` |
 
 ## 5개 투자 관점
