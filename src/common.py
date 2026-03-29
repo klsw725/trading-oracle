@@ -165,6 +165,15 @@ def collect_market_data(include_us: bool = False) -> dict:
     if causal_age and causal_age.get("warn"):
         market_data["causal_warning"] = causal_age["message"]
 
+    # 매크로 정량 시계열 (Phase 11)
+    try:
+        from src.data.macro import get_macro_snapshot
+        macro_snapshot = get_macro_snapshot()
+        if macro_snapshot:
+            market_data["macro_quant"] = macro_snapshot
+    except Exception:
+        pass
+
     # 매크로 웹 검색 (Phase 10 M4)
     try:
         from src.data.web_search import search_market_context
