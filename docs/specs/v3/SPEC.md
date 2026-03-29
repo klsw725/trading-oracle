@@ -8,9 +8,9 @@
 
 | Phase | PRD | 상태 | 설명 |
 |-------|-----|------|------|
-| Phase 14 | [phase14-hit-pattern.md](prds/phase14-hit-pattern.md) | 🔲 미착수 | 적중 패턴 분석 + 레짐별 관점 성적표 |
-| Phase 15 | [phase15-regime-weights.md](prds/phase15-regime-weights.md) | 🔲 미착수 | 레짐별 적응형 가중치 자동 조정 |
-| Phase 16 | [phase16-prompt-tuning.md](prds/phase16-prompt-tuning.md) | 🔲 미착수 | 프롬프트 자가 튜닝 (LLM 기반 자기 개선) |
+| Phase 14 | [phase14-hit-pattern.md](prds/phase14-hit-pattern.md) | ✅ 완료 | 적중 패턴 분석 + 레짐별 관점 성적표 |
+| Phase 15 | [phase15-regime-weights.md](prds/phase15-regime-weights.md) | ✅ 완료 | 레짐별 적응형 가중치 자동 조정 |
+| Phase 16 | [phase16-prompt-tuning.md](prds/phase16-prompt-tuning.md) | ✅ 완료 | 프롬프트 자가 튜닝 (LLM 기반 자기 개선) |
 
 ---
 
