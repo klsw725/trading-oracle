@@ -159,6 +159,17 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         lines.append(causal_context)
         lines.append("")
 
+    # 매크로 정량 시계열 (Phase 11)
+    try:
+        from src.data.macro import get_macro_snapshot, format_macro_for_prompt
+        macro_snapshot = get_macro_snapshot()
+        macro_quant = format_macro_for_prompt(macro_snapshot)
+        if macro_quant:
+            lines.append(macro_quant)
+            lines.append("")
+    except Exception:
+        pass
+
     # 매크로 글로벌 뉴스 (Phase 10 M4)
     web_macro = data.market_context.get("web_macro", {})
     macro_news = []

@@ -24,3 +24,4 @@ docs/refs/
 # Agent work dirs
 .sisyphus/
 .omc/
+data/macro_series.parquet
