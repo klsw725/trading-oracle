@@ -164,6 +164,9 @@ uv run scripts/build_causal.py info --json
 | "매크로 관점에서 반도체는?" | `uv run scripts/perspective.py --macro -t 005930 000660 --json` |
 | "인과 그래프 만들어줘" | `uv run scripts/build_causal.py build --json` |
 | "인과 그래프 정보" | `uv run scripts/build_causal.py info --json` |
+| "인과 그래프 검증" | `uv run scripts/verify_causal.py --json` |
+| "적중 패턴 분석" | `uv run scripts/performance.py patterns --json` |
+| "전체 명령 가이드" | `uv run main.py guide` |
 | "가중치 없이 분석해줘" | `uv run scripts/daily.py --no-weights --json` |
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
 | "어제 추천 결과는?" | `uv run scripts/performance.py detail 2026-03-27 --json` |
