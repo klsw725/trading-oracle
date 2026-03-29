@@ -9,7 +9,7 @@
 |-------|-----|------|------|
 | Phase 11 | [phase11-macro-timeseries.md](prds/phase11-macro-timeseries.md) | ✅ 완료 | 매크로 변수 정량 시계열 수집 |
 | Phase 12 | [phase12-causal-verification.md](prds/phase12-causal-verification.md) | ✅ 완료 | Granger 기반 트리플 검증 + 신뢰도 태깅 |
-| Phase 13 | [phase13-deliberative-consensus.md](prds/phase13-deliberative-consensus.md) | 🔲 미착수 | MAXS식 multi-round 숙의 합의 |
+| Phase 13 | [phase13-deliberative-consensus.md](prds/phase13-deliberative-consensus.md) | ✅ 완료 | MAXS식 multi-round 숙의 합의 |
 
 ---
 
