@@ -15,6 +15,9 @@
 - **웹 검색 보강**: DuckDuckGo로 최신 뉴스/공시/수급 수집 → LLM 프롬프트에 자동 삽입 (OUROBOROS Triple-Gate 검증)
 - **시그널 엔진 v2**: ATR 기반 변동성 정규화 임계값 + 레짐 필터
 - **백테스트**: 시그널 적중률 + 전략 성과 검증 인프라
+- **매크로 정량 시계열**: 11개 매크로 변수 (금리, 환율, 원자재, 지수) 자동 수집 + parquet 캐시
+- **Granger 인과 검증**: 인과 그래프 트리플을 실제 시계열 데이터로 통계 검증 (p-value, lag 태깅)
+- **숙의 합의**: 분기/약한 합의 시 소수 측에 다수 근거 제시 → 재판정 → 합의 수렴
 - **한국 + 미국 시장**: 티커 포맷 자동 판별 (숫자=KR, 알파벳=US)
 
 ## 빠른 시작
@@ -56,6 +59,7 @@ trading-oracle/
 │   ├── perspective.py               # 단일 관점 분석
 │   ├── performance.py               # 성과 리포트
 │   ├── backtest.py                  # 시그널 백테스트
+│   ├── verify_causal.py             # 인과 그래프 Granger 검증
 │   └── build_causal.py              # 인과 그래프 구축
 │
 ├── src/
@@ -63,7 +67,8 @@ trading-oracle/
 │   ├── data/
 │   │   ├── market.py                # OHLCV, 지수, 시총 (pykrx + FDR)
 │   │   ├── fundamentals.py          # PER/PBR (네이버 + yfinance)
-│   │   └── web_search.py            # DuckDuckGo 웹 검색 + OUROBOROS 검증
+│   │   ├── web_search.py            # DuckDuckGo 웹 검색 + OUROBOROS 검증
+│   │   └── macro.py                 # 매크로 시계열 (금리, 환율, 원자재)
 │   ├── signals/
 │   │   └── technical.py             # 6-시그널 앙상블 보팅 (v2: ATR 임계값)
 │   ├── perspectives/                # 5개 투자 관점
@@ -75,10 +80,12 @@ trading-oracle/
 │   │   └── value.py                 # 가치 투자
 │   ├── consensus/
 │   │   ├── voter.py                 # 5관점 병렬 호출
-│   │   └── scorer.py                # 합의도 계산 (가중 투표 지원)
+│   │   ├── scorer.py                # 합의도 계산 (가중 투표 지원)
+│   │   └── deliberator.py           # 숙의 합의 (분기 시 재판정)
 │   ├── causal/
 │   │   ├── builder.py               # 토픽 확장 + 트리플 추출
-│   │   └── graph.py                 # networkx 그래프 관리
+│   │   ├── graph.py                 # networkx 그래프 관리
+│   │   └── verifier.py              # Granger 인과추론 검증
 │   ├── performance/
 │   │   └── tracker.py               # 스냅샷, 적중 평가, 가중치
 │   ├── screener/
@@ -102,6 +109,9 @@ trading-oracle/
     └── specs/multi-perspective/
         ├── SPEC.md                  # 시스템 사양서
         └── prds/                    # Phase 1~10 PRD
+    └── specs/v2/
+        ├── SPEC.md                  # v2 사양서
+        └── prds/                    # Phase 11~13 PRD
 ```
 
 ## 사용자 요청별 명령 매핑
@@ -140,6 +150,8 @@ trading-oracle/
 ```
 
 스냅샷 5개 이상 축적 시 **적응형 가중치** 활성화 — 적중률 높은 관점에 더 높은 가중치 부여.
+
+분기/약한 합의 시 **숙의 합의** 자동 발동 — 소수 측에 다수 근거를 제시하고 재판정. 수렴하면 합의로 승격.
 
 ## 웹 검색
 
