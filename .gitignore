@@ -8,7 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
--e 
+
 # OS files
 .DS_Store
 
@@ -16,7 +16,11 @@ wheels/
 data/snapshots/
 data/portfolio.json
 data/fundamentals_cache.json
+data/web_cache.json
 
 # 저작권 참고자료 (절대 커밋 금지)
 docs/refs/
-data/web_cache.json
+
+# Agent work dirs
+.sisyphus/
+.omc/
