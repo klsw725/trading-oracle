@@ -121,7 +121,7 @@ uv run scripts/perspective.py --quant -t 005930 --json
 
 사용 가능 관점: `--kwangsoo`, `--ouroboros`, `--quant`, `--macro`, `--value`
 
-## 인과 그래프
+## 인과 그래프 + Granger 검증
 
 인과 그래프 구축 (1회성, ~$5):
 ```bash
@@ -142,6 +142,23 @@ uv run scripts/build_causal.py update 2차전지 AI --json
 ```bash
 uv run scripts/build_causal.py info --json
 ```
+
+Granger 인과 검증 (인과 그래프 트리플을 실제 시계열 데이터로 통계 검증):
+```bash
+uv run scripts/verify_causal.py --json
+```
+
+검증된 트리플 상세 보기:
+```bash
+uv run scripts/verify_causal.py --detail
+```
+
+기존 검증 결과 조회:
+```bash
+uv run scripts/verify_causal.py --info
+```
+
+> 인과 검증은 Phase 11(매크로 시계열)의 데이터를 사용합니다. 검증된 트리플은 매크로 관점 프롬프트에 "데이터 검증됨 (p-value, lag)" 라벨로 우선 주입됩니다.
 
 ## 사용자 요청별 매핑
 

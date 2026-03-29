@@ -162,6 +162,23 @@ trading-oracle/
 
 분기/약한 합의 시 **숙의 합의** 자동 발동 — 소수 측에 다수 근거를 제시하고 재판정. 수렴하면 합의로 승격.
 
+## 인과 검증
+
+인과 그래프의 트리플을 실제 시계열 데이터로 Granger Causality Test 검증:
+
+```bash
+# 검증 실행 (1,500 트리플 중 매핑 가능한 쌍 검증)
+uv run scripts/verify_causal.py
+
+# 검증된 트리플 상세
+uv run scripts/verify_causal.py --detail
+
+# 기존 결과 조회
+uv run scripts/verify_causal.py --info
+```
+
+검증 통과 트리플은 매크로 관점 프롬프트에 `lag`와 `p-value`와 함께 "데이터 검증됨" 라벨로 우선 주입됩니다.
+
 ## 웹 검색
 
 DuckDuckGo 기반 무료 웹 검색으로 LLM에 최신 정보 제공. OUROBOROS 프레임워크의 Triple-Gate 검증 적용.
