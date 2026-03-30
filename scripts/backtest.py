@@ -55,6 +55,7 @@ def main():
     parser.add_argument("--tickers", help="종목코드 (쉼표 구분)")
     parser.add_argument("--no-forex", action="store_true", help="환율 팩터 비활성화")
     parser.add_argument("--compare", action="store_true", help="forex ON/OFF 비교")
+    parser.add_argument("--optimize", action="store_true", help="파라미터 그리드 서치")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
     parser.add_argument("--capital", type=float, default=10_000_000, help="초기 자본금")
     args = parser.parse_args()
@@ -124,6 +125,46 @@ def main():
         result["metrics"] = metrics
         return result
 
+    if args.optimize:
+        from src.backtest.engine import run_optimization, BacktestConfig
+
+        base = BacktestConfig(initial_capital=args.capital, max_positions=config.get("max_positions", 3))
+        use_forex = not args.no_forex
+        base.use_forex = use_forex
+
+        if not args.json:
+            print(f"\n{'='*60}")
+            print(f"  파라미터 최적화 (그리드 서치)")
+            print(f"  기간: {args.period} ({period_days}거래일), 종목: {len(ticker_list)}개")
+            print(f"  환율: {'ON' if use_forex else 'OFF'}")
+            print(f"  탐색: min_votes×stop_loss×position_size = 3×4×3 = 36 조합")
+            print(f"{'='*60}")
+
+        def opt_progress(cur, total):
+            if not args.json:
+                pct = cur / total * 100
+                bar = "█" * int(pct / 5) + "░" * (20 - int(pct / 5))
+                print(f"\r  [{bar}] {pct:.0f}%% ({cur}/{total})", end="", flush=True)
+
+        results = run_optimization(
+            tickers=ticker_list,
+            ticker_names=ticker_names,
+            period_days=period_days,
+            signal_config=signal_config,
+            forex_config=forex_config if use_forex else None,
+            base_config=base,
+            on_progress=opt_progress if not args.json else None,
+        )
+
+        if not args.json:
+            print()
+
+        if args.json:
+            print(json.dumps(results, ensure_ascii=False, indent=2, cls=NumEncoder))
+        else:
+            _print_optimization(results)
+        return
+
     if args.compare:
         result_on = run_one(True, "환율 팩터 ON")
         result_off = run_one(False, "환율 팩터 OFF")
@@ -174,6 +215,44 @@ def _print_result(result: dict):
         print(f"\n📦 미청산 포지션")
         for p in final:
             print(f"  {p['name']}: {p['entry_price']:,.0f}→{p['current_price']:,.0f} ({p['pnl_pct']:+.1f}%%)")
+
+
+def _print_optimization(results: list[dict]):
+    """그리드 서치 결과 출력."""
+    if not results or "error" in results[0]:
+        print("  ❌ 최적화 실패")
+        return
+
+    print(f"\n📊 파라미터 최적화 결과 (상위 10개, 샤프 비율 기준)")
+    print(f"{'#':>3} {'min_v':>5} {'SL%%':>5} {'PS%%':>5} │ {'수익률':>8} {'CAGR':>7} {'샤프':>6} {'MDD':>7} {'승률':>6} {'거래':>4}")
+    print(f"{'─'*3} {'─'*5} {'─'*5} {'─'*5} ┼ {'─'*8} {'─'*7} {'─'*6} {'─'*7} {'─'*6} {'─'*4}")
+
+    for i, r in enumerate(results[:10]):
+        p = r["params"]
+        m = r["metrics"]
+        marker = " ★" if i == 0 else ""
+        print(
+            f"{i+1:>3} {p.get('min_votes', '-'):>5} {p.get('stop_loss_pct', '-'):>5} {p.get('position_size_pct', '-'):>5} │ "
+            f"{m['total_return_pct']:>+7.1f}%% {m['cagr_pct']:>+6.1f}%% {m['sharpe_ratio']:>5.2f} {m['mdd_pct']:>6.1f}%% {m['win_rate_pct']:>5.1f}%% {m['total_trades']:>4}{marker}"
+        )
+
+    # 최적 파라미터 요약
+    best = results[0]
+    bp = best["params"]
+    bm = best["metrics"]
+    print(f"\n🏆 최적 파라미터:")
+    for k, v in bp.items():
+        print(f"  {k}: {v}")
+    print(f"\n  수익률: {bm['total_return_pct']:+.2f}%%, 샤프: {bm['sharpe_ratio']:.2f}, MDD: {bm['mdd_pct']:.2f}%%")
+
+    # 최악 파라미터
+    worst = results[-1]
+    wp = worst["params"]
+    wm = worst["metrics"]
+    print(f"\n⚠️  최악 파라미터:")
+    for k, v in wp.items():
+        print(f"  {k}: {v}")
+    print(f"  수익률: {wm['total_return_pct']:+.2f}%%, 샤프: {wm['sharpe_ratio']:.2f}, MDD: {wm['mdd_pct']:.2f}%%")
 
 
 def _print_comparison(on: dict, off: dict):

@@ -32,7 +32,7 @@ signals:
   macd_signal: 9
   bb_period: 20
   momentum_window: 20
-  min_votes: 4  # 6개 시그널 중 최소 동의 수
+  min_votes: 4  # 6개 시그널 중 최소 동의 수 (백테스트 최적: 4)
 
 # LLM 설정
 # provider: anthropic (기본) 또는 codex (OpenAI Codex, OAuth 필요)
