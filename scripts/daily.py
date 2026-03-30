@@ -123,6 +123,22 @@ def main():
             output["delta"] = delta
         if analysis_text:
             output["analysis"] = analysis_text
+        # Phase 17: 환율 레짐
+        if market_data.get("fx_regime"):
+            output["fx_regime"] = market_data["fx_regime"]
+        if market_data.get("fx_regimes"):
+            output["fx_regimes"] = market_data["fx_regimes"]
+        # Phase 19: 상관 리스크
+        if len(positions) >= 2:
+            try:
+                from src.portfolio.sizer import check_portfolio_health
+                regime_str = market_data.get("regime", {}).get("regime", "sideways")
+                pf_check = check_portfolio_health(portfolio, regime_str, config)
+                output["portfolio"]["correlation_risk"] = pf_check.get("correlation_risk", {})
+                output["portfolio"]["sector_concentration"] = pf_check.get("sector_concentration", {})
+                output["portfolio"]["diversification_score"] = pf_check.get("diversification_score", 0)
+            except Exception:
+                pass
         print(json_dump(output))
     else:
         # 터미널 Rich 출력
@@ -148,6 +164,21 @@ def main():
         if market_data.get("causal_warning"):
             console.print(f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]")
 
+        # 환율 레짐 (Phase 17)
+        fx_regime = market_data.get("fx_regime")
+        if fx_regime and fx_regime.get("fx_regime") != "unknown":
+            fx_colors = {
+                "krw_weak": "red", "krw_extreme_weak": "bold red",
+                "krw_strong": "green", "krw_extreme_strong": "bold green",
+                "krw_stable": "yellow",
+            }
+            fc = fx_colors.get(fx_regime["fx_regime"], "white")
+            console.print(f"  [{fc}]💱 환율 레짐: {fx_regime['fx_regime_description']}[/{fc}]")
+            if fx_regime.get("usd_krw_ma20"):
+                console.print(f"     USD/KRW MA20={fx_regime['usd_krw_ma20']:,.0f} / MA60={fx_regime.get('usd_krw_ma60', 0):,.0f}")
+            if fx_regime.get("is_extreme"):
+                console.print(f"  [bold red]⚠️  환율 극단 변동 — 포지션 사이징 축소 적용[/bold red]")
+
         # 시그널
         print_phase("기술적 분석", f"{len(signals_data)}개 종목")
         for item in signals_data:
@@ -159,6 +190,31 @@ def main():
             print_portfolio_summary(portfolio)
             for alert in alerts:
                 print_alert(alert["message"])
+
+            # 상관 리스크 (Phase 19)
+            if len(positions) >= 2:
+                try:
+                    from src.portfolio.sizer import check_portfolio_health
+                    regime_str = market_data.get("regime", {}).get("regime", "sideways")
+                    pf_check = check_portfolio_health(portfolio, regime_str, config)
+
+                    corr_risk = pf_check.get("correlation_risk", {})
+                    sector_conc = pf_check.get("sector_concentration", {})
+                    div_score = pf_check.get("diversification_score", 0)
+
+                    if corr_risk or sector_conc.get("is_concentrated"):
+                        console.print(f"\n  [bold]🔗 포트폴리오 리스크[/bold]")
+                        if corr_risk.get("high_corr_pairs"):
+                            for pair in corr_risk["high_corr_pairs"]:
+                                t1, t2, c, n1, n2 = pair
+                                console.print(f"    [yellow]⚠️  {n1} ↔ {n2}: ρ={c:.3f} (고상관)[/yellow]")
+                        if sector_conc.get("is_concentrated"):
+                            s = sector_conc["most_concentrated"]
+                            p = sector_conc["concentration_pct"]
+                            console.print(f"    [yellow]⚠️  {s} 섹터 집중: {p:.0f}%% (분산 필요)[/yellow]")
+                        console.print(f"    분산도: {div_score:.2f}/1.00")
+                except Exception:
+                    pass
 
         # 다관점 / 레거시
         if multi_results:
@@ -220,6 +276,16 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
     for p in consensus.get("perspectives", []):
         emoji = verdict_emoji.get(p["verdict"], "⚪")
         lines.append(f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')[:60]}")
+
+    # 환율 시그널 (Phase 17)
+    fx = consensus.get("fx_signal")
+    if not fx:
+        # multi_results에 fx_signal이 없을 수 있으므로 perspectives에서 찾기
+        pass
+    if fx and fx.get("fx_verdict") != "NEUTRAL":
+        fx_emoji = {"BULLISH": "🟢", "BEARISH": "🔴"}.get(fx["fx_verdict"], "⚪")
+        fx_class_label = {"export": "수출주", "import": "내수주", "neutral": "중립"}.get(fx.get("fx_class", ""), "")
+        lines.append(f"  {fx_emoji} [bold]환율[/bold]: {fx['fx_verdict']} ({fx_class_label}, β={fx.get('fx_beta', 'N/A')})")
 
     if consensus.get("majority_reasoning"):
         lines.append("")
