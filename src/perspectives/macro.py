@@ -243,7 +243,7 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         for cur, sig in cross.items():
             cur_label = {"JPY_KRW": "엔화", "CNY_KRW": "위안화", "EUR_KRW": "유로"}.get(cur, cur)
             lines.append(f"- {cur_label} 시그널: {sig}")
-        lines.append(f"- **환율 종합 판정: {fx.get('fx_verdict', 'NEUTRAL')}** (신뢰도 {fx.get('fx_confidence', 0):.0%%})")
+        lines.append(f"- **환율 종합 판정: {fx.get('fx_verdict', 'NEUTRAL')}** (신뢰도 {fx.get('fx_confidence', 0):.0%})")
         lines.append("")
 
     lines.append("위 데이터를 기반으로 매크로 인과 관점에서 분석하고 JSON으로 응답하세요.")
