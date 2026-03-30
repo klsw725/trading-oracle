@@ -38,10 +38,11 @@ class Position:
     shares: int
     entry_date: str
     high_since_entry: float = 0.0
+    stop_loss_pct: float = 10.0
 
     @property
     def stop_price(self) -> float:
-        return self.high_since_entry * 0.9  # 고점 -10%
+        return self.high_since_entry * (1 - self.stop_loss_pct / 100)
 
 
 @dataclass
@@ -60,6 +61,20 @@ class Trade:
     exit_reason: str
 
 
+def preload_data(
+    tickers: list[str],
+    period_days: int,
+) -> dict[str, pd.DataFrame]:
+    """OHLCV 데이터 사전 로드. 최적화 시 중복 수집 방지."""
+    lookback = period_days + 80
+    ohlcv_data = {}
+    for ticker in tickers:
+        df = fetch_ohlcv(ticker, days_back=lookback)
+        if not df.empty and len(df) >= 60:
+            ohlcv_data[ticker] = df
+    return ohlcv_data
+
+
 def run_backtest(
     tickers: list[str],
     ticker_names: dict[str, str],
@@ -68,6 +83,7 @@ def run_backtest(
     signal_config: dict,
     forex_config: dict | None = None,
     on_progress: callable | None = None,
+    preloaded_data: dict[str, pd.DataFrame] | None = None,
 ) -> dict:
     """시그널 기반 백테스트 실행.
 
@@ -89,13 +105,11 @@ def run_backtest(
             "final_positions": [Position, ...],
         }
     """
-    # 데이터 사전 로드 (시그널 계산에 60일 추가 필요)
-    lookback = period_days + 80
-    ohlcv_data: dict[str, pd.DataFrame] = {}
-    for ticker in tickers:
-        df = fetch_ohlcv(ticker, days_back=lookback)
-        if not df.empty and len(df) >= 60:
-            ohlcv_data[ticker] = df
+    # 데이터: 사전 로드 또는 새로 수집
+    if preloaded_data:
+        ohlcv_data = preloaded_data
+    else:
+        ohlcv_data = preload_data(tickers, period_days)
 
     if not ohlcv_data:
         return {"error": "백테스트용 데이터 부족"}
@@ -251,6 +265,7 @@ def run_backtest(
                         entry_price=round(buy_price, 2),
                         shares=shares, entry_date=date_str,
                         high_since_entry=current_price,
+                        stop_loss_pct=config.stop_loss_pct,
                     )
 
         if on_progress:
@@ -285,6 +300,98 @@ def run_backtest(
         "trades": [_trade_to_dict(t) for t in trades],
         "final_positions": final_positions,
     }
+
+
+def run_optimization(
+    tickers: list[str],
+    ticker_names: dict[str, str],
+    period_days: int,
+    signal_config: dict,
+    forex_config: dict | None = None,
+    base_config: BacktestConfig | None = None,
+    param_grid: dict | None = None,
+    on_progress: callable | None = None,
+) -> list[dict]:
+    """파라미터 그리드 서치. 데이터 1회 로드 후 N회 백테스트.
+
+    Args:
+        param_grid: {"min_votes": [3,4,5], "stop_loss_pct": [7,10,15], ...}
+
+    Returns:
+        결과 리스트 (샤프 비율 내림차순 정렬)
+    """
+    from src.backtest.metrics import compute_metrics
+    from itertools import product
+
+    if base_config is None:
+        base_config = BacktestConfig()
+
+    if param_grid is None:
+        param_grid = {
+            "min_votes": [3, 4, 5],
+            "stop_loss_pct": [7, 10, 13, 15],
+            "position_size_pct": [20, 25, 30],
+        }
+
+    # 데이터 1회 로드
+    data = preload_data(tickers, period_days)
+    if not data:
+        return [{"error": "데이터 부족"}]
+
+    # 매크로 데이터 1회 로드
+    macro_df = None
+    if base_config.use_forex and forex_config:
+        try:
+            from src.data.macro import fetch_macro_series
+            macro_df = fetch_macro_series()
+        except Exception:
+            pass
+
+    # 파라미터 조합 생성
+    keys = list(param_grid.keys())
+    values = list(param_grid.values())
+    combos = list(product(*values))
+    total = len(combos)
+
+    results = []
+    for i, combo in enumerate(combos):
+        params = dict(zip(keys, combo))
+
+        cfg = BacktestConfig(
+            initial_capital=base_config.initial_capital,
+            max_positions=base_config.max_positions,
+            commission_pct=base_config.commission_pct,
+            slippage_pct=base_config.slippage_pct,
+            use_forex=base_config.use_forex,
+            cash_floor_pct=base_config.cash_floor_pct,
+            min_votes=params.get("min_votes", base_config.min_votes),
+            stop_loss_pct=params.get("stop_loss_pct", base_config.stop_loss_pct),
+            position_size_pct=params.get("position_size_pct", base_config.position_size_pct),
+        )
+
+        result = run_backtest(
+            tickers=tickers,
+            ticker_names=ticker_names,
+            period_days=period_days,
+            config=cfg,
+            signal_config=signal_config,
+            forex_config=forex_config,
+            preloaded_data=data,
+        )
+
+        if "error" not in result:
+            metrics = compute_metrics(result["equity_curve"], result["trades"])
+            results.append({
+                "params": params,
+                "metrics": metrics,
+            })
+
+        if on_progress:
+            on_progress(i + 1, total)
+
+    # 샤프 비율 내림차순
+    results.sort(key=lambda r: r["metrics"].get("sharpe_ratio", -999), reverse=True)
+    return results
 
 
 def _get_fx_multiplier(
