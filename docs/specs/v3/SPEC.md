@@ -12,6 +12,7 @@
 | Phase 15 | [phase15-regime-weights.md](prds/phase15-regime-weights.md) | ✅ 완료 | 레짐별 적응형 가중치 자동 조정 |
 | Phase 16 | [phase16-prompt-tuning.md](prds/phase16-prompt-tuning.md) | ✅ 완료 | 프롬프트 자가 튜닝 (LLM 기반 자기 개선) |
 | Phase 17 | [phase17-forex-factor.md](prds/phase17-forex-factor.md) | ✅ 완료 | 환율 팩터 시스템 (다통화 + 레짐 + 포지션 반영) |
+| Phase 18 | [phase18-backtest.md](prds/phase18-backtest.md) | ✅ 완료 | 시그널 백테스트 프레임워크 |
 
 ---
 
