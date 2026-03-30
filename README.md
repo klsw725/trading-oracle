@@ -14,8 +14,10 @@
 - **인과 그래프**: LLM 기반 한국 주식 시장 인과 관계 957트리플 구축
 - **웹 검색 보강**: DuckDuckGo로 최신 뉴스/공시/수급 수집 → LLM 프롬프트에 자동 삽입 (OUROBOROS Triple-Gate 검증)
 - **시그널 엔진 v2**: ATR 기반 변동성 정규화 임계값 + 레짐 필터
-- **백테스트**: 시그널 적중률 + 전략 성과 검증 인프라
-- **매크로 정량 시계열**: 11개 매크로 변수 (금리, 환율, 원자재, 지수) 자동 수집 + parquet 캐시
+- **백테스트**: 시그널 기반 전략 백테스트 (CAGR, MDD, 샤프 비율) + 파라미터 그리드 서치 최적화
+- **환율 팩터**: 다통화(USD/JPY/CNY/EUR-KRW) 수집, 환율 레짐 감지, 수출/내수 분류, 포지션 사이징 ±15% 조정
+- **상관 리스크**: 포지션 간 상관계수 기반 진입 차단(ρ>0.7), 섹터 집중도 경고, 분산도 점수
+- **매크로 정량 시계열**: 14개 매크로 변수 (금리, 환율 5통화, 원자재, 지수) 자동 수집 + parquet 캐시
 - **Granger 인과 검증**: 인과 그래프 트리플을 실제 시계열 데이터로 통계 검증 (p-value, lag 태깅)
 - **숙의 합의**: 분기/약한 합의 시 소수 측에 다수 근거 제시 → 재판정 → 합의 수렴
 - **자가 학습**: 적중 패턴 분석 → 레짐별 가중치 자동 조정 → 프롬프트 자가 튜닝 제안
@@ -39,6 +41,15 @@ uv run scripts/daily.py --json
 
 # 종목 추천
 uv run scripts/recommend.py --json
+
+# 백테스트 (6개월, 시그널 기반)
+uv run scripts/backtest.py --period 6m --tickers 005930,000660,005380
+
+# 환율 ON/OFF 비교
+uv run scripts/backtest.py --period 6m --compare
+
+# 파라미터 최적화
+uv run scripts/backtest.py --period 6m --optimize
 
 # 미국 종목 분석
 uv run scripts/daily.py -t AAPL MSFT --json
@@ -71,7 +82,8 @@ trading-oracle/
 │   │   ├── web_search.py            # DuckDuckGo 웹 검색 + OUROBOROS 검증
 │   │   └── macro.py                 # 매크로 시계열 (금리, 환율, 원자재)
 │   ├── signals/
-│   │   └── technical.py             # 6-시그널 앙상블 보팅 (v2: ATR 임계값)
+│   │   ├── technical.py             # 6-시그널 앙상블 보팅 (v2: ATR 임계값)
+│   │   └── forex.py                 # 환율 팩터 (베타, 시그널, 레짐)
 │   ├── perspectives/                # 5개 투자 관점
 │   │   ├── base.py                  # ABC + 공유 LLM 호출
 │   │   ├── kwangsoo.py              # 이광수 + systrader79 철학
@@ -93,9 +105,13 @@ trading-oracle/
 │   │   └── prompt_tuner.py          # 프롬프트 자가 튜닝
 │   ├── screener/
 │   │   └── leading.py               # 주도주 스크리닝
+│   ├── backtest/
+│   │   ├── engine.py                # 시그널 백테스트 엔진 + 그리드 서치
+│   │   └── metrics.py               # 성과 지표 (CAGR, MDD, 샤프, 승률)
 │   ├── portfolio/
 │   │   ├── tracker.py               # 포지션, 손절매
-│   │   └── sizer.py                 # 포지션 사이징 (포트폴리오 체크 + BUY/SELL 전략)
+│   │   ├── sizer.py                 # 포지션 사이징 (포트폴리오 체크 + BUY/SELL 전략)
+│   │   └── correlation.py           # 상관 리스크 + 섹터 분류
 │   ├── agent/
 │   │   ├── oracle.py                # Anthropic API (SSE 파싱)
 │   │   ├── codex.py                 # OpenAI Codex (OAuth)
@@ -109,15 +125,10 @@ trading-oracle/
 │   └── snapshots/                   # 일별 추천 스냅샷
 │
 └── docs/
-    └── specs/multi-perspective/
-        ├── SPEC.md                  # 시스템 사양서
-        └── prds/                    # Phase 1~10 PRD
-    └── specs/v2/
-        ├── SPEC.md                  # v2 사양서
-        └── prds/                    # Phase 11~13 PRD
-    └── specs/v3/
-        ├── SPEC.md                  # v3 사양서
-        └── prds/                    # Phase 14~16 PRD
+    └── specs/
+        ├── multi-perspective/       # v1 (Phase 1~10)
+        ├── v2/                      # v2 (Phase 11~13)
+        └── v3/                      # v3 (Phase 14~19)
 ```
 
 ## 사용자 요청별 명령 매핑
@@ -135,6 +146,9 @@ trading-oracle/
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
 | "적중 패턴 분석" | `uv run scripts/performance.py patterns --json` |
 | "인과 그래프 검증" | `uv run scripts/verify_causal.py --json` |
+| "백테스트 해봐" | `uv run scripts/backtest.py --period 6m` |
+| "환율 효과 비교" | `uv run scripts/backtest.py --period 6m --compare` |
+| "파라미터 최적화" | `uv run scripts/backtest.py --period 6m --optimize` |
 | "전체 명령 가이드" | `uv run main.py guide` |
 | "데이터 초기화" | `uv run main.py reset --all --json` |
 

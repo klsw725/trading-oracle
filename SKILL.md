@@ -37,6 +37,8 @@ uv run scripts/portfolio.py add 005930 55000 10 --reason "반도체" --json
 uv run scripts/daily.py --json
 ```
 > **매일 실행이 중요합니다.** 실행할 때마다 스냅샷이 축적되고, 5개 이상 쌓이면 적응형 가중치가 활성화되며, 30개 이상이면 자가 학습(레짐별 가중치)이 작동합니다.
+> 
+> 출력에는 환율 레짐(원화 강세/약세), 종목별 FX 시그널, 포트폴리오 상관 리스크 경고가 포함됩니다.
 
 ### 3단계: 종목 추천 (필요 시)
 
@@ -247,6 +249,9 @@ uv run scripts/verify_causal.py --info
 | "인과 그래프 정보" | `uv run scripts/build_causal.py info --json` |
 | "인과 그래프 검증" | `uv run scripts/verify_causal.py --json` |
 | "적중 패턴 분석" | `uv run scripts/performance.py patterns --json` |
+| "백테스트 해봐" | `uv run scripts/backtest.py --period 6m` |
+| "환율 효과 비교" | `uv run scripts/backtest.py --period 6m --compare` |
+| "파라미터 최적화" | `uv run scripts/backtest.py --period 6m --optimize` |
 | "전체 명령 가이드" | `uv run main.py guide` |
 | "가중치 없이 분석해줘" | `uv run scripts/daily.py --no-weights --json` |
 | "추천 성과 보여줘" | `uv run scripts/performance.py report --json` |
@@ -255,6 +260,35 @@ uv run scripts/verify_causal.py --info
 | "데이터 초기화" | `uv run main.py reset --all --json` |
 | "스냅샷 초기화" | `uv run main.py reset --snapshots --json` |
 | "인과 그래프 초기화" | `uv run main.py reset --causal --json` |
+
+## 백테스트
+
+시그널 기반 전략 백테스트 (LLM 비용 $0):
+```bash
+uv run scripts/backtest.py --period 6m --tickers 005930,000660,005380
+```
+
+환율 팩터 ON/OFF 비교:
+```bash
+uv run scripts/backtest.py --period 6m --compare
+```
+
+파라미터 그리드 서치 (min_votes × stop_loss × position_size):
+```bash
+uv run scripts/backtest.py --period 6m --optimize
+```
+
+상관 리스크 비활성화 비교:
+```bash
+uv run scripts/backtest.py --period 6m --no-corr
+```
+
+JSON 출력:
+```bash
+uv run scripts/backtest.py --period 6m --json
+```
+
+> 백테스트는 6-시그널 앙상블 + 환율 팩터 + 상관 리스크 필터를 적용합니다. LLM 관점은 포함되지 않습니다.
 
 ## 추천 성과 추적
 
