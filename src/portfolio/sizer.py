@@ -120,10 +120,56 @@ def check_portfolio_health(
         can_buy = False
         buy_block_reason = f"포트폴리오 손실 {total_pnl_pct:.1f}% — 감축 우선"
 
+    # 상관 리스크 분석 (Phase 19)
+    correlation_risk = {}
+    sector_concentration = {}
+    diversification_score = 0.0
+    if len(positions) >= 2:
+        try:
+            from src.portfolio.correlation import (
+                compute_correlation_matrix, compute_sector_concentration,
+                compute_diversification_score,
+            )
+            corr_config = config.get("correlation", {})
+            window = corr_config.get("window_days", 60)
+
+            ptickers = [p["ticker"] for p in positions]
+            corr_matrix = compute_correlation_matrix(ptickers, days_back=window)
+
+            if corr_matrix is not None:
+                high_pairs = []
+                max_pair_corr = 0.0
+                threshold = corr_config.get("max_pair_correlation", 0.7)
+                for i, t1 in enumerate(ptickers):
+                    for j, t2 in enumerate(ptickers):
+                        if i < j and t1 in corr_matrix.index and t2 in corr_matrix.columns:
+                            c = abs(corr_matrix.loc[t1, t2])
+                            if c > max_pair_corr:
+                                max_pair_corr = c
+                            if c > threshold:
+                                n1 = next((p["name"] for p in positions if p["ticker"] == t1), t1)
+                                n2 = next((p["name"] for p in positions if p["ticker"] == t2), t2)
+                                high_pairs.append((t1, t2, round(c, 3), n1, n2))
+
+                correlation_risk = {
+                    "max_pair_correlation": round(max_pair_corr, 3),
+                    "high_corr_pairs": high_pairs,
+                }
+
+            sector_concentration = compute_sector_concentration(positions)
+            diversification_score = compute_diversification_score(corr_matrix, sector_concentration)
+        except Exception:
+            pass
+
     # 건전성 등급
+    has_corr_risk = bool(correlation_risk.get("high_corr_pairs"))
+    is_sector_concentrated = sector_concentration.get("is_concentrated", False)
+
     if forced_sell or total_pnl_pct < loss_limit:
         health = "danger"
     elif not can_buy or overweight or cash_ratio < cash_floor_pct + 5:
+        health = "caution"
+    elif has_corr_risk or is_sector_concentrated:
         health = "caution"
     else:
         health = "healthy"
@@ -141,6 +187,9 @@ def check_portfolio_health(
         "forced_sell_tickers": forced_sell,
         "num_positions": len(positions),
         "max_positions": max_positions,
+        "correlation_risk": correlation_risk,
+        "sector_concentration": sector_concentration,
+        "diversification_score": diversification_score,
     }
 
 

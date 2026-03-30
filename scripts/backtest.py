@@ -54,6 +54,7 @@ def main():
     parser.add_argument("--period", default="6m", help="백테스트 기간 (6m, 1y, 2y, 120d)")
     parser.add_argument("--tickers", help="종목코드 (쉼표 구분)")
     parser.add_argument("--no-forex", action="store_true", help="환율 팩터 비활성화")
+    parser.add_argument("--no-corr", action="store_true", help="상관 리스크 체크 비활성화")
     parser.add_argument("--compare", action="store_true", help="forex ON/OFF 비교")
     parser.add_argument("--optimize", action="store_true", help="파라미터 그리드 서치")
     parser.add_argument("--json", action="store_true", help="JSON 출력")
@@ -81,11 +82,14 @@ def main():
     forex_config = config.get("forex", {})
 
     def run_one(use_forex: bool, label: str) -> dict:
+        corr_config = config.get("correlation", {})
         bt_config = BacktestConfig(
             initial_capital=args.capital,
             max_positions=config.get("max_positions", 3),
             min_votes=signal_config.get("min_votes", 4),
             use_forex=use_forex,
+            use_correlation=not args.no_corr,
+            max_pair_correlation=corr_config.get("max_pair_correlation", 0.7),
         )
 
         if not args.json:

@@ -27,6 +27,8 @@ class BacktestConfig:
     min_votes: int = 4                # 시그널 최소 투표 수
     use_forex: bool = True            # 환율 팩터 사용 여부
     cash_floor_pct: float = 20.0      # 최소 현금 비중 %
+    use_correlation: bool = True      # 상관 리스크 체크 여부
+    max_pair_correlation: float = 0.7 # 최대 허용 상관계수
 
 
 @dataclass
@@ -224,6 +226,27 @@ def run_backtest(
                 if signals["bull_votes"] >= config.min_votes:
                     if len(positions) >= config.max_positions:
                         continue
+
+                    # 상관 리스크 체크 (Phase 19)
+                    if config.use_correlation and positions:
+                        try:
+                            from src.portfolio.correlation import compute_correlation_from_data
+                            check_tickers = [ticker] + list(positions.keys())
+                            corr_mat = compute_correlation_from_data(
+                                ohlcv_data, check_tickers, up_to_date=date, window=60,
+                            )
+                            if corr_mat is not None and ticker in corr_mat.index:
+                                skip = False
+                                for pt in positions:
+                                    if pt in corr_mat.columns:
+                                        c = abs(corr_mat.loc[ticker, pt])
+                                        if c > config.max_pair_correlation:
+                                            skip = True
+                                            break
+                                if skip:
+                                    continue
+                        except Exception:
+                            pass
 
                     # 현금 비중 체크
                     available = cash - portfolio_value * config.cash_floor_pct / 100
