@@ -19,6 +19,8 @@ MACRO_SYMBOLS = {
     "US30YT": "^TYX",         # 미국 30년 국채금리 (Yahoo)
     "US13WT": "^IRX",         # 미국 13주 T-Bill (Yahoo)
     "USD_KRW": "USD/KRW",    # 원달러 환율
+    "JPY_KRW": "JPYKRW=X",   # 엔화 환율 (자동차/전자 경쟁, Yahoo)
+    "EUR_KRW": "EURKRW=X",   # 유로 환율 (자동차/조선 수출, Yahoo)
     "DXY": "DX-Y.NYB",       # 달러 인덱스 (Yahoo)
     "WTI": "CL=F",           # WTI 원유
     "GOLD": "GC=F",          # 금
@@ -115,6 +117,17 @@ def _add_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "US10YT" in df.columns and "US13WT" in df.columns:
         result["US_TERM_SPREAD"] = df["US10YT"] - df["US13WT"]
 
+    # CNY/KRW 크로스레이트 (USD/KRW ÷ USD/CNY)
+    if "USD_KRW" in df.columns and "CNY_KRW" not in df.columns:
+        try:
+            usd_cny = fdr.DataReader("USD/CNY", (df.index.min()).strftime("%Y-%m-%d"))
+            if not usd_cny.empty and "Close" in usd_cny.columns:
+                cny_series = usd_cny["Close"].reindex(df.index, method="ffill")
+                valid = cny_series.notna() & df["USD_KRW"].notna() & (cny_series > 0)
+                result.loc[valid, "CNY_KRW"] = df.loc[valid, "USD_KRW"] / cny_series[valid]
+        except Exception:
+            pass
+
     return result
 
 
@@ -176,6 +189,9 @@ def format_macro_for_prompt(snapshot: dict) -> str:
         "US30YT": "미국30년국채",
         "US13WT": "미국13주T-Bill",
         "USD_KRW": "원달러환율",
+        "JPY_KRW": "엔화환율",
+        "CNY_KRW": "위안화환율",
+        "EUR_KRW": "유로환율",
         "DXY": "달러인덱스",
         "WTI": "WTI원유",
         "GOLD": "금",
@@ -186,12 +202,13 @@ def format_macro_for_prompt(snapshot: dict) -> str:
     }
     units = {
         "US10YT": "%", "US30YT": "%", "US13WT": "%",
-        "USD_KRW": "원", "DXY": "pt", "WTI": "$", "GOLD": "$",
+        "USD_KRW": "원", "JPY_KRW": "원", "CNY_KRW": "원", "EUR_KRW": "원",
+        "DXY": "pt", "WTI": "$", "GOLD": "$",
         "KOSPI": "pt", "KOSDAQ": "pt", "NASDAQ": "pt", "SP500": "pt",
     }
 
     lines = ["### 매크로 정량 데이터 (시계열)"]
-    for key in ["US10YT", "US30YT", "US13WT", "USD_KRW", "DXY", "WTI", "GOLD"]:
+    for key in ["US10YT", "US30YT", "US13WT", "USD_KRW", "JPY_KRW", "CNY_KRW", "EUR_KRW", "DXY", "WTI", "GOLD"]:
         data = snapshot.get(key)
         if not data:
             continue

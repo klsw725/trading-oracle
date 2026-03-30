@@ -184,6 +184,22 @@ def collect_market_data(include_us: bool = False) -> dict:
     except Exception:
         pass
 
+    # 환율 레짐 감지 (Phase 17)
+    try:
+        from src.data.macro import fetch_macro_series
+        from src.signals.forex import detect_multi_fx_regimes
+        config = load_config()
+        macro_df = fetch_macro_series()
+        if not macro_df.empty:
+            fx_regimes = detect_multi_fx_regimes(macro_df, config)
+            if fx_regimes:
+                market_data["fx_regimes"] = fx_regimes
+                # 메인 환율 레짐 = USD/KRW
+                if "USD_KRW" in fx_regimes:
+                    market_data["fx_regime"] = fx_regimes["USD_KRW"]
+    except Exception:
+        pass
+
     return market_data
 
 
@@ -330,6 +346,20 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         market_context["regime"] = market_data["regime"]
     if "web_macro" in market_data:
         market_context["web_macro"] = market_data["web_macro"]
+    if "fx_regime" in market_data:
+        market_context["fx_regime"] = market_data["fx_regime"]
+    if "fx_regimes" in market_data:
+        market_context["fx_regimes"] = market_data["fx_regimes"]
+
+    # 환율 팩터용 매크로 시계열 (Phase 17)
+    macro_df = None
+    try:
+        from src.data.macro import fetch_macro_series
+        macro_df = fetch_macro_series()
+    except Exception:
+        pass
+
+    fx_regime = market_data.get("fx_regime")
 
     def _analyze_one(item: dict) -> tuple[str, dict]:
         ticker = item["ticker"]
@@ -339,6 +369,17 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         ohlcv = item.get("_ohlcv")
         if ohlcv is None or ohlcv.empty:
             ohlcv = fetch_ohlcv(ticker, days_back=120)
+
+        # 환율 시그널 계산 (Phase 17)
+        fx_signal = {}
+        if macro_df is not None and not macro_df.empty and fx_regime:
+            try:
+                from src.signals.forex import compute_fx_signal
+                fx_signal = compute_fx_signal(
+                    ticker, item["name"], ohlcv, macro_df, fx_regime, config,
+                )
+            except Exception:
+                pass
 
         pi = PerspectiveInput(
             ticker=ticker,
@@ -350,6 +391,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
             market_context=market_context,
             config=config,
             web_context=item.get("web_context", {}),
+            fx_signal=fx_signal,
         )
 
         results = run_all_perspectives(pi)
