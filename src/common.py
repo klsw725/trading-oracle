@@ -406,6 +406,10 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
             except Exception:
                 pass
 
+        # consensus에 fx_signal 첨부 (Phase 17 — 출력용)
+        if fx_signal:
+            consensus["fx_signal"] = fx_signal
+
         return ticker, consensus
 
     multi_results = {}
