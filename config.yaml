@@ -84,6 +84,12 @@ forex:
     strong_import: 1.10
     extreme_cap: 0.70
 
+# 상관 리스크 관리 (Phase 19)
+correlation:
+  max_pair_correlation: 0.7     # 이 이상이면 동시 보유 차단
+  window_days: 60               # 상관계수 롤링 윈도우 (거래일)
+  sector_concentration_limit: 50  # 단일 섹터 최대 비중 %
+
 # 웹 검색 설정 (DuckDuckGo 기반, API 키 불필요)
 web_search:
   enabled: true           # false로 끄면 검색 없이 기존 동작

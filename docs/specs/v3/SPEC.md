@@ -13,6 +13,7 @@
 | Phase 16 | [phase16-prompt-tuning.md](prds/phase16-prompt-tuning.md) | ✅ 완료 | 프롬프트 자가 튜닝 (LLM 기반 자기 개선) |
 | Phase 17 | [phase17-forex-factor.md](prds/phase17-forex-factor.md) | ✅ 완료 | 환율 팩터 시스템 (다통화 + 레짐 + 포지션 반영) |
 | Phase 18 | [phase18-backtest.md](prds/phase18-backtest.md) | ✅ 완료 | 시그널 백테스트 프레임워크 |
+| Phase 19 | [phase19-correlation-risk.md](prds/phase19-correlation-risk.md) | ✅ 완료 | 포트폴리오 상관 리스크 관리 |
 
 ---
 
