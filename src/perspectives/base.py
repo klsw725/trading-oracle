@@ -25,6 +25,7 @@ class PerspectiveInput:
     market_context: dict  # {"kospi": {...}, "kosdaq": {...}}
     config: dict
     web_context: dict = field(default_factory=dict)  # 웹 검색 결과 (Phase 10)
+    fx_signal: dict = field(default_factory=dict)  # 환율 팩터 (Phase 17)
 
 
 @dataclass

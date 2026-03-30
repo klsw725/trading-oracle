@@ -69,6 +69,21 @@ position_sizing:
     bear: 30
     sideways: 25
 
+# 환율 팩터 설정 (Phase 17)
+forex:
+  beta_window: 60
+  beta_export_threshold: 0.3
+  beta_import_threshold: -0.3
+  regime_ma_short: 20
+  regime_ma_long: 60
+  regime_extreme_threshold: 5.0
+  sizing_adjustment:
+    weak_export: 1.15
+    weak_import: 0.85
+    strong_export: 0.90
+    strong_import: 1.10
+    extreme_cap: 0.70
+
 # 웹 검색 설정 (DuckDuckGo 기반, API 키 불필요)
 web_search:
   enabled: true           # false로 끄면 검색 없이 기존 동작

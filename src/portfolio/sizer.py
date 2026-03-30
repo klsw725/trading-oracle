@@ -146,6 +146,38 @@ def check_portfolio_health(
 
 # ── BUY 사이징 ──
 
+def _fx_sizing_multiplier(fx_signal: dict | None, fx_regime: dict | None, config: dict) -> float:
+    """환율 팩터 기반 포지션 사이징 조정 계수 (Phase 17).
+
+    Returns:
+        0.7 ~ 1.15 사이의 배수. 기본 1.0.
+    """
+    if not fx_signal or not fx_regime:
+        return 1.0
+
+    fx_config = config.get("forex", {}).get("sizing_adjustment", {})
+    fx_class = fx_signal.get("fx_class", "neutral")
+    regime = fx_regime.get("fx_regime", "unknown")
+    is_extreme = fx_regime.get("is_extreme", False)
+
+    # 극단 환율 → 전체 축소
+    if is_extreme:
+        return fx_config.get("extreme_cap", 0.70)
+
+    if regime in ("krw_weak", "krw_extreme_weak"):
+        if fx_class == "export":
+            return fx_config.get("weak_export", 1.15)
+        elif fx_class == "import":
+            return fx_config.get("weak_import", 0.85)
+    elif regime in ("krw_strong", "krw_extreme_strong"):
+        if fx_class == "export":
+            return fx_config.get("strong_export", 0.90)
+        elif fx_class == "import":
+            return fx_config.get("strong_import", 1.10)
+
+    return 1.0
+
+
 def compute_buy_plan(
     current_price: float,
     stop_price: float,
@@ -154,6 +186,8 @@ def compute_buy_plan(
     portfolio_check: dict,
     config: dict,
     ticker: str | None = None,
+    fx_signal: dict | None = None,
+    fx_regime: dict | None = None,
 ) -> dict | None:
     """BUY 합의 시 분할 매수 전략 계산.
 
@@ -207,6 +241,11 @@ def compute_buy_plan(
 
     target_shares = max(1, min(target_shares, max_shares_by_weight, max_shares_by_cash))
 
+    # Step 2.5: 환율 팩터 조정 (Phase 17)
+    fx_mult = _fx_sizing_multiplier(fx_signal, fx_regime, config)
+    if fx_mult != 1.0:
+        target_shares = max(1, int(target_shares * fx_mult))
+
     # Step 3: 분할 매수 비율
     tranche_pct = sc["first_tranche"].get(confidence, 25) / 100
     first_shares = max(1, math.ceil(target_shares * tranche_pct))
@@ -234,6 +273,7 @@ def compute_buy_plan(
         "portfolio_cash_after": round(cash_after),
         "portfolio_cash_ratio_after": round(cash_ratio_after, 1),
         "note": "추세 확인 후 2차 매수 검토" if first_shares < target_shares else None,
+        "fx_adjustment": round(fx_mult, 2) if fx_mult != 1.0 else None,
     }
 
 
@@ -246,6 +286,8 @@ def compute_sell_plan(
     portfolio_check: dict,
     config: dict,
     ticker: str,
+    fx_signal: dict | None = None,
+    fx_regime: dict | None = None,
 ) -> dict | None:
     """SELL 합의 시 매도 전략 계산.
 
@@ -283,6 +325,17 @@ def compute_sell_plan(
         sell_shares = max(1, math.ceil(total_shares * sell_pct))
         sell_reason = f"합의 강도별 분할 ({sc['sell_ratio'].get(confidence, 33)}%)"
         urgency = "planned"
+
+    # Step 2.5: 환율 기반 매도 비율 조정 (Phase 17)
+    if fx_signal and fx_regime and urgency != "immediate":
+        fx_class = fx_signal.get("fx_class", "neutral")
+        fx_reg = fx_regime.get("fx_regime", "unknown")
+        if fx_reg == "krw_extreme_weak" and fx_class == "import":
+            sell_shares = max(sell_shares, math.ceil(total_shares * (sell_pct + 0.20)))
+            sell_reason = "원화 급락 + 내수주 — 환율 리스크 감축"
+        elif fx_reg == "krw_extreme_strong" and fx_class == "export":
+            sell_shares = max(sell_shares, math.ceil(total_shares * (sell_pct + 0.10)))
+            sell_reason = "원화 급등 + 수출주 — 환율 리스크 감축"
 
     # Step 3: 포트폴리오 레벨 조정
     loss_limit = sc["portfolio_loss_limit"]
@@ -336,6 +389,8 @@ def compute_action_plan(
     portfolio: dict,
     portfolio_check: dict,
     config: dict,
+    fx_signal: dict | None = None,
+    fx_regime: dict | None = None,
 ) -> dict | None:
     """합의 결과에 따라 BUY/SELL action_plan 계산.
 
@@ -345,10 +400,12 @@ def compute_action_plan(
         return compute_buy_plan(
             current_price, stop_price, confidence,
             portfolio, portfolio_check, config, ticker,
+            fx_signal=fx_signal, fx_regime=fx_regime,
         )
     elif consensus_verdict == "SELL":
         return compute_sell_plan(
             current_price, confidence,
             portfolio, portfolio_check, config, ticker,
+            fx_signal=fx_signal, fx_regime=fx_regime,
         )
     return None

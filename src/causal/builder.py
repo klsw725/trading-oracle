@@ -35,6 +35,11 @@ ROOT_TOPICS = [
     {"topic": "클라우드와 SaaS", "domain": "클라우드"},
     {"topic": "전기차와 자율주행", "domain": "글로벌EV"},
     {"topic": "미중 무역과 지정학", "domain": "지정학"},
+    # Phase 17: 환율 전용 토픽
+    {"topic": "원달러 환율과 수출 경쟁력", "domain": "환율"},
+    {"topic": "엔화 환율과 한일 경쟁", "domain": "환율"},
+    {"topic": "위안화 환율과 중국 수출입", "domain": "환율"},
+    {"topic": "달러 인덱스와 신흥국 자본흐름", "domain": "환율"},
 ]
 
 EXPAND_SYSTEM = """\

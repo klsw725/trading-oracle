@@ -155,13 +155,26 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
     # 검증된 인과 체인 (Phase 12 — Granger 검증 통과 트리플 우선)
     try:
         from src.causal.verifier import get_verified_chains
-        keywords = [data.name]
+        keywords = [data.name, "환율", "원달러"]
         if "전자" in data.name or "하이닉스" in data.name:
-            keywords.extend(["반도체", "금리", "환율"])
+            keywords.extend(["반도체", "금리", "수출 경쟁력"])
+        elif "자동차" in data.name or "기아" in data.name or "현대" in data.name:
+            keywords.extend(["자동차", "엔화", "수출 경쟁력"])
         elif "에어로" in data.name:
             keywords.extend(["방산", "금리"])
         elif "금융" in data.name or "은행" in data.name:
             keywords.extend(["금리", "금융"])
+        elif "화학" in data.name or "철강" in data.name or "포스코" in data.name:
+            keywords.extend(["위안화", "원자재 수입", "환율 비용"])
+        elif "조선" in data.name:
+            keywords.extend(["유로", "수출 경쟁력"])
+        # 환율 민감도별 키워드 추가
+        if data.fx_signal:
+            fx_class = data.fx_signal.get("fx_class", "neutral")
+            if fx_class == "export":
+                keywords.extend(["수출 경쟁력", "원화 약세 수혜"])
+            elif fx_class == "import":
+                keywords.extend(["원자재 수입", "환율 비용"])
         verified = get_verified_chains(keywords, min_confidence=0.5)
         if verified:
             lines.append("### 인과 체인 (데이터 검증됨 — Granger test)")
@@ -211,6 +224,27 @@ def _build_user_prompt(data: PerspectiveInput) -> str:
         web_text = format_web_context_for_prompt(data.web_context, "macro")
         if web_text:
             lines.append(web_text)
+
+    # 환율 팩터 (Phase 17)
+    if data.fx_signal:
+        fx = data.fx_signal
+        lines.append("### 환율 팩터")
+        fx_class_label = {"export": "수출주", "import": "내수/수입주", "neutral": "중립"}.get(fx.get("fx_class", ""), "중립")
+        lines.append(f"- 종목 환율 민감도: {fx_class_label} (β={fx.get('fx_beta', 'N/A')})")
+        comp = fx.get("components", {})
+        mom = comp.get("momentum", {})
+        if mom:
+            dir_label = {"weakening": "원화 약세 방향", "strengthening": "원화 강세 방향", "flat": "횡보"}.get(mom.get("direction", ""), "")
+            lines.append(f"- USD/KRW 5일 변화: {mom.get('usd_krw_5d', 0):+.2f}%% ({dir_label})")
+        align = comp.get("regime_alignment", {})
+        if align:
+            lines.append(f"- 환율-종목 정합성: {align.get('boost', 'NEUTRAL')}")
+        cross = comp.get("cross_currency", {})
+        for cur, sig in cross.items():
+            cur_label = {"JPY_KRW": "엔화", "CNY_KRW": "위안화", "EUR_KRW": "유로"}.get(cur, cur)
+            lines.append(f"- {cur_label} 시그널: {sig}")
+        lines.append(f"- **환율 종합 판정: {fx.get('fx_verdict', 'NEUTRAL')}** (신뢰도 {fx.get('fx_confidence', 0):.0%%})")
+        lines.append("")
 
     lines.append("위 데이터를 기반으로 매크로 인과 관점에서 분석하고 JSON으로 응답하세요.")
     lines.append("이 기업의 이익에 가장 큰 영향을 미치는 매크로 변수를 식별하고, 인과 체인을 구성하세요.")
