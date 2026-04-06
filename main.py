@@ -74,25 +74,44 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
     u = "" if is_us else "원"
     fmt = ",.2f" if is_us else ",.0f"
 
-    verdict_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡", "N/A": "⚪", "DIVIDED": "🔶", "INSUFFICIENT": "⚫"}
-    confidence_colors = {"very_high": "bold green", "high": "green", "moderate": "yellow", "low": "red", "insufficient": "dim"}
+    verdict_emoji = {
+        "BUY": "🟢",
+        "SELL": "🔴",
+        "HOLD": "🟡",
+        "N/A": "⚪",
+        "DIVIDED": "🔶",
+        "INSUFFICIENT": "⚫",
+    }
+    confidence_colors = {
+        "very_high": "bold green",
+        "high": "green",
+        "moderate": "yellow",
+        "low": "red",
+        "insufficient": "dim",
+    }
 
     lines = []
     votes = consensus["vote_summary"]
     cc = confidence_colors.get(consensus["confidence"], "white")
     weighted_tag = " [dim](가중)[/dim]" if consensus.get("weighted") else ""
-    lines.append(f"[bold]합의도:[/bold] [{cc}]{consensus['consensus_label']}[/{cc}]{weighted_tag}")
-    lines.append(f"[bold]투표:[/bold] 매수 {votes.get('BUY', 0)} / 매도 {votes.get('SELL', 0)} / 관망 {votes.get('HOLD', 0)} / N/A {votes.get('N/A', 0)}")
+    lines.append(
+        f"[bold]합의도:[/bold] [{cc}]{consensus['consensus_label']}[/{cc}]{weighted_tag}"
+    )
+    lines.append(
+        f"[bold]투표:[/bold] 매수 {votes.get('BUY', 0)} / 매도 {votes.get('SELL', 0)} / 관망 {votes.get('HOLD', 0)} / N/A {votes.get('N/A', 0)}"
+    )
     lines.append("")
 
     for p in consensus.get("perspectives", []):
         emoji = verdict_emoji.get(p["verdict"], "⚪")
-        lines.append(f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')[:60]}")
+        lines.append(
+            f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')}"
+        )
 
     if consensus.get("majority_reasoning"):
         lines.append("")
         for r in consensus["majority_reasoning"][:3]:
-            lines.append(f"  [dim]{r[:80]}[/dim]")
+            lines.append(f"  [dim]{r}[/dim]")
 
     # 매매 전략 (action_plan)
     plan = consensus.get("action_plan")
@@ -102,23 +121,39 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
             tranche_label = f"분할 매수 1차 / {plan['first_tranche_pct']}%"
             lines.append(f"  [bold green]💰 매수 전략 ({tranche_label})[/bold green]")
             lines.append(f"    매수가: {c}{plan['entry_price']:{fmt}}{u}")
-            lines.append(f"    1차 수량: {plan['first_tranche_shares']}주 (목표 {plan['target_shares']}주)")
+            lines.append(
+                f"    1차 수량: {plan['first_tranche_shares']}주 (목표 {plan['target_shares']}주)"
+            )
             lines.append(f"    투자금: {c}{plan['investment']:{fmt}}{u}")
             lines.append(f"    손절가: {c}{plan['stop_loss']:{fmt}}{u}")
-            lines.append(f"    최대 손실: {c}{plan['risk_amount']:{fmt}}{u} (자산의 {plan['risk_pct']}%%)")
-            lines.append(f"    매수 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)")
+            lines.append(
+                f"    최대 손실: {c}{plan['risk_amount']:{fmt}}{u} (자산의 {plan['risk_pct']}%%)"
+            )
+            lines.append(
+                f"    매수 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)"
+            )
             if plan.get("note"):
                 lines.append(f"    [dim]ℹ️  {plan['note']}[/dim]")
         elif plan["type"] == "sell":
-            ratio_label = f"{plan['sell_ratio']}%% 매도" if plan["sell_ratio"] < 100 else "전량 매도"
+            ratio_label = (
+                f"{plan['sell_ratio']}%% 매도"
+                if plan["sell_ratio"] < 100
+                else "전량 매도"
+            )
             lines.append(f"  [bold red]🔴 매도 전략 ({ratio_label})[/bold red]")
             lines.append(f"    매도가: {c}{plan['sell_price']:{fmt}}{u} (현재가)")
-            lines.append(f"    매도 수량: {plan['sell_shares']}주 (보유 {plan['total_shares']}주)")
+            lines.append(
+                f"    매도 수량: {plan['sell_shares']}주 (보유 {plan['total_shares']}주)"
+            )
             pnl_color = "green" if plan["expected_pnl"] >= 0 else "red"
-            lines.append(f"    예상 손익: [{pnl_color}]{c}{plan['expected_pnl']:+{fmt}}{u} ({plan['expected_pnl_pct']:+.1f}%%)[/{pnl_color}]")
+            lines.append(
+                f"    예상 손익: [{pnl_color}]{c}{plan['expected_pnl']:+{fmt}}{u} ({plan['expected_pnl_pct']:+.1f}%%)[/{pnl_color}]"
+            )
             if plan["remaining_shares"] > 0:
                 lines.append(f"    매도 후 잔여: {plan['remaining_shares']}주")
-            lines.append(f"    매도 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)")
+            lines.append(
+                f"    매도 후 현금: {c}{plan['portfolio_cash_after']:{fmt}}{u} ({plan['portfolio_cash_ratio_after']}%%)"
+            )
             lines.append(f"    [dim]{plan['sell_reason']}[/dim]")
             if plan["urgency"] == "immediate":
                 lines.append(f"    [bold red]⚡ 즉시 실행 권고[/bold red]")
@@ -127,11 +162,24 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
         elif plan["type"] == "sell_blocked":
             lines.append(f"  [dim]💤 {plan['reason']}[/dim]")
 
-    vs = {"BUY": "green", "SELL": "red", "HOLD": "yellow", "DIVIDED": "magenta", "INSUFFICIENT": "dim"}.get(consensus["consensus_verdict"], "white")
-    console.print(Panel("\n".join(lines), title=f"📊 {name} ({ticker}) — [{vs}]{consensus['consensus_verdict']}[/{vs}]", style=vs))
+    vs = {
+        "BUY": "green",
+        "SELL": "red",
+        "HOLD": "yellow",
+        "DIVIDED": "magenta",
+        "INSUFFICIENT": "dim",
+    }.get(consensus["consensus_verdict"], "white")
+    console.print(
+        Panel(
+            "\n".join(lines),
+            title=f"📊 {name} ({ticker}) — [{vs}]{consensus['consensus_verdict']}[/{vs}]",
+            style=vs,
+        )
+    )
 
 
 # --- Subcommands (thin wrappers) ---
+
 
 def cmd_add(args):
     portfolio = load_portfolio()
@@ -150,16 +198,32 @@ def cmd_add(args):
     cash_before = portfolio.get("cash", 0)
     portfolio["cash"] = cash_before - invested
     if portfolio["cash"] < 0:
-        console.print(f"[yellow]⚠️ 현금 부족: {cash_before:,.0f}원 → {portfolio['cash']:,.0f}원 (매수 대금 {invested:,.0f}원)[/yellow]")
+        console.print(
+            f"[yellow]⚠️ 현금 부족: {cash_before:,.0f}원 → {portfolio['cash']:,.0f}원 (매수 대금 {invested:,.0f}원)[/yellow]"
+        )
 
     add_position(portfolio, ticker, name, price, shares, reason, stop_loss)
 
     if getattr(args, "json", False):
-        print(json_dump({"status": "ok", "action": "add", "ticker": ticker, "name": name,
-                          "price": price, "shares": shares, "invested": invested, "stop_loss": stop_loss,
-                          "cash": portfolio["cash"]}))
+        print(
+            json_dump(
+                {
+                    "status": "ok",
+                    "action": "add",
+                    "ticker": ticker,
+                    "name": name,
+                    "price": price,
+                    "shares": shares,
+                    "invested": invested,
+                    "stop_loss": stop_loss,
+                    "cash": portfolio["cash"],
+                }
+            )
+        )
     else:
-        print_success(f"{name}({ticker}) 매수 기록 완료: {price:,.0f}원 × {shares}주 = {invested:,.0f}원 (손절가: {stop_loss:,.0f}원)")
+        print_success(
+            f"{name}({ticker}) 매수 기록 완료: {price:,.0f}원 × {shares}주 = {invested:,.0f}원 (손절가: {stop_loss:,.0f}원)"
+        )
         console.print(f"  [dim]보유 현금: {portfolio['cash']:,.0f}원[/dim]")
 
 
@@ -169,7 +233,14 @@ def cmd_remove(args):
     pos = next((p for p in portfolio["positions"] if p["ticker"] == ticker), None)
     if not pos:
         if getattr(args, "json", False):
-            print(json_dump({"status": "error", "message": f"{ticker} 은(는) 보유 종목이 아닙니다"}))
+            print(
+                json_dump(
+                    {
+                        "status": "error",
+                        "message": f"{ticker} 은(는) 보유 종목이 아닙니다",
+                    }
+                )
+            )
         else:
             print_error(f"{ticker} 은(는) 보유 종목이 아닙니다")
         return
@@ -179,13 +250,17 @@ def cmd_remove(args):
     sell_shares = args.shares  # None이면 전량
     if not sell_price:
         ohlcv = fetch_ohlcv(ticker, days_back=5)
-        sell_price = float(ohlcv["close"].values[-1]) if not ohlcv.empty else pos["entry_price"]
+        sell_price = (
+            float(ohlcv["close"].values[-1]) if not ohlcv.empty else pos["entry_price"]
+        )
 
     actual_sell_shares = sell_shares if sell_shares is not None else pos["shares"]
 
     # 수량 검증
     if actual_sell_shares > pos["shares"]:
-        msg = f"매도 수량({actual_sell_shares})이 보유 수량({pos['shares']})을 초과합니다"
+        msg = (
+            f"매도 수량({actual_sell_shares})이 보유 수량({pos['shares']})을 초과합니다"
+        )
         if getattr(args, "json", False):
             print(json_dump({"status": "error", "message": msg}))
         else:
@@ -210,19 +285,42 @@ def cmd_remove(args):
         return
 
     leftover = pos["shares"] - actual_sell_shares
-    sell_label = f"{actual_sell_shares}주" if sell_shares is not None else f"전량 {actual_sell_shares}주"
+    sell_label = (
+        f"{actual_sell_shares}주"
+        if sell_shares is not None
+        else f"전량 {actual_sell_shares}주"
+    )
 
     if getattr(args, "json", False):
-        print(json_dump({"status": "ok", "action": "remove", "ticker": ticker, "name": name,
-                          "sell_price": sell_price, "sell_shares": actual_sell_shares,
-                          "remaining_shares": leftover, "pnl_pct": pnl_pct, "pnl_amount": pnl_amt,
-                          "proceeds": proceeds, "cash": portfolio["cash"]}))
+        print(
+            json_dump(
+                {
+                    "status": "ok",
+                    "action": "remove",
+                    "ticker": ticker,
+                    "name": name,
+                    "sell_price": sell_price,
+                    "sell_shares": actual_sell_shares,
+                    "remaining_shares": leftover,
+                    "pnl_pct": pnl_pct,
+                    "pnl_amount": pnl_amt,
+                    "proceeds": proceeds,
+                    "cash": portfolio["cash"],
+                }
+            )
+        )
     else:
         pnl_color = "green" if pnl_pct >= 0 else "red"
-        console.print(f"[bold]{name}({ticker}) 매도 완료[/bold]: {sell_price:,.0f}원 × {sell_label} [{pnl_color}]{pnl_amt:+,.0f}원 ({pnl_pct:+.1f}%)[/{pnl_color}]")
+        console.print(
+            f"[bold]{name}({ticker}) 매도 완료[/bold]: {sell_price:,.0f}원 × {sell_label} [{pnl_color}]{pnl_amt:+,.0f}원 ({pnl_pct:+.1f}%)[/{pnl_color}]"
+        )
         if leftover > 0:
-            console.print(f"  [dim]잔여 보유: {leftover}주 (평단가 {pos['entry_price']:,.0f}원)[/dim]")
-        console.print(f"  [dim]보유 현금: {portfolio['cash']:,.0f}원 (+{proceeds:,.0f}원)[/dim]")
+            console.print(
+                f"  [dim]잔여 보유: {leftover}주 (평단가 {pos['entry_price']:,.0f}원)[/dim]"
+            )
+        console.print(
+            f"  [dim]보유 현금: {portfolio['cash']:,.0f}원 (+{proceeds:,.0f}원)[/dim]"
+        )
 
 
 def cmd_cash(args):
@@ -246,23 +344,35 @@ def cmd_portfolio(args):
             if not ohlcv.empty:
                 current_prices[pos["ticker"]] = float(ohlcv["close"].values[-1])
         config = load_config()
-        alerts = update_positions(portfolio, current_prices, config.get("trailing_stop_pct", 10))
+        alerts = update_positions(
+            portfolio, current_prices, config.get("trailing_stop_pct", 10)
+        )
 
     if getattr(args, "json", False):
         summary = get_portfolio_summary(portfolio)
-        print(json_dump({"summary": summary, "positions": portfolio.get("positions", []),
-                          "alerts": [a["message"] for a in alerts]}))
+        print(
+            json_dump(
+                {
+                    "summary": summary,
+                    "positions": portfolio.get("positions", []),
+                    "alerts": [a["message"] for a in alerts],
+                }
+            )
+        )
     else:
         print_header()
         print_portfolio_summary(portfolio)
         for alert in alerts:
             print_alert(alert["message"])
         if not positions:
-            console.print("\n[dim]종목 추가: uv run main.py add <종목코드> <매수가> <수량>[/dim]")
+            console.print(
+                "\n[dim]종목 추가: uv run main.py add <종목코드> <매수가> <수량>[/dim]"
+            )
 
 
 def cmd_codex_login(args):
     from src.agent.codex import codex_login
+
     codex_login()
 
 
@@ -284,9 +394,18 @@ def cmd_reset(args):
 
     if not targets:
         if getattr(args, "json", False):
-            print(json_dump({"status": "error", "message": "초기화 대상을 지정하세요 (--snapshots, --causal, --cache, --all, --portfolio)"}))
+            print(
+                json_dump(
+                    {
+                        "status": "error",
+                        "message": "초기화 대상을 지정하세요 (--snapshots, --causal, --cache, --all, --portfolio)",
+                    }
+                )
+            )
         else:
-            print_error("초기화 대상을 지정하세요: --snapshots, --causal, --cache, --all, --portfolio")
+            print_error(
+                "초기화 대상을 지정하세요: --snapshots, --causal, --cache, --all, --portfolio"
+            )
         return
 
     deleted = []
@@ -337,7 +456,9 @@ def cmd_analyze(args):
     portfolio = load_portfolio()
 
     # 분석할 종목 (시장 데이터 수집 전에 먼저 수집하여 US 여부 판단)
-    tickers, _ = collect_tickers(args.tickers, config, portfolio, getattr(args, "screen", False))
+    tickers, _ = collect_tickers(
+        args.tickers, config, portfolio, getattr(args, "screen", False)
+    )
     include_us = has_us_tickers(tickers, portfolio)
 
     # 시장 현황
@@ -352,13 +473,19 @@ def cmd_analyze(args):
         if regime.get("regime"):
             regime_colors = {"bull": "green", "bear": "red", "sideways": "yellow"}
             rc = regime_colors.get(regime["regime"], "white")
-            console.print(f"  [{rc}]📈 시장 레짐: {regime['label']}[/{rc}] — {regime['description']}")
+            console.print(
+                f"  [{rc}]📈 시장 레짐: {regime['label']}[/{rc}] — {regime['description']}"
+            )
         for idx_name in ("kospi", "kosdaq", "nasdaq", "sp500"):
             idx = market_data.get(idx_name)
             if idx:
-                console.print(f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)")
+                console.print(
+                    f"  {idx['name']}: {idx['close']:,.2f} (5일 {idx['change_5d']:+.1f}%, 20일 {idx['change_20d']:+.1f}%)"
+                )
         if market_data.get("causal_warning"):
-            console.print(f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]")
+            console.print(
+                f"  [bold yellow]⚠️  {market_data['causal_warning']}[/bold yellow]"
+            )
 
     if not tickers:
         if is_json:
@@ -379,7 +506,9 @@ def cmd_analyze(args):
 
     if not signals_data:
         if is_json:
-            print(json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"}))
+            print(
+                json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"})
+            )
         else:
             print_error("분석 가능한 종목이 없습니다")
         return
@@ -390,8 +519,12 @@ def cmd_analyze(args):
     if positions:
         if not quiet:
             print_phase("포트폴리오 업데이트")
-        current_prices = {item["ticker"]: item["signals"]["current_price"] for item in signals_data}
-        alerts = update_positions(portfolio, current_prices, config.get("trailing_stop_pct", 10))
+        current_prices = {
+            item["ticker"]: item["signals"]["current_price"] for item in signals_data
+        }
+        alerts = update_positions(
+            portfolio, current_prices, config.get("trailing_stop_pct", 10)
+        )
         if not quiet:
             print_portfolio_summary(portfolio)
             for alert in alerts:
@@ -411,6 +544,7 @@ def cmd_analyze(args):
                 print_loading("LLM API 호출")
             try:
                 from src.agent.oracle import analyze
+
                 analysis_text = analyze(market_data, signals_data, portfolio, config)
                 if not quiet:
                     print_analysis(analysis_text)
@@ -419,42 +553,72 @@ def cmd_analyze(args):
                     analysis_text = f"LLM 오류: {e}"
                 else:
                     print_error(f"LLM 분석 실패: {e}")
-                    console.print("[dim]--no-llm 옵션으로 시그널만 확인할 수 있습니다[/dim]")
+                    console.print(
+                        "[dim]--no-llm 옵션으로 시그널만 확인할 수 있습니다[/dim]"
+                    )
         else:
             if not quiet:
-                print_phase("다관점 투자 판정", f"{len(signals_data)}개 종목 × 5개 관점 병렬 분석")
+                print_phase(
+                    "다관점 투자 판정",
+                    f"{len(signals_data)}개 종목 × 5개 관점 병렬 분석",
+                )
             try:
                 use_weights = not getattr(args, "no_weights", False)
-                multi_results = run_multi_perspective(signals_data, portfolio, market_data, config, use_weights=use_weights)
+                multi_results = run_multi_perspective(
+                    signals_data,
+                    portfolio,
+                    market_data,
+                    config,
+                    use_weights=use_weights,
+                )
                 if multi_results:
                     try:
                         from src.performance.tracker import compute_delta
+
                         delta = compute_delta(multi_results)
                     except Exception:
                         pass
 
                     # 포지션 사이징: action_plan 부착
-                    from src.portfolio.sizer import check_portfolio_health, compute_action_plan
+                    from src.portfolio.sizer import (
+                        check_portfolio_health,
+                        compute_action_plan,
+                    )
+
                     regime_str = market_data.get("regime", {}).get("regime", "sideways")
                     pf_check = check_portfolio_health(portfolio, regime_str, config)
 
                     if not quiet and pf_check["portfolio_health"] == "danger":
                         for fs in pf_check.get("forced_sell_tickers", []):
-                            print_alert(f"포트폴리오 손실 {pf_check['total_pnl_pct']:.1f}%% — {fs['name']}({fs['ticker']}) 감축 권고 (손익 {fs['pnl_pct']:+.1f}%%)")
-                    if not quiet and not pf_check["can_buy"] and pf_check["buy_block_reason"]:
+                            print_alert(
+                                f"포트폴리오 손실 {pf_check['total_pnl_pct']:.1f}%% — {fs['name']}({fs['ticker']}) 감축 권고 (손익 {fs['pnl_pct']:+.1f}%%)"
+                            )
+                    if (
+                        not quiet
+                        and not pf_check["can_buy"]
+                        and pf_check["buy_block_reason"]
+                    ):
                         if pf_check["portfolio_health"] != "danger":
-                            console.print(f"  [yellow]⚠️  매수 제한: {pf_check['buy_block_reason']}[/yellow]")
+                            console.print(
+                                f"  [yellow]⚠️  매수 제한: {pf_check['buy_block_reason']}[/yellow]"
+                            )
 
                     for ticker, consensus in multi_results.items():
-                        sig_item = next((s for s in signals_data if s["ticker"] == ticker), None)
+                        sig_item = next(
+                            (s for s in signals_data if s["ticker"] == ticker), None
+                        )
                         if sig_item:
                             stop_price = sig_item["signals"]["trailing_stop_10pct"]
                             current_price = sig_item["signals"]["current_price"]
                             plan = compute_action_plan(
-                                ticker, current_price, stop_price,
+                                ticker,
+                                current_price,
+                                stop_price,
                                 consensus["consensus_verdict"],
                                 consensus["confidence"],
-                                portfolio, pf_check, config,
+                                portfolio,
+                                pf_check,
+                                config,
                             )
                             if plan:
                                 consensus["action_plan"] = plan
@@ -462,14 +626,19 @@ def cmd_analyze(args):
 
                 if not quiet:
                     for ticker, consensus in multi_results.items():
-                        name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)
+                        name = next(
+                            (s["name"] for s in signals_data if s["ticker"] == ticker),
+                            ticker,
+                        )
                         _print_consensus_card(name, ticker, consensus)
             except Exception as e:
                 if is_json:
                     analysis_text = f"LLM 오류: {e}"
                 else:
                     print_error(f"다관점 분석 실패: {e}")
-                    console.print("[dim]--no-llm 또는 --legacy 옵션을 사용할 수 있습니다[/dim]")
+                    console.print(
+                        "[dim]--no-llm 또는 --legacy 옵션을 사용할 수 있습니다[/dim]"
+                    )
 
     # JSON 출력
     if is_json:
@@ -477,8 +646,11 @@ def cmd_analyze(args):
         output = {
             "date": market_data["date"],
             "market": market_data,
-            "portfolio": {"summary": summary, "positions": portfolio.get("positions", []),
-                          "alerts": [a["message"] for a in alerts]},
+            "portfolio": {
+                "summary": summary,
+                "positions": portfolio.get("positions", []),
+                "alerts": [a["message"] for a in alerts],
+            },
             "signals": build_signals_json(signals_data),
         }
         if multi_results:
@@ -510,14 +682,18 @@ def main():
     add_parser.add_argument("price", type=float, help="매수가")
     add_parser.add_argument("shares", type=int, help="수량")
     add_parser.add_argument("--reason", "-r", help="매수 이유")
-    add_parser.add_argument("--stop-loss", "-s", type=float, help="손절가, 기본 매수가의 90%%")
+    add_parser.add_argument(
+        "--stop-loss", "-s", type=float, help="손절가, 기본 매수가의 90%%"
+    )
     add_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     # remove
     rm_parser = subparsers.add_parser("remove", help="매도 기록")
     rm_parser.add_argument("ticker", help="종목코드")
     rm_parser.add_argument("--price", "-p", type=float, help="매도가")
-    rm_parser.add_argument("--shares", "-n", type=int, help="매도 수량 (미지정 시 전량)")
+    rm_parser.add_argument(
+        "--shares", "-n", type=int, help="매도 수량 (미지정 시 전량)"
+    )
     rm_parser.add_argument("--reason", "-r", help="매도 이유")
     rm_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
@@ -536,11 +712,23 @@ def main():
 
     # reset
     reset_parser = subparsers.add_parser("reset", help="데이터 초기화")
-    reset_parser.add_argument("--snapshots", action="store_true", help="추천 스냅샷 초기화")
-    reset_parser.add_argument("--causal", action="store_true", help="인과 그래프 초기화")
-    reset_parser.add_argument("--cache", action="store_true", help="펀더멘털 캐시 초기화")
-    reset_parser.add_argument("--portfolio", action="store_true", help="포트폴리오 초기화 (주의: 실제 투자 기록 삭제)")
-    reset_parser.add_argument("--all", action="store_true", help="전체 초기화 (포트폴리오 제외)")
+    reset_parser.add_argument(
+        "--snapshots", action="store_true", help="추천 스냅샷 초기화"
+    )
+    reset_parser.add_argument(
+        "--causal", action="store_true", help="인과 그래프 초기화"
+    )
+    reset_parser.add_argument(
+        "--cache", action="store_true", help="펀더멘털 캐시 초기화"
+    )
+    reset_parser.add_argument(
+        "--portfolio",
+        action="store_true",
+        help="포트폴리오 초기화 (주의: 실제 투자 기록 삭제)",
+    )
+    reset_parser.add_argument(
+        "--all", action="store_true", help="전체 초기화 (포트폴리오 제외)"
+    )
     reset_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     # codex-login
@@ -554,9 +742,13 @@ def main():
     parser.add_argument("--screen", action="store_true", help="주도주 스크리닝 포함")
     parser.add_argument("--no-llm", action="store_true", help="LLM 분석 생략")
     parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
-    parser.add_argument("--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)")
+    parser.add_argument(
+        "--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)"
+    )
     parser.add_argument("--no-search", action="store_true", help="웹 검색 비활성화")
-    parser.add_argument("--no-deliberation", action="store_true", help="숙의 합의 비활성화")
+    parser.add_argument(
+        "--no-deliberation", action="store_true", help="숙의 합의 비활성화"
+    )
     parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     args = parser.parse_args()
@@ -629,9 +821,13 @@ def main():
         print(guide)
 
     cmds = {
-        "add": cmd_add, "remove": cmd_remove, "cash": cmd_cash,
-        "portfolio": cmd_portfolio, "history": cmd_history,
-        "reset": cmd_reset, "codex-login": cmd_codex_login,
+        "add": cmd_add,
+        "remove": cmd_remove,
+        "cash": cmd_cash,
+        "portfolio": cmd_portfolio,
+        "history": cmd_history,
+        "reset": cmd_reset,
+        "codex-login": cmd_codex_login,
         "guide": cmd_guide,
     }
     handler = cmds.get(args.command)
