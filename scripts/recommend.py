@@ -77,8 +77,17 @@ def main():
     for rec in recs:
         consensus = rec.get("consensus")
         sig = rec["signals"]
+        plan = rec.get("action_plan")
+        is_buyable = bool(plan and plan.get("type") == "buy")
+        badge = (
+            "[bold black on green] 매수 가능 [/bold black on green]"
+            if is_buyable
+            else "[bold white on red] 매수 불가 [/bold white on red]"
+        )
+        panel_style = "green" if is_buyable else "red"
 
         lines = []
+        lines.append(badge)
         lines.append(
             f"[bold]시그널:[/bold] {sig['verdict']} (Bull {sig['bull_votes']}/6)"
         )
@@ -95,7 +104,6 @@ def main():
                 )
 
         # 매수 전략
-        plan = rec.get("action_plan")
         if plan and plan.get("type") == "buy":
             lines.append("")
             lines.append(
@@ -118,8 +126,8 @@ def main():
         console.print(
             Panel(
                 "\n".join(lines),
-                title=f"🟢 {rec['name']} ({rec['ticker']}) — {rec['price']:,.0f}원",
-                style="green",
+                title=f"🟢 {rec['name']} ({rec['ticker']}) {badge} — {rec['price']:,.0f}원",
+                style=panel_style,
             )
         )
 
