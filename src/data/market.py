@@ -2,18 +2,41 @@
 
 import re
 import warnings
+import math
+
 warnings.filterwarnings("ignore", category=UserWarning, module="pykrx")
 
 from datetime import datetime, timedelta
+from numbers import Integral
 
 import pandas as pd
 import FinanceDataReader as fdr
 from pykrx import stock as krx
 
 
+def _safe_int(value: object) -> int:
+    if value is None:
+        return 0
+    if isinstance(value, str):
+        text = value.replace(",", "").strip()
+        if not text:
+            return 0
+        try:
+            return int(float(text))
+        except ValueError:
+            return 0
+    if isinstance(value, Integral):
+        return int(value)
+    if isinstance(value, float):
+        if math.isnan(value):
+            return 0
+        return int(value)
+    return 0
+
+
 def is_us_ticker(ticker: str) -> bool:
     """미국 종목 여부 판별. 알파벳으로만 구성되면 US."""
-    return bool(re.match(r'^[A-Za-z]{1,5}$', ticker))
+    return bool(re.match(r"^[A-Za-z]{1,5}$", ticker))
 
 
 def get_trading_dates(days_back: int = 120) -> tuple[str, str]:
@@ -42,13 +65,15 @@ def _fetch_ohlcv_us(ticker: str, days_back: int = 120) -> pd.DataFrame:
     df = fdr.DataReader(ticker, start)
     if df.empty:
         return df
-    result = pd.DataFrame({
-        "open": df["Open"],
-        "high": df["High"],
-        "low": df["Low"],
-        "close": df["Close"],
-        "volume": df["Volume"],
-    })
+    result = pd.DataFrame(
+        {
+            "open": df["Open"],
+            "high": df["High"],
+            "low": df["Low"],
+            "close": df["Close"],
+            "volume": df["Volume"],
+        }
+    )
     if "Change" in df.columns:
         result["change_pct"] = df["Change"] * 100
     else:
@@ -78,19 +103,21 @@ def fetch_market_cap(ticker: str) -> dict:
     row = listing[listing["Code"] == ticker]
     if row.empty:
         return {}
+    latest = row.iloc[0]
     return {
-        "market_cap": int(row.iloc[0].get("Marcap", 0)),
-        "shares": int(row.iloc[0].get("Stocks", 0)),
+        "market_cap": _safe_int(latest.get("Marcap", 0)),
+        "shares": _safe_int(latest.get("Stocks", 0)),
     }
 
 
 def _fetch_market_cap_us(ticker: str) -> dict:
     try:
         import yfinance as yf
+
         info = yf.Ticker(ticker).info
         return {
-            "market_cap": int(info.get("marketCap", 0)),
-            "shares": int(info.get("sharesOutstanding", 0)),
+            "market_cap": _safe_int(info.get("marketCap", 0)),
+            "shares": _safe_int(info.get("sharesOutstanding", 0)),
         }
     except Exception:
         return {}
@@ -105,13 +132,15 @@ def fetch_index_ohlcv(index_symbol: str = "KS11", days_back: int = 120) -> pd.Da
     df = fdr.DataReader(index_symbol, start)
     if df.empty:
         return df
-    result = pd.DataFrame({
-        "open": df["Open"],
-        "high": df["High"],
-        "low": df["Low"],
-        "close": df["Close"],
-        "volume": df["Volume"],
-    })
+    result = pd.DataFrame(
+        {
+            "open": df["Open"],
+            "high": df["High"],
+            "low": df["Low"],
+            "close": df["Close"],
+            "volume": df["Volume"],
+        }
+    )
     return result
 
 
@@ -120,7 +149,9 @@ def get_kospi_tickers() -> list[str]:
 
 
 def get_kosdaq_tickers() -> list[str]:
-    return krx.get_market_ticker_list(datetime.now().strftime("%Y%m%d"), market="KOSDAQ")
+    return krx.get_market_ticker_list(
+        datetime.now().strftime("%Y%m%d"), market="KOSDAQ"
+    )
 
 
 _US_LISTING_CACHE: pd.DataFrame | None = None
