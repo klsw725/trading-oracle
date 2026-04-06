@@ -26,12 +26,15 @@ def _get_sizing_config(config: dict) -> dict:
         "first_tranche": {**_DEFAULT_FIRST_TRANCHE, **ps.get("first_tranche", {})},
         "sell_ratio": {**_DEFAULT_SELL_RATIO, **ps.get("sell_ratio", {})},
         "max_weight_pct": ps.get("max_weight_pct", _DEFAULT_MAX_WEIGHT_PCT),
-        "portfolio_loss_limit": ps.get("portfolio_loss_limit", _DEFAULT_PORTFOLIO_LOSS_LIMIT),
+        "portfolio_loss_limit": ps.get(
+            "portfolio_loss_limit", _DEFAULT_PORTFOLIO_LOSS_LIMIT
+        ),
         "cash_floor": {**_DEFAULT_CASH_FLOOR, **ps.get("cash_floor", {})},
     }
 
 
 # ── 포트폴리오 레벨 체크 ──
+
 
 def check_portfolio_health(
     portfolio: dict,
@@ -82,12 +85,14 @@ def check_portfolio_health(
         mv = p.get("market_value", p["entry_price"] * p["shares"])
         weight = (mv / total_assets * 100) if total_assets > 0 else 0
         if weight > max_weight:
-            overweight.append({
-                "ticker": p["ticker"],
-                "name": p["name"],
-                "weight_pct": round(weight, 1),
-                "excess_pct": round(weight - max_weight, 1),
-            })
+            overweight.append(
+                {
+                    "ticker": p["ticker"],
+                    "name": p["name"],
+                    "weight_pct": round(weight, 1),
+                    "excess_pct": round(weight - max_weight, 1),
+                }
+            )
 
     # 강제 감축 대상
     forced_sell = []
@@ -97,11 +102,13 @@ def check_portfolio_health(
         sorted_pos = sorted(positions, key=lambda p: p.get("pnl_pct", 0))
         for p in sorted_pos:
             if p.get("pnl_pct", 0) < 0:
-                forced_sell.append({
-                    "ticker": p["ticker"],
-                    "name": p["name"],
-                    "pnl_pct": round(p.get("pnl_pct", 0), 1),
-                })
+                forced_sell.append(
+                    {
+                        "ticker": p["ticker"],
+                        "name": p["name"],
+                        "pnl_pct": round(p.get("pnl_pct", 0), 1),
+                    }
+                )
 
     # 매수 가능 여부
     can_buy = True
@@ -127,9 +134,11 @@ def check_portfolio_health(
     if len(positions) >= 2:
         try:
             from src.portfolio.correlation import (
-                compute_correlation_matrix, compute_sector_concentration,
+                compute_correlation_matrix,
+                compute_sector_concentration,
                 compute_diversification_score,
             )
+
             corr_config = config.get("correlation", {})
             window = corr_config.get("window_days", 60)
 
@@ -142,13 +151,23 @@ def check_portfolio_health(
                 threshold = corr_config.get("max_pair_correlation", 0.7)
                 for i, t1 in enumerate(ptickers):
                     for j, t2 in enumerate(ptickers):
-                        if i < j and t1 in corr_matrix.index and t2 in corr_matrix.columns:
+                        if (
+                            i < j
+                            and t1 in corr_matrix.index
+                            and t2 in corr_matrix.columns
+                        ):
                             c = abs(corr_matrix.loc[t1, t2])
                             if c > max_pair_corr:
                                 max_pair_corr = c
                             if c > threshold:
-                                n1 = next((p["name"] for p in positions if p["ticker"] == t1), t1)
-                                n2 = next((p["name"] for p in positions if p["ticker"] == t2), t2)
+                                n1 = next(
+                                    (p["name"] for p in positions if p["ticker"] == t1),
+                                    t1,
+                                )
+                                n2 = next(
+                                    (p["name"] for p in positions if p["ticker"] == t2),
+                                    t2,
+                                )
                                 high_pairs.append((t1, t2, round(c, 3), n1, n2))
 
                 correlation_risk = {
@@ -157,7 +176,9 @@ def check_portfolio_health(
                 }
 
             sector_concentration = compute_sector_concentration(positions)
-            diversification_score = compute_diversification_score(corr_matrix, sector_concentration)
+            diversification_score = compute_diversification_score(
+                corr_matrix, sector_concentration
+            )
         except Exception:
             pass
 
@@ -195,7 +216,10 @@ def check_portfolio_health(
 
 # ── BUY 사이징 ──
 
-def _fx_sizing_multiplier(fx_signal: dict | None, fx_regime: dict | None, config: dict) -> float:
+
+def _fx_sizing_multiplier(
+    fx_signal: dict | None, fx_regime: dict | None, config: dict
+) -> float:
     """환율 팩터 기반 포지션 사이징 조정 계수 (Phase 17).
 
     Returns:
@@ -285,10 +309,32 @@ def compute_buy_plan(
                 existing_value = p.get("market_value", p["entry_price"] * p["shares"])
                 break
     remaining_weight = max_weight_amount - existing_value
-    max_shares_by_weight = int(remaining_weight / current_price) if current_price > 0 else 0
+    max_shares_by_weight = (
+        int(remaining_weight / current_price) if current_price > 0 else 0
+    )
     max_shares_by_cash = int(available_cash / current_price) if current_price > 0 else 0
 
-    target_shares = max(1, min(target_shares, max_shares_by_weight, max_shares_by_cash))
+    if max_shares_by_cash < 1:
+        return {
+            "type": "buy_blocked",
+            "reason": (
+                f"가용 현금 {available_cash:,.0f}원 < 1주 필요금액 {current_price:,.0f}원"
+            ),
+        }
+
+    if max_shares_by_weight < 1:
+        return {
+            "type": "buy_blocked",
+            "reason": "기존 보유 비중이 높아 추가 매수 불가",
+        }
+
+    if target_shares < 1:
+        return {
+            "type": "buy_blocked",
+            "reason": "손절 기준 대비 허용 리스크가 너무 작아 목표 수량 산정 불가",
+        }
+
+    target_shares = min(target_shares, max_shares_by_weight, max_shares_by_cash)
 
     # Step 2.5: 환율 팩터 조정 (Phase 17)
     fx_mult = _fx_sizing_multiplier(fx_signal, fx_regime, config)
@@ -303,8 +349,12 @@ def compute_buy_plan(
     investment = round(current_price * first_shares)
     risk_amount = round(loss_per_share * first_shares)
     cash_after = portfolio.get("cash", 0) - investment
-    total_after = total_assets - investment + investment  # 자산 총액은 변하지 않음 (현금→주식)
-    weight_after = (existing_value + investment) / total_after * 100 if total_after > 0 else 0
+    total_after = (
+        total_assets - investment + investment
+    )  # 자산 총액은 변하지 않음 (현금→주식)
+    weight_after = (
+        (existing_value + investment) / total_after * 100 if total_after > 0 else 0
+    )
     cash_ratio_after = cash_after / total_after * 100 if total_after > 0 else 0
 
     return {
@@ -317,7 +367,9 @@ def compute_buy_plan(
         "investment": investment,
         "remaining_shares": target_shares - first_shares,
         "risk_amount": risk_amount,
-        "risk_pct": round(risk_amount / total_assets * 100, 1) if total_assets > 0 else 0,
+        "risk_pct": round(risk_amount / total_assets * 100, 1)
+        if total_assets > 0
+        else 0,
         "weight_pct": round(weight_after, 1),
         "portfolio_cash_after": round(cash_after),
         "portfolio_cash_ratio_after": round(cash_ratio_after, 1),
@@ -327,6 +379,7 @@ def compute_buy_plan(
 
 
 # ── SELL 사이징 ──
+
 
 def compute_sell_plan(
     current_price: float,
@@ -351,7 +404,9 @@ def compute_sell_plan(
     Returns:
         action_plan dict 또는 None (미보유 시)
     """
-    pos = next((p for p in portfolio.get("positions", []) if p["ticker"] == ticker), None)
+    pos = next(
+        (p for p in portfolio.get("positions", []) if p["ticker"] == ticker), None
+    )
     if not pos:
         return {"type": "sell_blocked", "reason": "매도 대상 없음 (미보유)"}
 
@@ -397,14 +452,18 @@ def compute_sell_plan(
         urgency = "immediate"
     elif cash_ratio < cash_floor_pct:
         sell_shares = max(sell_shares, math.ceil(total_shares * 2 / 3))
-        sell_reason = f"현금 비중 부족 ({cash_ratio:.0f}% < {cash_floor_pct}%) — 비중 축소"
+        sell_reason = (
+            f"현금 비중 부족 ({cash_ratio:.0f}% < {cash_floor_pct}%) — 비중 축소"
+        )
 
     sell_shares = min(sell_shares, total_shares)
     remaining = total_shares - sell_shares
 
     pnl_per_share = current_price - entry_price
     expected_pnl = round(pnl_per_share * sell_shares)
-    expected_pnl_pct = round(pnl_per_share / entry_price * 100, 1) if entry_price > 0 else 0
+    expected_pnl_pct = (
+        round(pnl_per_share / entry_price * 100, 1) if entry_price > 0 else 0
+    )
 
     proceeds = round(current_price * sell_shares)
     cash_after = portfolio.get("cash", 0) + proceeds
@@ -416,7 +475,9 @@ def compute_sell_plan(
         "sell_price": current_price,
         "total_shares": total_shares,
         "sell_shares": sell_shares,
-        "sell_ratio": round(sell_shares / total_shares * 100) if total_shares > 0 else 0,
+        "sell_ratio": round(sell_shares / total_shares * 100)
+        if total_shares > 0
+        else 0,
         "remaining_shares": remaining,
         "expected_pnl": expected_pnl,
         "expected_pnl_pct": expected_pnl_pct,
@@ -428,6 +489,7 @@ def compute_sell_plan(
 
 
 # ── 통합 엔트리포인트 ──
+
 
 def compute_action_plan(
     ticker: str,
@@ -447,14 +509,25 @@ def compute_action_plan(
     """
     if consensus_verdict == "BUY":
         return compute_buy_plan(
-            current_price, stop_price, confidence,
-            portfolio, portfolio_check, config, ticker,
-            fx_signal=fx_signal, fx_regime=fx_regime,
+            current_price,
+            stop_price,
+            confidence,
+            portfolio,
+            portfolio_check,
+            config,
+            ticker,
+            fx_signal=fx_signal,
+            fx_regime=fx_regime,
         )
     elif consensus_verdict == "SELL":
         return compute_sell_plan(
-            current_price, confidence,
-            portfolio, portfolio_check, config, ticker,
-            fx_signal=fx_signal, fx_regime=fx_regime,
+            current_price,
+            confidence,
+            portfolio,
+            portfolio_check,
+            config,
+            ticker,
+            fx_signal=fx_signal,
+            fx_regime=fx_regime,
         )
     return None
