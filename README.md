@@ -5,7 +5,7 @@
 ## 핵심 기능
 
 - **다관점 분석**: 5개 관점이 동일 데이터를 독립적으로 판정 → 합의/분기 결과 제시
-- **1-step 종목 추천**: 스크리닝 → 시그널 필터 → 다관점 분석 → BUY 합의 종목 반환
+- **추천 파이프라인**: `KR/US/ALL` 시장 semantics, 넓은 universe 확보, diversified selection 후 BUY 합의 종목 반환
 - **포지션 사이징**: BUY/SELL 합의 시 포트폴리오 상태 반영한 구체적 매매 전략 자동 계산 (분할 매수, 합의 강도별 매도 비율, 현금 하한·집중도 제약)
 - **포트폴리오 관리**: 매수/매도(분할 매도 지원), 현금, 추적 손절매
 - **성과 추적**: 일별 스냅샷 자동 저장, 적중률 리포트, 적응형 관점 가중치
@@ -39,8 +39,14 @@ uv run main.py
 # JSON 출력 (shacs-bot 연동)
 uv run scripts/daily.py --json
 
-# 종목 추천
+# 종목 추천 (기본: KR = KOSPI + KOSDAQ)
 uv run scripts/recommend.py --json
+
+# 미국 전체 추천 (US = NASDAQ + NYSE)
+uv run scripts/recommend.py --market US --json
+
+# 전체 시장 추천 (ALL = KR + US)
+uv run scripts/recommend.py --market ALL --json
 
 # 백테스트 (6개월, 시그널 기반)
 uv run scripts/backtest.py --period 6m --tickers 005930,000660,005380
@@ -65,7 +71,7 @@ trading-oracle/
 │
 ├── scripts/                         # 기능별 진입점
 │   ├── daily.py                     # 일일 다관점 분석
-│   ├── recommend.py                 # 1-step 종목 추천
+│   ├── recommend.py                 # 추천 파이프라인 (KR/US/ALL + diversified selection)
 │   ├── screen.py                    # 주도주 스크리닝
 │   ├── portfolio.py                 # 포트폴리오 CRUD
 │   ├── perspective.py               # 단일 관점 분석
@@ -136,6 +142,7 @@ trading-oracle/
 | 사용자 요청 | 명령 |
 |-------------|------|
 | "뭐 살까?" | `uv run scripts/recommend.py --json` |
+| "전체 시장에서 뭐 살까?" | `uv run scripts/recommend.py --market ALL --json` |
 | "오늘 주식 분석해줘" | `uv run scripts/daily.py --json` |
 | "삼성전자 어때?" | `uv run scripts/daily.py -t 005930 --json` |
 | "AAPL 분석해줘" | `uv run scripts/daily.py -t AAPL --json` |
@@ -151,6 +158,28 @@ trading-oracle/
 | "파라미터 최적화" | `uv run scripts/backtest.py --period 6m --optimize` |
 | "전체 명령 가이드" | `uv run main.py guide` |
 | "데이터 초기화" | `uv run main.py reset --all --json` |
+
+## 종목 추천 파이프라인
+
+- 기본 `--market` 값은 `KR`
+- 시장 의미:
+  - `KR` = `KOSPI + KOSDAQ`
+  - `US` = `NASDAQ + NYSE`
+  - `ALL` = `KR + US`
+- `--top`은 초기 스크리닝 후보 수가 아니라 **최종 분석 대상 수**
+- 추천 흐름:
+  - 시장 선택
+  - 시장별 넓은 universe 확보
+  - score 계산
+  - diversified selection으로 `top_n` 압축
+  - 시그널 필터(Bull 4/6+)
+  - 다관점 분석
+  - BUY 합의 종목 반환
+- 추천 결과에는 다음 메타데이터가 포함될 수 있음:
+  - `universe_size`
+  - `universe_breakdown`
+  - `selection_constraints`
+  - 각 종목의 `market`, `sector`, `selected_by`
 
 ## 5개 투자 관점
 
