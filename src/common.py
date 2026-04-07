@@ -37,6 +37,8 @@ class NumEncoder(json.JSONEncoder):
     """numpy 타입 JSON 직렬화"""
 
     def default(self, obj):
+        if isinstance(obj, (np.bool_,)):
+            return bool(obj)
         if isinstance(obj, (np.integer,)):
             return int(obj)
         if isinstance(obj, (np.floating,)):
@@ -513,12 +515,190 @@ def run_multi_perspective(
     return multi_results
 
 
+def _build_market_context(market_data: dict) -> dict:
+    market_context = {}
+    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
+        if _idx_key in market_data:
+            market_context[_idx_key] = market_data[_idx_key]
+    if "regime" in market_data:
+        market_context["regime"] = market_data["regime"]
+    if "web_macro" in market_data:
+        market_context["web_macro"] = market_data["web_macro"]
+    if "fx_regime" in market_data:
+        market_context["fx_regime"] = market_data["fx_regime"]
+    if "fx_regimes" in market_data:
+        market_context["fx_regimes"] = market_data["fx_regimes"]
+    return market_context
+
+
+def _build_perspective_input(
+    item: dict,
+    positions: list[dict],
+    market_context: dict,
+    config: dict,
+    macro_df=None,
+    fx_regime: dict | None = None,
+):
+    from src.perspectives.base import PerspectiveInput
+
+    ticker = item["ticker"]
+    pos = next((p for p in positions if p["ticker"] == ticker), None)
+    fund = (
+        fetch_fundamentals_cached(ticker)
+        if not item.get("fundamentals")
+        else item["fundamentals"]
+    )
+
+    ohlcv = item.get("_ohlcv")
+    if ohlcv is None or ohlcv.empty:
+        ohlcv = fetch_ohlcv(ticker, days_back=120)
+
+    fx_signal = {}
+    if macro_df is not None and not macro_df.empty and fx_regime:
+        try:
+            from src.signals.forex import compute_fx_signal
+
+            fx_signal = compute_fx_signal(
+                ticker,
+                item["name"],
+                ohlcv,
+                macro_df,
+                fx_regime,
+                config,
+            )
+        except Exception:
+            pass
+
+    return PerspectiveInput(
+        ticker=ticker,
+        name=item["name"],
+        ohlcv=ohlcv,
+        signals=item["signals"],
+        fundamentals=fund,
+        position=pos,
+        market_context=market_context,
+        config=config,
+        web_context=item.get("web_context", {}),
+        fx_signal=fx_signal,
+    )
+
+
+def _build_quant_preview(data) -> dict:
+    from src.perspectives.quant_perspective import (
+        _build_signals_dict,
+        _code_verdict_to_perspective,
+    )
+
+    verdict, confidence = _code_verdict_to_perspective(data.signals)
+    action = {"type": verdict.lower()}
+    if verdict == "SELL":
+        action["stop_loss"] = data.signals["trailing_stop_atr"]
+
+    return {
+        "perspective": "quant",
+        "verdict": verdict,
+        "confidence": confidence,
+        "reason": f"{'Bull' if verdict == 'BUY' else 'Bear' if verdict == 'SELL' else 'Neutral'} {data.signals['bull_votes']}/6 vs {data.signals['bear_votes']}/6",
+        "action": action,
+        "signals": _build_signals_dict(data.signals),
+    }
+
+
+def _build_prompt_package(data, perspective_name: str) -> dict:
+    modules = {
+        "kwangsoo": "src.perspectives.kwangsoo",
+        "ouroboros": "src.perspectives.ouroboros",
+        "quant": "src.perspectives.quant_perspective",
+        "macro": "src.perspectives.macro",
+        "value": "src.perspectives.value",
+    }
+
+    module_name = modules[perspective_name]
+    module = __import__(module_name, fromlist=["SYSTEM_PROMPT", "_build_user_prompt"])
+
+    package = {
+        "perspective": perspective_name,
+        "system_prompt": module.SYSTEM_PROMPT,
+        "user_prompt": module._build_user_prompt(data),
+        "response_format": "json",
+    }
+
+    if perspective_name == "quant":
+        package["deterministic_preview"] = _build_quant_preview(data)
+
+    return package
+
+
+def build_skill_ticker_payloads(
+    signals_data: list[dict],
+    portfolio: dict,
+    market_data: dict,
+    config: dict,
+    perspective_names: list[str] | None = None,
+    include_prompts: bool = False,
+) -> list[dict]:
+    perspective_names = perspective_names or [
+        "kwangsoo",
+        "ouroboros",
+        "quant",
+        "macro",
+        "value",
+    ]
+
+    positions = portfolio.get("positions", [])
+    market_context = _build_market_context(market_data)
+
+    macro_df = None
+    try:
+        from src.data.macro import fetch_macro_series
+
+        macro_df = fetch_macro_series()
+    except Exception:
+        pass
+
+    fx_regime = market_data.get("fx_regime")
+
+    payloads = []
+    for item in signals_data:
+        pi = _build_perspective_input(
+            item,
+            positions,
+            market_context,
+            config,
+            macro_df=macro_df,
+            fx_regime=fx_regime,
+        )
+
+        entry = {
+            "ticker": pi.ticker,
+            "name": pi.name,
+            "signals": pi.signals,
+            "fundamentals": pi.fundamentals,
+            "position": pi.position,
+            "market_context": pi.market_context,
+            "web_context": pi.web_context,
+            "fx_signal": pi.fx_signal,
+            "perspectives": [{"perspective": name} for name in perspective_names],
+            "quant_preview": _build_quant_preview(pi),
+        }
+
+        if include_prompts:
+            entry["prompt_packages"] = [
+                _build_prompt_package(pi, name) for name in perspective_names
+            ]
+
+        payloads.append(entry)
+
+    return payloads
+
+
 def run_single_perspective(
     perspective_name: str,
     signals_data: list[dict],
     portfolio: dict,
     market_data: dict,
     config: dict,
+    llm_mode: str | None = None,
 ) -> dict:
     """단일 관점 분석. ticker → PerspectiveResult dict 반환."""
     from src.perspectives.base import PerspectiveInput
@@ -532,13 +712,37 @@ def run_single_perspective(
             "error": f"알 수 없는 관점: {perspective_name}. 사용 가능: kwangsoo, ouroboros, quant, macro, value"
         }
 
+    if llm_mode in ("payload", "prompt-ready"):
+        return {
+            "schema_version": "v1",
+            "llm_mode": llm_mode,
+            "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "command": "perspective",
+            "user_intent": "single_perspective_analysis",
+            "perspective": perspective_name,
+            "market": market_data,
+            "portfolio": {
+                "summary": get_portfolio_summary(portfolio),
+                "positions": portfolio.get("positions", []),
+            },
+            "analysis": {
+                "tickers": build_skill_ticker_payloads(
+                    signals_data,
+                    portfolio,
+                    market_data,
+                    config,
+                    perspective_names=[perspective_name],
+                    include_prompts=llm_mode == "prompt-ready",
+                )
+            },
+            "render_hints": {
+                "primary_order": ["requested_perspective", "ticker_summary"],
+                "requested_perspective": perspective_name,
+            },
+        }
+
     positions = portfolio.get("positions", [])
-    market_context = {}
-    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
-        if _idx_key in market_data:
-            market_context[_idx_key] = market_data[_idx_key]
-    if "regime" in market_data:
-        market_context["regime"] = market_data["regime"]
+    market_context = _build_market_context(market_data)
 
     results = {}
     for item in signals_data:
@@ -577,6 +781,7 @@ def run_recommend(
     top_n: int = 6,
     signal_filter: bool = True,
     use_llm: bool = True,
+    llm_mode: str | None = None,
 ) -> dict:
     """1-step 종목 추천 파이프라인.
 
@@ -596,6 +801,32 @@ def run_recommend(
     market_data = collect_market_data(include_us=include_us)
     min_votes = config.get("signals", {}).get("min_votes", 4)
 
+    def _skill_recommend_response(
+        analysis_candidates: list[dict], reason: str | None
+    ) -> dict:
+        return {
+            "schema_version": "v1",
+            "llm_mode": llm_mode,
+            "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "command": "recommend",
+            "user_intent": "recommendation_analysis",
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": len(candidates),
+            "signal_filtered": len(bull_data),
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "analysis_candidates": analysis_candidates,
+            "no_recommendation_reason": reason,
+            "render_hints": {
+                "primary_order": ["score_desc", "market_balance", "sector_diversity"],
+                "max_candidates": top_n,
+            },
+        }
+
     # 1단계: 스크리닝
     candidates, screening_meta = screen_recommendation_candidates(
         market=market,
@@ -603,6 +834,9 @@ def run_recommend(
         config=config,
     )
     if not candidates:
+        bull_data = []
+        if llm_mode in ("payload", "prompt-ready"):
+            return _skill_recommend_response([], "스크리닝 실패")
         return {
             "date": market_data["date"],
             "market": market,
@@ -622,6 +856,9 @@ def run_recommend(
     signals_data = analyze_tickers(tickers, config)
 
     if not signals_data:
+        bull_data = []
+        if llm_mode in ("payload", "prompt-ready"):
+            return _skill_recommend_response([], "시그널 분석 실패")
         return {
             "date": market_data["date"],
             "market": market,
@@ -641,6 +878,55 @@ def run_recommend(
         bull_data = [s for s in signals_data if s["signals"]["bull_votes"] >= min_votes]
     else:
         bull_data = signals_data
+
+    if not bull_data and llm_mode in ("payload", "prompt-ready"):
+        return _skill_recommend_response([], "시그널 Bull 종목 없음")
+
+    if llm_mode in ("payload", "prompt-ready"):
+        candidate_payloads = build_skill_ticker_payloads(
+            bull_data,
+            load_portfolio(),
+            market_data,
+            config,
+            include_prompts=llm_mode == "prompt-ready",
+        )
+        payload_map = {item["ticker"]: item for item in candidate_payloads}
+
+        analysis_candidates = []
+        for item in bull_data:
+            ticker = item["ticker"]
+            candidate = next((c for c in candidates if c["ticker"] == ticker), None)
+            payload = payload_map.get(ticker, {})
+            analysis_candidates.append(
+                {
+                    "ticker": ticker,
+                    "name": item["name"],
+                    "price": item["signals"]["current_price"],
+                    "score": candidate["score"] if candidate else 0,
+                    "market": candidate["market"] if candidate else market,
+                    "sector": candidate["sector"] if candidate else "기타",
+                    "selected_by": candidate.get("selected_by", [])
+                    if candidate
+                    else [],
+                    "signals": item["signals"],
+                    "fundamentals": payload.get(
+                        "fundamentals", item.get("fundamentals", {})
+                    ),
+                    "position": payload.get("position"),
+                    "market_context": payload.get("market_context", {}),
+                    "web_context": payload.get("web_context", {}),
+                    "fx_signal": payload.get("fx_signal", {}),
+                    "perspectives": payload.get("perspectives", []),
+                    "quant_preview": payload.get("quant_preview"),
+                    "prompt_packages": payload.get("prompt_packages", []),
+                }
+            )
+
+        analysis_candidates.sort(key=lambda x: x["score"], reverse=True)
+        return _skill_recommend_response(
+            analysis_candidates,
+            None if analysis_candidates else "시그널 Bull 종목 없음",
+        )
 
     if not use_llm:
         # LLM 없이 시그널 Bull 종목만 반환
