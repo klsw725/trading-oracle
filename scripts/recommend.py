@@ -24,11 +24,18 @@ from src.common import load_config, json_dump, run_recommend
 
 
 def main():
+    config = load_config()
+    default_market = config.get("recommend", {}).get("default_market", "KR")
+
     parser = argparse.ArgumentParser(description="Trading Oracle — 종목 추천")
     parser.add_argument(
-        "--market", default="ALL", help="시장 (ALL, KOSPI, KOSDAQ, US, NASDAQ, NYSE)"
+        "--market",
+        default=default_market,
+        help="시장 (기본: KR, KR=KOSPI+KOSDAQ, US=NASDAQ+NYSE, ALL=KR+US)",
     )
-    parser.add_argument("--top", type=int, default=6, help="스크리닝 후보 수 (기본: 6)")
+    parser.add_argument(
+        "--top", type=int, default=6, help="최종 분석 대상 수 (기본: 6)"
+    )
     parser.add_argument(
         "--no-filter", action="store_true", help="시그널 필터 없이 전체 분석"
     )
@@ -36,7 +43,6 @@ def main():
     parser.add_argument("--json", action="store_true", help="JSON 출력")
     args = parser.parse_args()
 
-    config = load_config()
     result = run_recommend(
         config,
         market=args.market,
@@ -55,7 +61,31 @@ def main():
 
     regime = result.get("regime", {})
     regime_label = regime.get("label", "")
-    console.print(f"\n[bold]🎯 종목 추천[/bold] ({result['date']}, {regime_label})")
+    console.print(
+        f"\n[bold]🎯 종목 추천[/bold] ({result['market']}, {result['date']}, {regime_label})"
+    )
+
+    universe_breakdown = result.get("universe_breakdown", {})
+    universe_parts = [
+        f"{market} {count}" for market, count in universe_breakdown.items() if count
+    ]
+    if universe_parts:
+        console.print(
+            f"  universe: {' + '.join(universe_parts)} = {result.get('universe_size', 0)}"
+        )
+
+    constraints = result.get("selection_constraints", {})
+    if constraints:
+        selection_bits = ["score 우선"]
+        sector_cap = constraints.get("sector_cap")
+        if sector_cap is not None:
+            selection_bits.append(f"섹터 cap {sector_cap}")
+        if constraints.get("prefer_market_balance"):
+            selection_bits.append("시장 균형 선호")
+        if constraints.get("relaxed"):
+            selection_bits.append("부족 시 완화 적용")
+        console.print(f"  선택 기준: {' + '.join(selection_bits)}")
+
     console.print(
         f"  스크리닝: {result['screened']}개 후보 → 시그널 필터: {result['signal_filtered']}개 통과 → 분석: {result['analyzed']}개"
     )
@@ -84,10 +114,15 @@ def main():
             if is_buyable
             else "[bold white on red] 매수 불가 [/bold white on red]"
         )
-        panel_style = "green" if is_buyable else "red"
+        panel_style = "green"
 
         lines = []
         lines.append(badge)
+        lines.append(
+            f"[bold]시장/섹터:[/bold] {rec.get('market', '-')} / {rec.get('sector', '기타')}"
+        )
+        if rec.get("selected_by"):
+            lines.append(f"[bold]선정 이유:[/bold] {', '.join(rec['selected_by'])}")
         lines.append(
             f"[bold]시그널:[/bold] {sig['verdict']} (Bull {sig['bull_votes']}/6)"
         )
