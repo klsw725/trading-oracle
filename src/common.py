@@ -68,7 +68,7 @@ def ensure_project_root():
 def load_config() -> dict:
     config_path = Path("config.yaml")
     if config_path.exists():
-        return yaml.safe_load(config_path.read_text()) or {}
+        return yaml.safe_load(config_path.read_text(encoding="utf-8-sig")) or {}
     return {}
 
 

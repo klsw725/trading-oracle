@@ -21,6 +21,9 @@ data/web_cache.json
 # 저작권 참고자료 (절대 커밋 금지)
 docs/refs/
 
+# 로컬 작업 이력 (절대 커밋 금지)
+docs/*.md
+
 # Agent work dirs
 .sisyphus/
 .omc/
