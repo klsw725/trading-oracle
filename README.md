@@ -39,6 +39,9 @@ uv run main.py
 # JSON 출력 (shacs-bot 연동)
 uv run scripts/daily.py --json
 
+# 스킬 경로용 prompt package 출력
+uv run scripts/daily.py --json --llm-mode prompt-ready
+
 # 종목 추천 (기본: KR = KOSPI + KOSDAQ)
 uv run scripts/recommend.py --json
 
@@ -248,6 +251,12 @@ llm:
 
 - **Anthropic**: `ANTHROPIC_API_KEY` 환경변수 설정
 - **Codex**: `uv run main.py codex-login`으로 OAuth 로그인
+
+### 스킬 경로용 LLM 위임 모드
+
+- `scripts/daily.py`, `scripts/recommend.py`, `scripts/perspective.py`는 `--llm-mode payload|prompt-ready`를 지원합니다.
+- 이 모드는 **스킬 호출 경로 전용**입니다. 프로젝트가 구조화된 데이터 또는 prompt package를 반환하고, 실제 LLM 호출은 상위 호출자가 담당합니다.
+- 로컬 CLI 기본 동작은 기존과 동일하게 프로젝트 내부 provider(`config.yaml`)를 사용합니다.
 
 ## 요구 사항
 

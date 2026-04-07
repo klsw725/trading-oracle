@@ -106,6 +106,11 @@ uv run scripts/daily.py --screen --json
 uv run scripts/daily.py --no-llm --json
 ```
 
+스킬 호출자용 prompt package 출력:
+```bash
+uv run scripts/daily.py --json --llm-mode prompt-ready
+```
+
 적응형 가중치 비활성화 (동등 가중치):
 ```bash
 uv run scripts/daily.py --no-weights --json
@@ -194,6 +199,11 @@ uv run scripts/recommend.py --top 10 --json
 uv run scripts/recommend.py --no-llm --json
 ```
 
+스킬 호출자용 prompt package 출력:
+```bash
+uv run scripts/recommend.py --json --llm-mode prompt-ready
+```
+
 추천 결과에는 `universe_size`, `universe_breakdown`, `selection_constraints` 메타데이터와 종목별 `market`, `sector`, `selected_by` 정보가 포함될 수 있습니다.
 
 ## 주도주 스크리닝
@@ -220,6 +230,11 @@ uv run scripts/perspective.py --quant -t 005930 --json
 ```
 
 사용 가능 관점: `--kwangsoo`, `--ouroboros`, `--quant`, `--macro`, `--value`
+
+스킬 호출자용 단일 관점 payload:
+```bash
+uv run scripts/perspective.py --macro -t 005930 --json --llm-mode prompt-ready
+```
 
 ## 인과 그래프 + Granger 검증
 
