@@ -13,21 +13,54 @@ from src.data.market import fetch_ohlcv
 
 # 섹터 분류 (종목명 키워드 기반)
 SECTOR_MAP = {
-    "반도체": "반도체", "전자": "반도체", "하이닉스": "반도체",
-    "자동차": "자동차", "기아": "자동차", "현대차": "자동차", "현대모비스": "자동차",
-    "금융": "금융", "은행": "금융", "KB": "금융", "신한": "금융", "하나": "금융",
-    "에어로": "방산", "한화": "방산",
-    "바이오": "바이오", "제약": "바이오", "셀트리온": "바이오",
-    "화학": "화학", "LG화학": "화학",
-    "배터리": "에너지", "SDI": "에너지", "에코프로": "에너지", "포스코퓨처엠": "에너지",
-    "NAVER": "IT", "카카오": "IT", "네이버": "IT",
-    "조선": "조선", "중공업": "조선",
-    "철강": "철강", "포스코": "철강",
+    "반도체": "반도체",
+    "전자": "반도체",
+    "하이닉스": "반도체",
+    "자동차": "자동차",
+    "기아": "자동차",
+    "현대차": "자동차",
+    "현대모비스": "자동차",
+    "금융": "금융",
+    "은행": "금융",
+    "KB": "금융",
+    "신한": "금융",
+    "하나": "금융",
+    "에어로": "방산",
+    "한화": "방산",
+    "바이오": "바이오",
+    "제약": "바이오",
+    "셀트리온": "바이오",
+    "화학": "화학",
+    "LG화학": "화학",
+    "배터리": "에너지",
+    "SDI": "에너지",
+    "에코프로": "에너지",
+    "포스코퓨처엠": "에너지",
+    "NAVER": "IT",
+    "카카오": "IT",
+    "네이버": "IT",
+    "조선": "조선",
+    "중공업": "조선",
+    "철강": "철강",
+    "포스코": "철강",
 }
 
 
-def classify_sector(name: str) -> str:
-    """종목명에서 섹터를 분류."""
+def classify_sector(
+    name: str,
+    listing_sector: str | None = None,
+    listing_industry: str | None = None,
+) -> str:
+    if listing_sector:
+        sector = str(listing_sector).strip()
+        if sector:
+            return sector
+
+    if listing_industry:
+        industry = str(listing_industry).strip()
+        if industry:
+            return industry
+
     for keyword, sector in SECTOR_MAP.items():
         if keyword in name:
             return sector
@@ -145,7 +178,12 @@ def compute_sector_concentration(
         }
     """
     if not positions:
-        return {"sectors": {}, "most_concentrated": None, "concentration_pct": 0, "is_concentrated": False}
+        return {
+            "sectors": {},
+            "most_concentrated": None,
+            "concentration_pct": 0,
+            "is_concentrated": False,
+        }
 
     sector_values = {}
     total_value = 0
@@ -155,12 +193,19 @@ def compute_sector_concentration(
         if not name and ticker_names:
             name = ticker_names.get(pos.get("ticker", ""), "")
         sector = classify_sector(name)
-        value = pos.get("market_value", pos.get("entry_price", 0) * pos.get("shares", 0))
+        value = pos.get(
+            "market_value", pos.get("entry_price", 0) * pos.get("shares", 0)
+        )
         sector_values[sector] = sector_values.get(sector, 0) + value
         total_value += value
 
     if total_value <= 0:
-        return {"sectors": {}, "most_concentrated": None, "concentration_pct": 0, "is_concentrated": False}
+        return {
+            "sectors": {},
+            "most_concentrated": None,
+            "concentration_pct": 0,
+            "is_concentrated": False,
+        }
 
     sectors = {s: round(v / total_value * 100, 1) for s, v in sector_values.items()}
     most = max(sectors, key=sectors.get)

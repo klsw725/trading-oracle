@@ -18,7 +18,10 @@ from src.data.market import (
 )
 from src.data.fundamentals import fetch_naver_fundamentals, fetch_fundamentals_cached
 from src.signals.technical import compute_signals
-from src.screener.leading import screen_leading_stocks
+from src.screener.leading import (
+    screen_leading_stocks,
+    screen_recommendation_candidates,
+)
 from src.portfolio.tracker import (
     load_portfolio,
     save_portfolio,
@@ -99,30 +102,52 @@ def _detect_regime(index_data: dict, ohlcv_closes: np.ndarray | None = None) -> 
     above_ema = None
     if ohlcv_closes is not None and len(ohlcv_closes) >= 20:
         from src.signals.technical import ema
+
         ema20 = ema(ohlcv_closes[-30:], 20)
         above_ema = ohlcv_closes[-1] > ema20[-1]
 
     if change_20d > 3 and above_ema is not False:
-        return {"regime": "bull", "label": "상승 추세", "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 상회"}
+        return {
+            "regime": "bull",
+            "label": "상승 추세",
+            "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 상회",
+        }
     elif change_20d < -3 and above_ema is not True:
-        return {"regime": "bear", "label": "하락 추세", "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 하회"}
+        return {
+            "regime": "bear",
+            "label": "하락 추세",
+            "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 하회",
+        }
     else:
-        return {"regime": "sideways", "label": "횡보", "description": f"코스피 20일 {change_20d:+.1f}%, 방향성 부재"}
+        return {
+            "regime": "sideways",
+            "label": "횡보",
+            "description": f"코스피 20일 {change_20d:+.1f}%, 방향성 부재",
+        }
 
 
 def _check_causal_graph_age() -> dict | None:
     """인과 그래프 나이를 확인하여 갱신 경고를 반환한다. 90일 이상이면 경고."""
     try:
         from src.causal.graph import CausalGraph, CAUSAL_GRAPH_PATH
+
         if not CAUSAL_GRAPH_PATH.exists():
-            return {"warn": True, "message": "인과 그래프가 없습니다. `uv run scripts/build_causal.py build`로 구축하세요.", "days": None}
+            return {
+                "warn": True,
+                "message": "인과 그래프가 없습니다. `uv run scripts/build_causal.py build`로 구축하세요.",
+                "days": None,
+            }
         graph = CausalGraph.load()
         updated = graph.metadata.get("updated_at")
         if not updated:
             return None
         age = (datetime.now() - datetime.strptime(updated, "%Y-%m-%d")).days
         if age >= 90:
-            return {"warn": True, "message": f"인과 그래프가 {age}일 경과했습니다. `uv run scripts/build_causal.py build --fresh`로 갱신을 권장합니다.", "days": age}
+            return {
+                "warn": True,
+                "message": f"인과 그래프가 {age}일 경과했습니다. `uv run scripts/build_causal.py build --fresh`로 갱신을 권장합니다.",
+                "days": age,
+            }
         return {"warn": False, "days": age}
     except Exception:
         return None
@@ -155,10 +180,16 @@ def collect_market_data(include_us: bool = False) -> dict:
     if regime_source:
         idx_code = "KS11" if kospi else "IXIC"
         idx_ohlcv = fetch_index_ohlcv(idx_code, days_back=60)
-        closes = idx_ohlcv["close"].values.astype(float) if not idx_ohlcv.empty else None
+        closes = (
+            idx_ohlcv["close"].values.astype(float) if not idx_ohlcv.empty else None
+        )
         market_data["regime"] = _detect_regime(regime_source, closes)
     else:
-        market_data["regime"] = {"regime": "unknown", "label": "판정 불가", "description": "지수 데이터 부족"}
+        market_data["regime"] = {
+            "regime": "unknown",
+            "label": "판정 불가",
+            "description": "지수 데이터 부족",
+        }
 
     # 인과 그래프 나이 체크
     causal_age = _check_causal_graph_age()
@@ -168,6 +199,7 @@ def collect_market_data(include_us: bool = False) -> dict:
     # 매크로 정량 시계열 (Phase 11)
     try:
         from src.data.macro import get_macro_snapshot
+
         macro_snapshot = get_macro_snapshot()
         if macro_snapshot:
             market_data["macro_quant"] = macro_snapshot
@@ -177,6 +209,7 @@ def collect_market_data(include_us: bool = False) -> dict:
     # 매크로 웹 검색 (Phase 10 M4)
     try:
         from src.data.web_search import search_market_context
+
         config = load_config()
         web_macro = search_market_context(include_us=include_us, config=config)
         if web_macro:
@@ -188,6 +221,7 @@ def collect_market_data(include_us: bool = False) -> dict:
     try:
         from src.data.macro import fetch_macro_series
         from src.signals.forex import detect_multi_fx_regimes
+
         config = load_config()
         macro_df = fetch_macro_series()
         if not macro_df.empty:
@@ -225,6 +259,7 @@ def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict
     web_context = {}
     try:
         from src.data.web_search import search_ticker_context
+
         web_context = search_ticker_context(ticker, name, config)
     except Exception:
         pass
@@ -246,10 +281,15 @@ def run_screening(config: dict) -> list[dict]:
     if not candidates:
         return []
     max_positions = config.get("max_positions", 3)
-    return candidates[:max_positions * 2]
+    return candidates[: max_positions * 2]
 
 
-def collect_tickers(args_tickers: list[str] | None, config: dict, portfolio: dict, do_screen: bool = False) -> tuple[set[str], list[dict]]:
+def collect_tickers(
+    args_tickers: list[str] | None,
+    config: dict,
+    portfolio: dict,
+    do_screen: bool = False,
+) -> tuple[set[str], list[dict]]:
     """분석할 종목 세트 수집. (tickers, screening_candidates) 반환."""
     tickers = set()
     for pos in portfolio.get("positions", []):
@@ -270,7 +310,9 @@ def collect_tickers(args_tickers: list[str] | None, config: dict, portfolio: dic
     return tickers, candidates
 
 
-def has_us_tickers(tickers: set[str] | list[str], portfolio: dict | None = None) -> bool:
+def has_us_tickers(
+    tickers: set[str] | list[str], portfolio: dict | None = None
+) -> bool:
     """종목 세트에 미국 종목이 포함되어 있는지."""
     for t in tickers:
         if is_us_ticker(t):
@@ -282,7 +324,9 @@ def has_us_tickers(tickers: set[str] | list[str], portfolio: dict | None = None)
     return False
 
 
-def analyze_tickers(tickers: set[str], config: dict, regime: str | None = None) -> list[dict]:
+def analyze_tickers(
+    tickers: set[str], config: dict, regime: str | None = None
+) -> list[dict]:
     """여러 종목 병렬 분석. 성공한 것만 반환."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -296,7 +340,10 @@ def analyze_tickers(tickers: set[str], config: dict, regime: str | None = None) 
 
     results = []
     with ThreadPoolExecutor(max_workers=min(len(tickers), 6)) as executor:
-        futures = {executor.submit(analyze_ticker, ticker, config, regime): ticker for ticker in tickers}
+        futures = {
+            executor.submit(analyze_ticker, ticker, config, regime): ticker
+            for ticker in tickers
+        }
         for future in as_completed(futures):
             try:
                 result = future.result()
@@ -307,7 +354,13 @@ def analyze_tickers(tickers: set[str], config: dict, regime: str | None = None) 
     return results
 
 
-def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data: dict, config: dict, use_weights: bool = True) -> dict:
+def run_multi_perspective(
+    signals_data: list[dict],
+    portfolio: dict,
+    market_data: dict,
+    config: dict,
+    use_weights: bool = True,
+) -> dict:
     """다관점 분석 실행. ticker → consensus dict 반환.
 
     Args:
@@ -326,6 +379,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         if regime:
             try:
                 from src.performance.pattern_analyzer import compute_regime_weights
+
                 weights = compute_regime_weights(regime)
             except Exception:
                 pass
@@ -333,6 +387,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         if weights is None:
             try:
                 from src.performance.tracker import compute_perspective_weights
+
                 weights = compute_perspective_weights()
             except Exception:
                 pass
@@ -355,6 +410,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
     macro_df = None
     try:
         from src.data.macro import fetch_macro_series
+
         macro_df = fetch_macro_series()
     except Exception:
         pass
@@ -364,7 +420,11 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
     def _analyze_one(item: dict) -> tuple[str, dict]:
         ticker = item["ticker"]
         pos = next((p for p in positions if p["ticker"] == ticker), None)
-        fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
+        fund = (
+            fetch_fundamentals_cached(ticker)
+            if not item.get("fundamentals")
+            else item["fundamentals"]
+        )
 
         ohlcv = item.get("_ohlcv")
         if ohlcv is None or ohlcv.empty:
@@ -375,8 +435,14 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         if macro_df is not None and not macro_df.empty and fx_regime:
             try:
                 from src.signals.forex import compute_fx_signal
+
                 fx_signal = compute_fx_signal(
-                    ticker, item["name"], ohlcv, macro_df, fx_regime, config,
+                    ticker,
+                    item["name"],
+                    ohlcv,
+                    macro_df,
+                    fx_regime,
+                    config,
                 )
             except Exception:
                 pass
@@ -401,6 +467,7 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
         if config.get("deliberation", {}).get("enabled", True):
             try:
                 from src.consensus.deliberator import should_deliberate, deliberate
+
                 if should_deliberate(consensus):
                     consensus = deliberate(consensus, pi)
             except Exception:
@@ -419,8 +486,12 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
             multi_results[ticker] = consensus
     else:
         from concurrent.futures import ThreadPoolExecutor, as_completed
+
         with ThreadPoolExecutor(max_workers=min(len(signals_data), 4)) as executor:
-            futures = {executor.submit(_analyze_one, item): item["ticker"] for item in signals_data}
+            futures = {
+                executor.submit(_analyze_one, item): item["ticker"]
+                for item in signals_data
+            }
             for future in as_completed(futures):
                 try:
                     ticker, consensus = future.result()
@@ -432,21 +503,34 @@ def run_multi_perspective(signals_data: list[dict], portfolio: dict, market_data
     if multi_results:
         try:
             from src.performance.tracker import save_snapshot
-            save_snapshot(market_data.get("date", ""), market_data, multi_results, signals_data)
+
+            save_snapshot(
+                market_data.get("date", ""), market_data, multi_results, signals_data
+            )
         except Exception:
             pass  # 스냅샷 저장 실패는 분석을 중단시키지 않음
 
     return multi_results
 
 
-def run_single_perspective(perspective_name: str, signals_data: list[dict], portfolio: dict, market_data: dict, config: dict) -> dict:
+def run_single_perspective(
+    perspective_name: str,
+    signals_data: list[dict],
+    portfolio: dict,
+    market_data: dict,
+    config: dict,
+) -> dict:
     """단일 관점 분석. ticker → PerspectiveResult dict 반환."""
     from src.perspectives.base import PerspectiveInput
     from src.consensus.voter import ALL_PERSPECTIVES
 
-    perspective = next((p for p in ALL_PERSPECTIVES if p.name == perspective_name), None)
+    perspective = next(
+        (p for p in ALL_PERSPECTIVES if p.name == perspective_name), None
+    )
     if not perspective:
-        return {"error": f"알 수 없는 관점: {perspective_name}. 사용 가능: kwangsoo, ouroboros, quant, macro, value"}
+        return {
+            "error": f"알 수 없는 관점: {perspective_name}. 사용 가능: kwangsoo, ouroboros, quant, macro, value"
+        }
 
     positions = portfolio.get("positions", [])
     market_context = {}
@@ -460,7 +544,11 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
     for item in signals_data:
         ticker = item["ticker"]
         pos = next((p for p in positions if p["ticker"] == ticker), None)
-        fund = fetch_fundamentals_cached(ticker) if not item.get("fundamentals") else item["fundamentals"]
+        fund = (
+            fetch_fundamentals_cached(ticker)
+            if not item.get("fundamentals")
+            else item["fundamentals"]
+        )
 
         ohlcv = item.get("_ohlcv")
         if ohlcv is None or ohlcv.empty:
@@ -483,14 +571,20 @@ def run_single_perspective(perspective_name: str, signals_data: list[dict], port
     return results
 
 
-def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filter: bool = True, use_llm: bool = True) -> dict:
+def run_recommend(
+    config: dict,
+    market: str = "KR",
+    top_n: int = 6,
+    signal_filter: bool = True,
+    use_llm: bool = True,
+) -> dict:
     """1-step 종목 추천 파이프라인.
 
     스크리닝 → 시그널 필터(Bull 4/6+) → 다관점 분석 → BUY 합의 필터.
 
     Args:
-        market: "ALL", "KOSPI", "KOSDAQ", "US", "NASDAQ", "NYSE"
-        top_n: 스크리닝 후보 수
+        market: "KR", "US", "ALL", "KOSPI", "KOSDAQ", "NASDAQ", "NYSE"
+        top_n: 최종 분석 대상 수
         signal_filter: True면 Bull 4/6+ 종목만 LLM 분석 (비용 절감)
         use_llm: False면 시그널까지만 (LLM 없이)
 
@@ -498,17 +592,29 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
         {"date", "market", "regime", "screened", "signal_filtered", "analyzed",
          "recommendations": [...], "no_recommendation_reason": str|None}
     """
-    include_us = market in ("US", "NASDAQ", "NYSE")
+    include_us = market in ("US", "NASDAQ", "NYSE", "ALL")
     market_data = collect_market_data(include_us=include_us)
     min_votes = config.get("signals", {}).get("min_votes", 4)
 
     # 1단계: 스크리닝
-    candidates = screen_leading_stocks(market=market, top_n=top_n)
+    candidates, screening_meta = screen_recommendation_candidates(
+        market=market,
+        top_n=top_n,
+        config=config,
+    )
     if not candidates:
         return {
-            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
-            "screened": 0, "signal_filtered": 0, "analyzed": 0,
-            "recommendations": [], "no_recommendation_reason": "스크리닝 실패",
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": 0,
+            "signal_filtered": 0,
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "recommendations": [],
+            "no_recommendation_reason": "스크리닝 실패",
         }
 
     # 기술적 분석
@@ -517,9 +623,17 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
 
     if not signals_data:
         return {
-            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
-            "screened": len(candidates), "signal_filtered": 0, "analyzed": 0,
-            "recommendations": [], "no_recommendation_reason": "시그널 분석 실패",
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": len(candidates),
+            "signal_filtered": 0,
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "recommendations": [],
+            "no_recommendation_reason": "시그널 분석 실패",
         }
 
     # 2단계: 시그널 필터
@@ -532,24 +646,67 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
         # LLM 없이 시그널 Bull 종목만 반환
         recs = []
         for s in bull_data:
-            recs.append({
-                "ticker": s["ticker"], "name": s["name"], "price": s["signals"]["current_price"],
-                "score": next((c["score"] for c in candidates if c["ticker"] == s["ticker"]), 0),
-                "signals": {"verdict": s["signals"]["verdict"], "bull_votes": s["signals"]["bull_votes"], "bear_votes": s["signals"]["bear_votes"]},
-                "consensus": None,
-            })
+            recs.append(
+                {
+                    "ticker": s["ticker"],
+                    "name": s["name"],
+                    "price": s["signals"]["current_price"],
+                    "score": next(
+                        (c["score"] for c in candidates if c["ticker"] == s["ticker"]),
+                        0,
+                    ),
+                    "market": next(
+                        (c["market"] for c in candidates if c["ticker"] == s["ticker"]),
+                        market,
+                    ),
+                    "sector": next(
+                        (c["sector"] for c in candidates if c["ticker"] == s["ticker"]),
+                        "기타",
+                    ),
+                    "selected_by": next(
+                        (
+                            c.get("selected_by", [])
+                            for c in candidates
+                            if c["ticker"] == s["ticker"]
+                        ),
+                        [],
+                    ),
+                    "signals": {
+                        "verdict": s["signals"]["verdict"],
+                        "bull_votes": s["signals"]["bull_votes"],
+                        "bear_votes": s["signals"]["bear_votes"],
+                    },
+                    "consensus": None,
+                }
+            )
         recs.sort(key=lambda x: x["score"], reverse=True)
         return {
-            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
-            "screened": len(candidates), "signal_filtered": len(bull_data), "analyzed": 0,
-            "recommendations": recs, "no_recommendation_reason": None if recs else "시그널 Bull 종목 없음",
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": len(candidates),
+            "signal_filtered": len(bull_data),
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "recommendations": recs,
+            "no_recommendation_reason": None if recs else "시그널 Bull 종목 없음",
         }
 
     if not bull_data:
         return {
-            "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
-            "screened": len(candidates), "signal_filtered": 0, "analyzed": 0,
-            "recommendations": [], "no_recommendation_reason": "시그널 Bull 종목 없음",
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": len(candidates),
+            "signal_filtered": 0,
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "recommendations": [],
+            "no_recommendation_reason": "시그널 Bull 종목 없음",
         }
 
     # 3단계: 다관점 분석 (Bull 종목만)
@@ -558,6 +715,7 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
 
     # 4단계: BUY 합의 필터 + action_plan 부착
     from src.portfolio.sizer import check_portfolio_health, compute_action_plan
+
     regime_str = market_data.get("regime", {}).get("regime", "sideways")
     pf_check = check_portfolio_health(portfolio, regime_str, config)
 
@@ -569,15 +727,43 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
                 stop_price = item["signals"]["trailing_stop_10pct"]
                 current_price = item["signals"]["current_price"]
                 plan = compute_action_plan(
-                    ticker, current_price, stop_price,
+                    ticker,
+                    current_price,
+                    stop_price,
                     consensus["consensus_verdict"],
                     consensus["confidence"],
-                    portfolio, pf_check, config,
+                    portfolio,
+                    pf_check,
+                    config,
                 )
                 rec_entry = {
-                    "ticker": ticker, "name": item["name"], "price": current_price,
-                    "score": next((c["score"] for c in candidates if c["ticker"] == ticker), 0),
-                    "signals": {"verdict": item["signals"]["verdict"], "bull_votes": item["signals"]["bull_votes"], "bear_votes": item["signals"]["bear_votes"]},
+                    "ticker": ticker,
+                    "name": item["name"],
+                    "price": current_price,
+                    "score": next(
+                        (c["score"] for c in candidates if c["ticker"] == ticker), 0
+                    ),
+                    "market": next(
+                        (c["market"] for c in candidates if c["ticker"] == ticker),
+                        market,
+                    ),
+                    "sector": next(
+                        (c["sector"] for c in candidates if c["ticker"] == ticker),
+                        "기타",
+                    ),
+                    "selected_by": next(
+                        (
+                            c.get("selected_by", [])
+                            for c in candidates
+                            if c["ticker"] == ticker
+                        ),
+                        [],
+                    ),
+                    "signals": {
+                        "verdict": item["signals"]["verdict"],
+                        "bull_votes": item["signals"]["bull_votes"],
+                        "bear_votes": item["signals"]["bear_votes"],
+                    },
                     "consensus": consensus,
                 }
                 if plan:
@@ -591,9 +777,17 @@ def run_recommend(config: dict, market: str = "ALL", top_n: int = 6, signal_filt
         reason = "BUY 합의 종목 없음"
 
     return {
-        "date": market_data["date"], "market": market, "regime": market_data.get("regime", {}),
-        "screened": len(candidates), "signal_filtered": len(bull_data), "analyzed": len(multi_results),
-        "recommendations": recs, "no_recommendation_reason": reason,
+        "date": market_data["date"],
+        "market": market,
+        "regime": market_data.get("regime", {}),
+        "universe_size": screening_meta.get("universe_size", 0),
+        "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+        "screened": len(candidates),
+        "signal_filtered": len(bull_data),
+        "analyzed": len(multi_results),
+        "selection_constraints": screening_meta.get("selection_constraints", {}),
+        "recommendations": recs,
+        "no_recommendation_reason": reason,
     }
 
 

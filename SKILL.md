@@ -1,6 +1,6 @@
 ---
 name: trading-oracle
-description: "다관점 한국 주식 투자 조언 에이전트. 5개 관점(이광수/포렌식/퀀트/매크로/가치) + 합의도 시스템. 포트폴리오 관리 + 주도주 스크리닝."
+description: "다관점 한국+미국 주식 투자 조언 에이전트. 5개 관점(이광수/포렌식/퀀트/매크로/가치) + 합의도 시스템. 포트폴리오 관리 + 추천 파이프라인 + 주도주 스크리닝."
 metadata: {"shacs-bot":{"emoji":"🔮","requires":{"bins":["uv"],"env":[]}}}
 ---
 
@@ -43,8 +43,16 @@ uv run scripts/daily.py --json
 ### 3단계: 종목 추천 (필요 시)
 
 ```bash
-# "뭐 살까?" — BUY 합의 종목 자동 추천
+# "뭐 살까?" — KR 기본 추천 (`KR = KOSPI + KOSDAQ`)
 uv run scripts/recommend.py --json
+```
+
+```bash
+# 미국 전체 추천 (`US = NASDAQ + NYSE`)
+uv run scripts/recommend.py --market US --json
+
+# 전체 시장 추천 (`ALL = KR + US`)
+uv run scripts/recommend.py --market ALL --json
 ```
 
 ### 4단계: 성과 확인 (주간)
@@ -145,22 +153,48 @@ uv run scripts/portfolio.py show --json
 uv run scripts/portfolio.py history --json
 ```
 
-## 종목 추천 (1-step)
+## 종목 추천 (Recommendation Pipeline)
 
-BUY 합의 종목 자동 추천 (스크리닝 → 시그널 필터 → 다관점 분석):
+BUY 합의 종목 자동 추천:
 ```bash
 uv run scripts/recommend.py --json
 ```
+
+- 기본 `--market`은 `KR`
+- 시장 의미:
+  - `KR` = `KOSPI + KOSDAQ`
+  - `US` = `NASDAQ + NYSE`
+  - `ALL` = `KR + US`
+- `--top`은 초기 후보 수가 아니라 **최종 분석 대상 수**
+- 내부 흐름:
+  - 시장별 넓은 universe 확보
+  - score 계산
+  - diversified selection
+  - 시그널 필터
+  - 다관점 분석
+  - BUY 합의 종목 반환
 
 미국 시장:
 ```bash
 uv run scripts/recommend.py --market US --json
 ```
 
+전체 시장:
+```bash
+uv run scripts/recommend.py --market ALL --json
+```
+
+최종 분석 대상 수 조정:
+```bash
+uv run scripts/recommend.py --top 10 --json
+```
+
 시그널만 (LLM 없이, 빠름):
 ```bash
 uv run scripts/recommend.py --no-llm --json
 ```
+
+추천 결과에는 `universe_size`, `universe_breakdown`, `selection_constraints` 메타데이터와 종목별 `market`, `sector`, `selected_by` 정보가 포함될 수 있습니다.
 
 ## 주도주 스크리닝
 
@@ -232,6 +266,7 @@ uv run scripts/verify_causal.py --info
 |-------------|-----------|
 | "뭐 살까?" | `uv run scripts/recommend.py --json` |
 | "미국주식 뭐 살까?" | `uv run scripts/recommend.py --market US --json` |
+| "전체 시장에서 뭐 살까?" | `uv run scripts/recommend.py --market ALL --json` |
 | "오늘 주식 분석해줘" | `uv run scripts/daily.py --json` |
 | "삼성전자 어때?" | `uv run scripts/daily.py -t 005930 --json` |
 | "주도주 뭐 있어?" | `uv run scripts/screen.py --json` |
