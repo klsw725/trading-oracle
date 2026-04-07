@@ -40,6 +40,11 @@ def main():
         "--no-filter", action="store_true", help="시그널 필터 없이 전체 분석"
     )
     parser.add_argument("--no-llm", action="store_true", help="시그널만 (LLM 없이)")
+    parser.add_argument(
+        "--llm-mode",
+        choices=["payload", "prompt-ready"],
+        help="스킬 경로용 LLM 위임 모드",
+    )
     parser.add_argument("--json", action="store_true", help="JSON 출력")
     args = parser.parse_args()
 
@@ -49,9 +54,10 @@ def main():
         top_n=args.top,
         signal_filter=not args.no_filter,
         use_llm=not args.no_llm,
+        llm_mode=args.llm_mode,
     )
 
-    if args.json:
+    if args.json or args.llm_mode:
         print(json_dump(result))
         return
 

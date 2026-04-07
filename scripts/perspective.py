@@ -34,6 +34,11 @@ PERSPECTIVES = ["kwangsoo", "ouroboros", "quant", "macro", "value"]
 def main():
     parser = argparse.ArgumentParser(description="Trading Oracle — 단일 관점 분석")
     parser.add_argument("--tickers", "-t", nargs="+", required=True, help="분석 종목")
+    parser.add_argument(
+        "--llm-mode",
+        choices=["payload", "prompt-ready"],
+        help="스킬 경로용 LLM 위임 모드",
+    )
     parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -50,12 +55,21 @@ def main():
     signals_data = analyze_tickers(set(args.tickers), config)
     if not signals_data:
         if args.json:
-            print(json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"}))
+            print(
+                json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"})
+            )
         else:
             print("분석 가능한 종목이 없습니다", file=sys.stderr)
         sys.exit(1)
 
-    results = run_single_perspective(perspective_name, signals_data, portfolio, market_data, config)
+    results = run_single_perspective(
+        perspective_name,
+        signals_data,
+        portfolio,
+        market_data,
+        config,
+        llm_mode=args.llm_mode,
+    )
 
     if "error" in results:
         if args.json:
@@ -64,7 +78,9 @@ def main():
             print(f"오류: {results['error']}", file=sys.stderr)
         sys.exit(1)
 
-    if args.json:
+    if args.llm_mode:
+        print(json_dump(results))
+    elif args.json:
         print(json_dump({"perspective": perspective_name, "results": results}))
     else:
         from src.output.formatter import console
@@ -82,9 +98,19 @@ def main():
             for r in result.get("reasoning", []):
                 lines.append(f"  • {r[:80]}")
 
-            vs = {"BUY": "green", "SELL": "red", "HOLD": "yellow"}.get(result["verdict"], "white")
-            name = next((s["name"] for s in signals_data if s["ticker"] == ticker), ticker)
-            console.print(Panel("\n".join(lines), title=f"[{vs}]{perspective_name}[/{vs}] — {name} ({ticker})", style=vs))
+            vs = {"BUY": "green", "SELL": "red", "HOLD": "yellow"}.get(
+                result["verdict"], "white"
+            )
+            name = next(
+                (s["name"] for s in signals_data if s["ticker"] == ticker), ticker
+            )
+            console.print(
+                Panel(
+                    "\n".join(lines),
+                    title=f"[{vs}]{perspective_name}[/{vs}] — {name} ({ticker})",
+                    style=vs,
+                )
+            )
 
 
 if __name__ == "__main__":

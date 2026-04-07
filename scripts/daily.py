@@ -13,6 +13,7 @@
 import argparse
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 # 프로젝트 루트를 sys.path에 추가 (scripts/ 에서 실행 시)
@@ -29,6 +30,7 @@ from src.common import (
     analyze_tickers,
     run_multi_perspective,
     build_signals_json,
+    build_skill_ticker_payloads,
     has_us_tickers,
 )
 from src.portfolio.tracker import (
@@ -43,6 +45,11 @@ def main():
     parser.add_argument("--tickers", "-t", nargs="+", help="분석 종목")
     parser.add_argument("--screen", action="store_true", help="주도주 스크리닝 포함")
     parser.add_argument("--no-llm", action="store_true", help="LLM 분석 생략")
+    parser.add_argument(
+        "--llm-mode",
+        choices=["payload", "prompt-ready"],
+        help="스킬 경로용 LLM 위임 모드",
+    )
     parser.add_argument("--legacy", action="store_true", help="기존 단일 관점 분석")
     parser.add_argument(
         "--no-weights", action="store_true", help="적응형 가중치 비활성화 (동등 가중치)"
@@ -101,6 +108,38 @@ def main():
     multi_results = {}
     analysis_text = None
     delta = None
+
+    if args.llm_mode:
+        summary = get_portfolio_summary(portfolio)
+        output = {
+            "schema_version": "v1",
+            "llm_mode": args.llm_mode,
+            "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "command": "daily",
+            "user_intent": "portfolio_daily_analysis",
+            "market": market_data,
+            "portfolio": {
+                "summary": summary,
+                "positions": portfolio.get("positions", []),
+                "alerts": [a["message"] for a in alerts],
+            },
+            "signals": build_signals_json(signals_data),
+            "analysis": {
+                "tickers": build_skill_ticker_payloads(
+                    signals_data,
+                    portfolio,
+                    market_data,
+                    config,
+                    include_prompts=args.llm_mode == "prompt-ready",
+                )
+            },
+            "render_hints": {
+                "primary_order": ["portfolio_alerts", "positions", "watchlist"],
+                "max_reasons_per_perspective": 2,
+            },
+        }
+        print(json_dump(output))
+        return
 
     if not args.no_llm:
         if args.legacy:
