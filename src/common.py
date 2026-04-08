@@ -78,9 +78,11 @@ def load_config() -> dict:
 
 def get_index_summary(index_code: str, name: str) -> dict:
     df = fetch_index_ohlcv(index_code, days_back=60)
-    if df.empty or len(df) < 20:
+    if df.empty:
         return {}
-    closes = df["close"].values
+    closes = df["close"].dropna().values
+    if len(closes) < 20:
+        return {}
     return {
         "name": name,
         "close": float(closes[-1]),
@@ -185,7 +187,9 @@ def collect_market_data(include_us: bool = False) -> dict:
         idx_code = "KS11" if kospi else "IXIC"
         idx_ohlcv = fetch_index_ohlcv(idx_code, days_back=60)
         closes = (
-            idx_ohlcv["close"].values.astype(float) if not idx_ohlcv.empty else None
+            idx_ohlcv["close"].dropna().values.astype(float)
+            if not idx_ohlcv.empty
+            else None
         )
         market_data["regime"] = _detect_regime(regime_source, closes)
     else:
