@@ -29,10 +29,14 @@ from src.common import (
     analyze_tickers,
     run_multi_perspective,
     build_signals_json,
+    build_portfolio_summary_for_display,
+    format_portfolio_alert,
+    get_usd_krw_rate,
     has_us_tickers,
 )
 from src.portfolio.tracker import (
     load_portfolio,
+    get_cash_balance,
     update_positions,
     get_portfolio_summary,
 )
@@ -63,7 +67,9 @@ def main():
 
     # 분석 종목 수집 (시장 데이터 전에 US 여부 판단)
     tickers, _ = collect_tickers(args.tickers, config, portfolio, args.screen)
-    include_us = has_us_tickers(tickers, portfolio)
+    include_us = (
+        has_us_tickers(tickers, portfolio) or get_cash_balance(portfolio, "USD") > 0
+    )
 
     # 시장 데이터
     market_data = collect_market_data(include_us=include_us)
@@ -124,16 +130,18 @@ def main():
 
     # 출력
     if args.json:
-        summary = get_portfolio_summary(portfolio)
+        summary_native = get_portfolio_summary(portfolio)
+        summary_display = build_portfolio_summary_for_display(portfolio, market_data)
         output = {
             "date": market_data["date"],
             "market": market_data,
             "portfolio": {
-                "summary": summary,
+                "summary": summary_display,
+                "summary_native": summary_native,
                 "positions": portfolio.get("positions", []),
-                "alerts": [a["message"] for a in alerts],
+                "alerts": [format_portfolio_alert(a, market_data) for a in alerts],
             },
-            "signals": build_signals_json(signals_data),
+            "signals": build_signals_json(signals_data, market_data),
         }
         if multi_results:
             output["multi_perspective"] = multi_results
@@ -152,7 +160,12 @@ def main():
                 from src.portfolio.sizer import check_portfolio_health
 
                 regime_str = market_data.get("regime", {}).get("regime", "sideways")
-                pf_check = check_portfolio_health(portfolio, regime_str, config)
+                pf_check = check_portfolio_health(
+                    portfolio,
+                    regime_str,
+                    config,
+                    exchange_rate=get_usd_krw_rate(market_data),
+                )
                 output["portfolio"]["correlation_risk"] = pf_check.get(
                     "correlation_risk", {}
                 )
@@ -228,14 +241,14 @@ def main():
         # 시그널
         print_phase("기술적 분석", f"{len(signals_data)}개 종목")
         for item in signals_data:
-            print_signal_card(item)
+            print_signal_card(item, market_data)
 
         # 포트폴리오
         if positions:
             print_phase("포트폴리오")
-            print_portfolio_summary(portfolio)
+            print_portfolio_summary(portfolio, market_data)
             for alert in alerts:
-                print_alert(alert["message"])
+                print_alert(format_portfolio_alert(alert, market_data))
 
             # 상관 리스크 (Phase 19)
             if len(positions) >= 2:
@@ -243,7 +256,12 @@ def main():
                     from src.portfolio.sizer import check_portfolio_health
 
                     regime_str = market_data.get("regime", {}).get("regime", "sideways")
-                    pf_check = check_portfolio_health(portfolio, regime_str, config)
+                    pf_check = check_portfolio_health(
+                        portfolio,
+                        regime_str,
+                        config,
+                        exchange_rate=get_usd_krw_rate(market_data),
+                    )
 
                     corr_risk = pf_check.get("correlation_risk", {})
                     sector_conc = pf_check.get("sector_concentration", {})
