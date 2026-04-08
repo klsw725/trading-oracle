@@ -108,6 +108,7 @@ def main():
         consensus = rec.get("consensus")
         sig = rec["signals"]
         plan = rec.get("action_plan")
+        price_display = rec.get("price_display") or f"{rec['price']:,.0f}원"
         is_buyable = bool(plan and plan.get("type") == "buy")
         badge = (
             "[bold black on green] 매수 가능 [/bold black on green]"
@@ -118,6 +119,7 @@ def main():
 
         lines = []
         lines.append(badge)
+        lines.append(f"[bold]현재가:[/bold] {price_display}")
         lines.append(
             f"[bold]시장/섹터:[/bold] {rec.get('market', '-')} / {rec.get('sector', '기타')}"
         )
@@ -161,7 +163,7 @@ def main():
         console.print(
             Panel(
                 "\n".join(lines),
-                title=f"🟢 {rec['name']} ({rec['ticker']}) {badge} — {rec['price']:,.0f}원",
+                title=f"🟢 {rec['name']} ({rec['ticker']}) {badge}",
                 style=panel_style,
             )
         )

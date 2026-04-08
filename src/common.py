@@ -28,6 +28,8 @@ from src.portfolio.tracker import (
     add_position,
     remove_position,
     set_cash,
+    get_cash_balance,
+    adjust_cash_balance,
     update_positions,
     get_portfolio_summary,
 )
@@ -41,6 +43,8 @@ class NumEncoder(json.JSONEncoder):
             return int(obj)
         if isinstance(obj, (np.floating,)):
             return float(obj)
+        if isinstance(obj, (np.bool_,)):
+            return bool(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super().default(obj)
@@ -235,6 +239,210 @@ def collect_market_data(include_us: bool = False) -> dict:
         pass
 
     return market_data
+
+
+def get_usd_krw_rate(market_data: dict) -> float | None:
+    macro_quant = market_data.get("macro_quant", {})
+    usd_krw = macro_quant.get("USD_KRW", {})
+    value = usd_krw.get("value")
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except TypeError, ValueError:
+        return None
+
+
+def build_price_context(ticker: str, current_price: float, market_data: dict) -> dict:
+    if not is_us_ticker(ticker):
+        price_krw = round(float(current_price))
+        return {
+            "price": float(current_price),
+            "price_currency": "KRW",
+            "price_krw": price_krw,
+            "price_display": f"{price_krw:,.0f}원",
+            "exchange_rate": None,
+        }
+
+    exchange_rate = get_usd_krw_rate(market_data)
+    price_krw = (
+        round(float(current_price) * exchange_rate)
+        if exchange_rate is not None
+        else None
+    )
+    if price_krw is not None:
+        price_display = (
+            f"${float(current_price):,.2f} "
+            f"(약 {price_krw:,.0f}원, 환율 {exchange_rate:,.2f}원/USD)"
+        )
+    else:
+        price_display = f"${float(current_price):,.2f}"
+
+    return {
+        "price": float(current_price),
+        "price_currency": "USD",
+        "price_usd": round(float(current_price), 2),
+        "price_krw": price_krw,
+        "price_display": price_display,
+        "exchange_rate": round(exchange_rate, 2) if exchange_rate is not None else None,
+    }
+
+
+def convert_price_to_krw(ticker: str, price: float | None, market_data) -> float | None:
+    if price is None:
+        return None
+    if not is_us_ticker(ticker):
+        return float(price)
+    exchange_rate = get_usd_krw_rate(market_data)
+    if exchange_rate is None:
+        return None
+    return float(price) * exchange_rate
+
+
+def format_price_for_display(
+    ticker: str,
+    price: float | None,
+    market_data,
+    *,
+    include_exchange_rate: bool = False,
+) -> str:
+    if price is None:
+        return "N/A"
+
+    if not is_us_ticker(ticker):
+        return f"{float(price):,.0f}원"
+
+    exchange_rate = get_usd_krw_rate(market_data)
+    if exchange_rate is None:
+        return f"${float(price):,.2f}"
+
+    krw_price = round(float(price) * exchange_rate)
+    if include_exchange_rate:
+        return f"${float(price):,.2f} (약 {krw_price:,.0f}원, 환율 {exchange_rate:,.2f}원/USD)"
+    return f"${float(price):,.2f} (약 {krw_price:,.0f}원)"
+
+
+def build_cash_summary_for_display(portfolio: dict, market_data=None) -> dict:
+    market_data = market_data or {}
+    cash_krw = get_cash_balance(portfolio, "KRW")
+    cash_usd = get_cash_balance(portfolio, "USD")
+    exchange_rate = get_usd_krw_rate(market_data)
+    cash_usd_krw = cash_usd * exchange_rate if exchange_rate is not None else None
+    total_cash_krw = cash_krw + (cash_usd_krw or 0)
+
+    if cash_usd > 0 and cash_usd_krw is not None:
+        display = f"{cash_krw:,.0f}원 + ${cash_usd:,.2f} (약 {cash_usd_krw:,.0f}원)"
+    elif cash_usd > 0:
+        display = f"{cash_krw:,.0f}원 + ${cash_usd:,.2f}"
+    else:
+        display = f"{cash_krw:,.0f}원"
+
+    return {
+        "cash": total_cash_krw,
+        "cash_krw": cash_krw,
+        "cash_usd": cash_usd,
+        "cash_usd_krw": cash_usd_krw,
+        "cash_display": display,
+    }
+
+
+def build_portfolio_summary_for_display(portfolio: dict, market_data=None) -> dict:
+    market_data = market_data or {}
+    positions = portfolio.get("positions", [])
+    cash_summary = build_cash_summary_for_display(portfolio, market_data)
+    cash = cash_summary["cash"]
+
+    total_invested = 0.0
+    total_market_value = 0.0
+    for pos in positions:
+        shares = pos.get("shares", 0)
+        entry_krw = convert_price_to_krw(
+            pos["ticker"], pos.get("entry_price"), market_data
+        )
+        current_krw = convert_price_to_krw(
+            pos["ticker"],
+            pos.get("current_price", pos.get("entry_price")),
+            market_data,
+        )
+
+        if entry_krw is None:
+            entry_krw = float(pos.get("entry_price", 0))
+        if current_krw is None:
+            current_krw = float(pos.get("current_price", pos.get("entry_price", 0)))
+
+        total_invested += float(entry_krw) * shares
+        total_market_value += float(current_krw) * shares
+
+    total_pnl = total_market_value - total_invested
+    total_pnl_pct = (total_pnl / total_invested * 100) if total_invested > 0 else 0
+    total_assets = total_market_value + cash
+    cash_pct = (cash / total_assets * 100) if total_assets > 0 else 100
+
+    return {
+        "num_positions": len(positions),
+        **cash_summary,
+        "total_invested": total_invested,
+        "total_market_value": total_market_value,
+        "total_pnl": total_pnl,
+        "total_pnl_pct": total_pnl_pct,
+        "total_assets": total_assets,
+        "cash_pct": cash_pct,
+    }
+
+
+def format_portfolio_alert(alert: dict, market_data=None) -> str:
+    market_data = market_data or {}
+    ticker = alert.get("ticker", "")
+    name = alert.get("name", ticker)
+    current_display = format_price_for_display(
+        ticker,
+        alert.get("price"),
+        market_data,
+        include_exchange_rate=True,
+    )
+
+    if alert.get("type") == "STOP_LOSS":
+        stop_display = format_price_for_display(
+            ticker, alert.get("stop_loss"), market_data
+        )
+        return (
+            f"⚠️ 손절매 도달! {name}({ticker}) 현재가 {current_display} ≤ 손절가 {stop_display} "
+            "→ 즉시 매도 검토"
+        )
+
+    trailing_display = format_price_for_display(
+        ticker, alert.get("trailing_stop"), market_data
+    )
+    peak_display = format_price_for_display(ticker, alert.get("peak"), market_data)
+    pnl_pct = alert.get("pnl_pct", 0)
+    return (
+        f"⚠️ 추적 손절매 도달! {name}({ticker}) 고점 {peak_display} → 현재 {current_display} "
+        f"({pnl_pct:+.1f}%) → 매도 검토"
+    )
+
+
+def build_trade_record_display(record: dict, market_data=None) -> dict:
+    market_data = market_data or {}
+    ticker = record["ticker"]
+    sell_shares = record.get("sell_shares", record.get("shares", 0))
+    pnl_amount = (
+        record.get("sell_price", 0) - record.get("entry_price", 0)
+    ) * sell_shares
+
+    return {
+        **record,
+        "currency": "USD" if is_us_ticker(ticker) else "KRW",
+        "entry_price_display": format_price_for_display(
+            ticker, record.get("entry_price"), market_data
+        ),
+        "sell_price_display": format_price_for_display(
+            ticker, record.get("sell_price"), market_data, include_exchange_rate=True
+        ),
+        "pnl_amount": pnl_amount,
+        "pnl_amount_display": format_price_for_display(
+            ticker, pnl_amount, market_data, include_exchange_rate=True
+        ),
+    }
 
 
 def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict | None:
@@ -594,6 +802,7 @@ def run_recommend(
     """
     include_us = market in ("US", "NASDAQ", "NYSE", "ALL")
     market_data = collect_market_data(include_us=include_us)
+    usd_krw_rate = get_usd_krw_rate(market_data)
     min_votes = config.get("signals", {}).get("min_votes", 4)
 
     # 1단계: 스크리닝
@@ -646,11 +855,14 @@ def run_recommend(
         # LLM 없이 시그널 Bull 종목만 반환
         recs = []
         for s in bull_data:
+            price_ctx = build_price_context(
+                s["ticker"], s["signals"]["current_price"], market_data
+            )
             recs.append(
                 {
                     "ticker": s["ticker"],
                     "name": s["name"],
-                    "price": s["signals"]["current_price"],
+                    **price_ctx,
                     "score": next(
                         (c["score"] for c in candidates if c["ticker"] == s["ticker"]),
                         0,
@@ -683,6 +895,7 @@ def run_recommend(
         return {
             "date": market_data["date"],
             "market": market,
+            "usd_krw_rate": usd_krw_rate,
             "regime": market_data.get("regime", {}),
             "universe_size": screening_meta.get("universe_size", 0),
             "universe_breakdown": screening_meta.get("universe_breakdown", {}),
@@ -717,7 +930,12 @@ def run_recommend(
     from src.portfolio.sizer import check_portfolio_health, compute_action_plan
 
     regime_str = market_data.get("regime", {}).get("regime", "sideways")
-    pf_check = check_portfolio_health(portfolio, regime_str, config)
+    pf_check = check_portfolio_health(
+        portfolio,
+        regime_str,
+        config,
+        exchange_rate=get_usd_krw_rate(market_data),
+    )
 
     recs = []
     for ticker, consensus in multi_results.items():
@@ -726,10 +944,24 @@ def run_recommend(
             if item:
                 stop_price = item["signals"]["trailing_stop_10pct"]
                 current_price = item["signals"]["current_price"]
+                price_ctx = build_price_context(ticker, current_price, market_data)
+                exchange_rate = price_ctx.get("exchange_rate")
+                plan_current_price = (
+                    price_ctx["price_krw"]
+                    if price_ctx.get("price_currency") == "USD"
+                    and price_ctx.get("price_krw") is not None
+                    else current_price
+                )
+                plan_stop_price = (
+                    round(stop_price * exchange_rate)
+                    if price_ctx.get("price_currency") == "USD"
+                    and exchange_rate is not None
+                    else stop_price
+                )
                 plan = compute_action_plan(
                     ticker,
-                    current_price,
-                    stop_price,
+                    plan_current_price,
+                    plan_stop_price,
                     consensus["consensus_verdict"],
                     consensus["confidence"],
                     portfolio,
@@ -739,7 +971,7 @@ def run_recommend(
                 rec_entry = {
                     "ticker": ticker,
                     "name": item["name"],
-                    "price": current_price,
+                    **price_ctx,
                     "score": next(
                         (c["score"] for c in candidates if c["ticker"] == ticker), 0
                     ),
@@ -767,6 +999,11 @@ def run_recommend(
                     "consensus": consensus,
                 }
                 if plan:
+                    if price_ctx.get("price_currency") == "USD":
+                        plan["entry_price_usd"] = price_ctx.get("price_usd")
+                        plan["stop_loss_usd"] = round(stop_price, 2)
+                        plan["exchange_rate"] = exchange_rate
+                        plan["native_currency"] = "USD"
                     rec_entry["action_plan"] = plan
                 recs.append(rec_entry)
 
@@ -779,6 +1016,7 @@ def run_recommend(
     return {
         "date": market_data["date"],
         "market": market,
+        "usd_krw_rate": usd_krw_rate,
         "regime": market_data.get("regime", {}),
         "universe_size": screening_meta.get("universe_size", 0),
         "universe_breakdown": screening_meta.get("universe_breakdown", {}),
@@ -791,18 +1029,27 @@ def run_recommend(
     }
 
 
-def build_signals_json(signals_data: list[dict]) -> list[dict]:
+def build_signals_json(signals_data: list[dict], market_data=None) -> list[dict]:
     """시그널 데이터를 JSON 출력용으로 변환."""
+    market_data = market_data or {}
     return [
         {
             "ticker": s["ticker"],
             "name": s["name"],
-            "price": s["signals"]["current_price"],
+            **build_price_context(
+                s["ticker"], s["signals"]["current_price"], market_data
+            ),
             "verdict": s["signals"]["verdict"],
             "bull_votes": s["signals"]["bull_votes"],
             "bear_votes": s["signals"]["bear_votes"],
             "rsi": s["signals"]["signals"]["rsi"]["value"],
             "trailing_stop": s["signals"]["trailing_stop_10pct"],
+            "trailing_stop_display": format_price_for_display(
+                s["ticker"], s["signals"]["trailing_stop_10pct"], market_data
+            ),
+            "trailing_stop_krw": convert_price_to_krw(
+                s["ticker"], s["signals"]["trailing_stop_10pct"], market_data
+            ),
             "change_5d": s["signals"]["change_5d"],
             "change_20d": s["signals"]["change_20d"],
             "per": s.get("fundamentals", {}).get("per"),
