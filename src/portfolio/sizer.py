@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import math
 
+from src.portfolio.tracker import get_cash_balance
+
 
 # ── 기본값 (config.yaml position_sizing로 오버라이드 가능) ──
 
@@ -40,6 +42,7 @@ def check_portfolio_health(
     portfolio: dict,
     market_regime: str,
     config: dict,
+    exchange_rate: float | None = None,
 ) -> dict:
     """포트폴리오 건전성 평가. BUY/SELL 전략 계산 전에 호출.
 
@@ -56,7 +59,9 @@ def check_portfolio_health(
     """
     sc = _get_sizing_config(config)
     positions = portfolio.get("positions", [])
-    cash = portfolio.get("cash", 0)
+    cash_krw = get_cash_balance(portfolio, "KRW")
+    cash_usd = get_cash_balance(portfolio, "USD")
+    cash = cash_krw + (cash_usd * exchange_rate if exchange_rate is not None else 0)
     max_positions = config.get("max_positions", 3)
 
     # 총 자산 / 손익
@@ -197,6 +202,9 @@ def check_portfolio_health(
 
     return {
         "portfolio_health": health,
+        "cash": round(cash),
+        "cash_krw": round(cash_krw),
+        "cash_usd": round(cash_usd, 2),
         "cash_ratio": round(cash_ratio, 1),
         "cash_floor": cash_floor_pct,
         "available_cash": round(available_cash),
@@ -348,7 +356,7 @@ def compute_buy_plan(
 
     investment = round(current_price * first_shares)
     risk_amount = round(loss_per_share * first_shares)
-    cash_after = portfolio.get("cash", 0) - investment
+    cash_after = portfolio_check.get("cash", 0) - investment
     total_after = (
         total_assets - investment + investment
     )  # 자산 총액은 변하지 않음 (현금→주식)
@@ -466,7 +474,7 @@ def compute_sell_plan(
     )
 
     proceeds = round(current_price * sell_shares)
-    cash_after = portfolio.get("cash", 0) + proceeds
+    cash_after = portfolio_check.get("cash", 0) + proceeds
     total_assets = portfolio_check["total_assets"]
     cash_ratio_after = cash_after / total_assets * 100 if total_assets > 0 else 0
 

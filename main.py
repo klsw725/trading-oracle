@@ -38,14 +38,22 @@ from src.common import (
     analyze_tickers,
     run_multi_perspective,
     build_signals_json,
+    build_portfolio_summary_for_display,
+    format_portfolio_alert,
+    build_cash_summary_for_display,
+    format_price_for_display,
+    build_trade_record_display,
+    get_usd_krw_rate,
     has_us_tickers,
 )
-from src.data.market import fetch_ohlcv, get_ticker_name
+from src.data.market import fetch_ohlcv, get_ticker_name, is_us_ticker
 from src.portfolio.tracker import (
     load_portfolio,
     add_position,
     remove_position,
     set_cash,
+    get_cash_balance,
+    adjust_cash_balance,
     update_positions,
     get_portfolio_summary,
 )
@@ -184,6 +192,7 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
 def cmd_add(args):
     portfolio = load_portfolio()
     ticker = args.ticker
+    currency = "USD" if is_us_ticker(ticker) else "KRW"
     name = get_ticker_name(ticker)
     if not name:
         print_error(f"종목 {ticker} 을(를) 찾을 수 없음")
@@ -193,16 +202,20 @@ def cmd_add(args):
     reason = args.reason or ""
     stop_loss = args.stop_loss or price * 0.9
     invested = price * shares
+    include_us = currency == "USD" or get_cash_balance(portfolio, "USD") > 0
+    market_data = collect_market_data(include_us=include_us) if include_us else {}
 
     # 현금 차감
-    cash_before = portfolio.get("cash", 0)
-    portfolio["cash"] = cash_before - invested
-    if portfolio["cash"] < 0:
+    cash_before = get_cash_balance(portfolio, currency)
+    adjust_cash_balance(portfolio, -invested, currency)
+    cash_after = get_cash_balance(portfolio, currency)
+    if cash_after < 0:
         console.print(
-            f"[yellow]⚠️ 현금 부족: {cash_before:,.0f}원 → {portfolio['cash']:,.0f}원 (매수 대금 {invested:,.0f}원)[/yellow]"
+            f"[yellow]⚠️ 현금 부족: {format_price_for_display(ticker, cash_before, market_data)} → {format_price_for_display(ticker, cash_after, market_data)} (매수 대금 {format_price_for_display(ticker, invested, market_data)})[/yellow]"
         )
 
     add_position(portfolio, ticker, name, price, shares, reason, stop_loss)
+    cash_summary = build_cash_summary_for_display(portfolio, market_data)
 
     if getattr(args, "json", False):
         print(
@@ -212,24 +225,37 @@ def cmd_add(args):
                     "action": "add",
                     "ticker": ticker,
                     "name": name,
+                    "currency": currency,
                     "price": price,
+                    "price_display": format_price_for_display(
+                        ticker, price, market_data
+                    ),
                     "shares": shares,
                     "invested": invested,
+                    "invested_display": format_price_for_display(
+                        ticker, invested, market_data
+                    ),
                     "stop_loss": stop_loss,
-                    "cash": portfolio["cash"],
+                    "stop_loss_display": format_price_for_display(
+                        ticker, stop_loss, market_data
+                    ),
+                    "cash_krw": cash_summary["cash_krw"],
+                    "cash_usd": cash_summary["cash_usd"],
+                    "cash_display": cash_summary["cash_display"],
                 }
             )
         )
     else:
         print_success(
-            f"{name}({ticker}) 매수 기록 완료: {price:,.0f}원 × {shares}주 = {invested:,.0f}원 (손절가: {stop_loss:,.0f}원)"
+            f"{name}({ticker}) 매수 기록 완료: {format_price_for_display(ticker, price, market_data)} × {shares}주 = {format_price_for_display(ticker, invested, market_data)} (손절가: {format_price_for_display(ticker, stop_loss, market_data)})"
         )
-        console.print(f"  [dim]보유 현금: {portfolio['cash']:,.0f}원[/dim]")
+        console.print(f"  [dim]보유 현금: {cash_summary['cash_display']}[/dim]")
 
 
 def cmd_remove(args):
     portfolio = load_portfolio()
     ticker = args.ticker
+    currency = "USD" if is_us_ticker(ticker) else "KRW"
     pos = next((p for p in portfolio["positions"] if p["ticker"] == ticker), None)
     if not pos:
         if getattr(args, "json", False):
@@ -268,12 +294,14 @@ def cmd_remove(args):
         return
 
     name = pos["name"]
+    original_shares = pos["shares"]
     pnl_pct = (sell_price - pos["entry_price"]) / pos["entry_price"] * 100
     pnl_amt = (sell_price - pos["entry_price"]) * actual_sell_shares
+    include_us = currency == "USD" or get_cash_balance(portfolio, "USD") > 0
+    market_data = collect_market_data(include_us=include_us) if include_us else {}
 
     # 현금 가산
     proceeds = sell_price * actual_sell_shares
-    portfolio["cash"] = portfolio.get("cash", 0) + proceeds
 
     try:
         remove_position(portfolio, ticker, sell_price, reason, shares=sell_shares)
@@ -283,13 +311,15 @@ def cmd_remove(args):
         else:
             print_error(str(e))
         return
+    adjust_cash_balance(portfolio, proceeds, currency)
 
-    leftover = pos["shares"] - actual_sell_shares
+    leftover = original_shares - actual_sell_shares
     sell_label = (
         f"{actual_sell_shares}주"
         if sell_shares is not None
         else f"전량 {actual_sell_shares}주"
     )
+    cash_summary = build_cash_summary_for_display(portfolio, market_data)
 
     if getattr(args, "json", False):
         print(
@@ -299,37 +329,67 @@ def cmd_remove(args):
                     "action": "remove",
                     "ticker": ticker,
                     "name": name,
+                    "currency": currency,
                     "sell_price": sell_price,
+                    "sell_price_display": format_price_for_display(
+                        ticker, sell_price, market_data, include_exchange_rate=True
+                    ),
                     "sell_shares": actual_sell_shares,
                     "remaining_shares": leftover,
                     "pnl_pct": pnl_pct,
                     "pnl_amount": pnl_amt,
+                    "pnl_amount_display": format_price_for_display(
+                        ticker, pnl_amt, market_data, include_exchange_rate=True
+                    ),
                     "proceeds": proceeds,
-                    "cash": portfolio["cash"],
+                    "proceeds_display": format_price_for_display(
+                        ticker, proceeds, market_data, include_exchange_rate=True
+                    ),
+                    "cash_krw": cash_summary["cash_krw"],
+                    "cash_usd": cash_summary["cash_usd"],
+                    "cash_display": cash_summary["cash_display"],
                 }
             )
         )
     else:
         pnl_color = "green" if pnl_pct >= 0 else "red"
         console.print(
-            f"[bold]{name}({ticker}) 매도 완료[/bold]: {sell_price:,.0f}원 × {sell_label} [{pnl_color}]{pnl_amt:+,.0f}원 ({pnl_pct:+.1f}%)[/{pnl_color}]"
+            f"[bold]{name}({ticker}) 매도 완료[/bold]: {format_price_for_display(ticker, sell_price, market_data, include_exchange_rate=True)} × {sell_label} [{pnl_color}]{format_price_for_display(ticker, pnl_amt, market_data, include_exchange_rate=True)} ({pnl_pct:+.1f}%)[/{pnl_color}]"
         )
         if leftover > 0:
             console.print(
-                f"  [dim]잔여 보유: {leftover}주 (평단가 {pos['entry_price']:,.0f}원)[/dim]"
+                f"  [dim]잔여 보유: {leftover}주 (평단가 {format_price_for_display(ticker, pos['entry_price'], market_data)})[/dim]"
             )
         console.print(
-            f"  [dim]보유 현금: {portfolio['cash']:,.0f}원 (+{proceeds:,.0f}원)[/dim]"
+            f"  [dim]보유 현금: {cash_summary['cash_display']} (+{format_price_for_display(ticker, proceeds, market_data, include_exchange_rate=True)})[/dim]"
         )
 
 
 def cmd_cash(args):
     portfolio = load_portfolio()
-    set_cash(portfolio, args.amount)
+    currency = "USD" if args.usd else "KRW"
+    include_us = currency == "USD" or get_cash_balance(portfolio, "USD") > 0
+    market_data = collect_market_data(include_us=include_us) if include_us else {}
+    set_cash(portfolio, args.amount, currency=currency)
+    cash_summary = build_cash_summary_for_display(portfolio, market_data)
     if getattr(args, "json", False):
-        print(json_dump({"status": "ok", "action": "cash", "amount": args.amount}))
+        print(
+            json_dump(
+                {
+                    "status": "ok",
+                    "action": "cash",
+                    "currency": currency,
+                    "amount": args.amount,
+                    "cash_krw": cash_summary["cash_krw"],
+                    "cash_usd": cash_summary["cash_usd"],
+                    "cash_display": cash_summary["cash_display"],
+                }
+            )
+        )
     else:
-        print_success(f"보유 현금: {args.amount:,.0f}원으로 설정 완료")
+        label = f"${args.amount:,.2f}" if currency == "USD" else f"{args.amount:,.0f}원"
+        print_success(f"보유 현금({currency}): {label}로 설정 완료")
+        console.print(f"  [dim]전체 현금: {cash_summary['cash_display']}[/dim]")
 
 
 def cmd_portfolio(args):
@@ -349,21 +409,31 @@ def cmd_portfolio(args):
         )
 
     if getattr(args, "json", False):
-        summary = get_portfolio_summary(portfolio)
+        market_data = collect_market_data(
+            include_us=has_us_tickers([p["ticker"] for p in positions], portfolio)
+            or get_cash_balance(portfolio, "USD") > 0
+        )
+        summary_native = get_portfolio_summary(portfolio)
+        summary_display = build_portfolio_summary_for_display(portfolio, market_data)
         print(
             json_dump(
                 {
-                    "summary": summary,
+                    "summary": summary_display,
+                    "summary_native": summary_native,
                     "positions": portfolio.get("positions", []),
-                    "alerts": [a["message"] for a in alerts],
+                    "alerts": [format_portfolio_alert(a, market_data) for a in alerts],
                 }
             )
         )
     else:
+        market_data = collect_market_data(
+            include_us=has_us_tickers([p["ticker"] for p in positions], portfolio)
+            or get_cash_balance(portfolio, "USD") > 0
+        )
         print_header()
-        print_portfolio_summary(portfolio)
+        print_portfolio_summary(portfolio, market_data)
         for alert in alerts:
-            print_alert(alert["message"])
+            print_alert(format_portfolio_alert(alert, market_data))
         if not positions:
             console.print(
                 "\n[dim]종목 추가: uv run main.py add <종목코드> <매수가> <수량>[/dim]"
@@ -433,12 +503,25 @@ def cmd_reset(args):
 
 def cmd_history(args):
     portfolio = load_portfolio()
+    history = portfolio.get("history", [])
+    include_us = any(is_us_ticker(trade["ticker"]) for trade in history)
+    market_data = collect_market_data(include_us=include_us) if include_us else {}
     if getattr(args, "json", False):
-        print(json_dump({"history": portfolio.get("history", [])}))
+        print(
+            json_dump(
+                {
+                    "history": history,
+                    "history_display": [
+                        build_trade_record_display(trade, market_data)
+                        for trade in history
+                    ],
+                }
+            )
+        )
     else:
         print_header()
         print_phase("거래 내역")
-        print_trade_history(portfolio)
+        print_trade_history(portfolio, market_data)
 
 
 def cmd_analyze(args):
@@ -459,7 +542,9 @@ def cmd_analyze(args):
     tickers, _ = collect_tickers(
         args.tickers, config, portfolio, getattr(args, "screen", False)
     )
-    include_us = has_us_tickers(tickers, portfolio)
+    include_us = (
+        has_us_tickers(tickers, portfolio) or get_cash_balance(portfolio, "USD") > 0
+    )
 
     # 시장 현황
     if not quiet:
@@ -526,9 +611,9 @@ def cmd_analyze(args):
             portfolio, current_prices, config.get("trailing_stop_pct", 10)
         )
         if not quiet:
-            print_portfolio_summary(portfolio)
+            print_portfolio_summary(portfolio, market_data)
             for alert in alerts:
-                print_alert(alert["message"])
+                print_alert(format_portfolio_alert(alert, market_data))
 
     # LLM 분석
     no_llm = getattr(args, "no_llm", False)
@@ -586,7 +671,12 @@ def cmd_analyze(args):
                     )
 
                     regime_str = market_data.get("regime", {}).get("regime", "sideways")
-                    pf_check = check_portfolio_health(portfolio, regime_str, config)
+                    pf_check = check_portfolio_health(
+                        portfolio,
+                        regime_str,
+                        config,
+                        exchange_rate=get_usd_krw_rate(market_data),
+                    )
 
                     if not quiet and pf_check["portfolio_health"] == "danger":
                         for fs in pf_check.get("forced_sell_tickers", []):
@@ -700,6 +790,7 @@ def main():
     # cash
     cash_parser = subparsers.add_parser("cash", help="보유 현금 설정")
     cash_parser.add_argument("amount", type=float, help="금액")
+    cash_parser.add_argument("--usd", action="store_true", help="USD 현금 설정")
     cash_parser.add_argument("--json", action="store_true", help="JSON 출력")
 
     # portfolio
