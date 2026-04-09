@@ -8,6 +8,7 @@
 | Phase | PRD | 상태 | 설명 |
 |-------|-----|------|------|
 | Phase 20 | [prds/phase20-diversified-recommend.md](prds/phase20-diversified-recommend.md) | 📝 초안 | 추천 후보군 확장 + 다양성 선택 |
+| Phase 21 | [prds/phase21-sizing-visibility.md](prds/phase21-sizing-visibility.md) | 📝 초안 | 추천 포지션 사이징 가시성 |
 
 ---
 
@@ -181,6 +182,13 @@ Recommendation Pipeline 스펙은 추천 결과에 다음 메타데이터를 포
   "universe_size": 100,
   "universe_breakdown": {"KOSPI": 50, "KOSDAQ": 50},
   "screened": 6,
+  "portfolio_sizing": {
+    "cash": 8000000,
+    "cash_ratio": 65.0,
+    "cash_floor": 25,
+    "cash_floor_amount": 3075000,
+    "available_cash": 4925000
+  },
   "selection_constraints": {
     "sector_cap": 1,
     "prefer_market_balance": true,
@@ -192,6 +200,7 @@ Recommendation Pipeline 스펙은 추천 결과에 다음 메타데이터를 포
 ### 목적
 
 - 사용자가 왜 해당 후보만 분석됐는지 이해할 수 있게 함
+- 사용자가 왜 `매수 가능 금액`과 `목표 수량`이 그렇게 계산됐는지 이해할 수 있게 함
 - 추후 추천 품질/편향을 사후 분석할 수 있게 함
 
 ---

@@ -178,6 +178,7 @@ trading-oracle/
 - 추천 결과에는 다음 메타데이터가 포함될 수 있음:
   - `universe_size`
   - `universe_breakdown`
+  - `portfolio_sizing` (현재 현금, 현금 하한, 가용 현금)
   - `selection_constraints`
   - 각 종목의 `market`, `sector`, `selected_by`
 
