@@ -808,6 +808,22 @@ def run_recommend(
     market_data = collect_market_data(include_us=include_us)
     usd_krw_rate = get_usd_krw_rate(market_data)
     min_votes = config.get("signals", {}).get("min_votes", 4)
+    portfolio = load_portfolio()
+    from src.portfolio.sizer import check_portfolio_health, compute_action_plan
+
+    regime_str = market_data.get("regime", {}).get("regime", "sideways")
+    pf_check = check_portfolio_health(
+        portfolio,
+        regime_str,
+        config,
+        exchange_rate=usd_krw_rate,
+    )
+    cash_summary = build_cash_summary_for_display(portfolio, market_data)
+    portfolio_sizing = {
+        **pf_check,
+        "cash_display": cash_summary["cash_display"],
+        "cash_usd_krw": cash_summary["cash_usd_krw"],
+    }
 
     # 1단계: 스크리닝
     candidates, screening_meta = screen_recommendation_candidates(
@@ -820,6 +836,7 @@ def run_recommend(
             "date": market_data["date"],
             "market": market,
             "regime": market_data.get("regime", {}),
+            "portfolio_sizing": portfolio_sizing,
             "universe_size": screening_meta.get("universe_size", 0),
             "universe_breakdown": screening_meta.get("universe_breakdown", {}),
             "screened": 0,
@@ -839,6 +856,7 @@ def run_recommend(
             "date": market_data["date"],
             "market": market,
             "regime": market_data.get("regime", {}),
+            "portfolio_sizing": portfolio_sizing,
             "universe_size": screening_meta.get("universe_size", 0),
             "universe_breakdown": screening_meta.get("universe_breakdown", {}),
             "screened": len(candidates),
@@ -901,6 +919,7 @@ def run_recommend(
             "market": market,
             "usd_krw_rate": usd_krw_rate,
             "regime": market_data.get("regime", {}),
+            "portfolio_sizing": portfolio_sizing,
             "universe_size": screening_meta.get("universe_size", 0),
             "universe_breakdown": screening_meta.get("universe_breakdown", {}),
             "screened": len(candidates),
@@ -916,6 +935,7 @@ def run_recommend(
             "date": market_data["date"],
             "market": market,
             "regime": market_data.get("regime", {}),
+            "portfolio_sizing": portfolio_sizing,
             "universe_size": screening_meta.get("universe_size", 0),
             "universe_breakdown": screening_meta.get("universe_breakdown", {}),
             "screened": len(candidates),
@@ -927,20 +947,9 @@ def run_recommend(
         }
 
     # 3단계: 다관점 분석 (Bull 종목만)
-    portfolio = load_portfolio()
     multi_results = run_multi_perspective(bull_data, portfolio, market_data, config)
 
     # 4단계: BUY 합의 필터 + action_plan 부착
-    from src.portfolio.sizer import check_portfolio_health, compute_action_plan
-
-    regime_str = market_data.get("regime", {}).get("regime", "sideways")
-    pf_check = check_portfolio_health(
-        portfolio,
-        regime_str,
-        config,
-        exchange_rate=get_usd_krw_rate(market_data),
-    )
-
     recs = []
     for ticker, consensus in multi_results.items():
         if consensus["consensus_verdict"] == "BUY":
@@ -1022,6 +1031,7 @@ def run_recommend(
         "market": market,
         "usd_krw_rate": usd_krw_rate,
         "regime": market_data.get("regime", {}),
+        "portfolio_sizing": portfolio_sizing,
         "universe_size": screening_meta.get("universe_size", 0),
         "universe_breakdown": screening_meta.get("universe_breakdown", {}),
         "screened": len(candidates),

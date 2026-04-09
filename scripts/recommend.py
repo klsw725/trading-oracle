@@ -23,6 +23,61 @@ if str(_PROJECT_ROOT) not in sys.path:
 from src.common import load_config, json_dump, run_recommend
 
 
+def _format_binding_constraints(binding_constraints: list[str]) -> str:
+    labels = {
+        "risk": "리스크",
+        "weight": "종목 비중",
+        "cash": "가용 현금",
+    }
+    if not binding_constraints:
+        return "-"
+    return ", ".join(labels.get(item, item) for item in binding_constraints)
+
+
+def _int_from_plan(plan: dict[str, object], key: str) -> int:
+    value = plan.get(key, 0)
+    return int(value) if isinstance(value, (int, float, str)) else 0
+
+
+def _describe_buy_plan(plan: dict[str, object]) -> str:
+    binding_constraints = plan.get("binding_constraints", [])
+    if not isinstance(binding_constraints, list):
+        binding_constraints = []
+
+    target_shares = _int_from_plan(plan, "target_shares")
+    first_tranche_shares = _int_from_plan(plan, "first_tranche_shares")
+
+    if not binding_constraints:
+        return f"목표 수량 {target_shares}주 기준으로 1차 매수 {first_tranche_shares}주를 제안합니다"
+
+    labels = {
+        "risk": "손절 기준 리스크",
+        "weight": "종목 비중",
+        "cash": "가용 현금",
+    }
+    constraints_text = ", ".join(
+        labels.get(str(item), str(item)) for item in binding_constraints
+    )
+    return (
+        f"{constraints_text} 제약 때문에 목표 수량이 {target_shares}주로 제한됐고, "
+        f"1차 매수는 {first_tranche_shares}주만 제안됩니다"
+    )
+
+
+def _describe_buy_block(plan: dict[str, object]) -> str:
+    reason = str(plan.get("reason", ""))
+
+    if "가용 현금" in reason:
+        return "종목 자체는 통과했지만, 현재 포트폴리오 현금 여력으로는 1주도 신규 진입할 수 없습니다"
+    if "기존 보유 비중" in reason:
+        return "기존 보유 비중이 이미 높아, 추가 매수보다 분산 유지가 우선인 상태입니다"
+    if "손절 기준 대비 허용 리스크" in reason:
+        return "손절폭 대비 허용 리스크가 작아 전략상 의미 있는 신규 진입 수량이 나오지 않습니다"
+    if "손절가가 현재가 이상" in reason:
+        return "손절가와 현재가 간격이 없어 현재 전략 기준으로는 진입 자체가 성립하지 않습니다"
+    return "현재 포트폴리오 제약 또는 진입 조건 때문에 신규 매수가 차단됐습니다"
+
+
 def main():
     config = load_config()
     default_market = config.get("recommend", {}).get("default_market", "KR")
@@ -89,6 +144,27 @@ def main():
     console.print(
         f"  스크리닝: {result['screened']}개 후보 → 시그널 필터: {result['signal_filtered']}개 통과 → 분석: {result['analyzed']}개"
     )
+    portfolio_sizing = result.get("portfolio_sizing", {})
+    if portfolio_sizing:
+        cash_display = portfolio_sizing.get(
+            "cash_display", f"{portfolio_sizing.get('cash', 0):,.0f}원"
+        )
+        console.print(
+            f"  포트폴리오: 총자산 {portfolio_sizing.get('total_assets', 0):,.0f}원 / "
+            f"현재 현금 {cash_display} / "
+            f"현금 비중 {portfolio_sizing.get('cash_ratio', 0):.1f}%"
+        )
+        console.print(
+            f"  매수 가능 현금: {portfolio_sizing.get('available_cash', 0):,.0f}원 "
+            f"(현금 하한 {portfolio_sizing.get('cash_floor', 0)}% = "
+            f"{portfolio_sizing.get('cash_floor_amount', 0):,.0f}원 보호)"
+        )
+        if not portfolio_sizing.get("can_buy", True) and portfolio_sizing.get(
+            "buy_block_reason"
+        ):
+            console.print(
+                f"  [yellow]⚠️ 포트폴리오 제약: {portfolio_sizing['buy_block_reason']}[/yellow]"
+            )
     console.print()
 
     recs = result["recommendations"]
@@ -154,11 +230,30 @@ def main():
             lines.append(
                 f"    최대 손실: {plan['risk_amount']:,.0f}원 (자산의 {plan['risk_pct']}%%)"
             )
+            share_limits = plan.get("share_limits") or {}
+            if share_limits:
+                lines.append(
+                    f"    제약 기준: 리스크 {share_limits.get('risk', 0)}주 / "
+                    f"비중 {share_limits.get('weight', 0)}주 / "
+                    f"현금 {share_limits.get('cash', 0)}주"
+                )
+                lines.append(
+                    f"    최종 제한: {_format_binding_constraints(plan.get('binding_constraints', []))}"
+                )
+            lines.append(f"    해석: {_describe_buy_plan(plan)}")
+            lines.append(
+                f"    가용 현금: {plan.get('available_cash', 0):,.0f}원 "
+                f"(현금 하한 보호분 {plan.get('cash_floor_amount', 0):,.0f}원)"
+            )
+            lines.append(
+                f"    매수 후 현금: {plan['portfolio_cash_after']:,.0f}원 ({plan['portfolio_cash_ratio_after']}%%)"
+            )
             if plan.get("note"):
                 lines.append(f"    [dim]ℹ️  {plan['note']}[/dim]")
         elif plan and plan.get("type") == "buy_blocked":
             lines.append("")
-            lines.append(f"  [dim]💤 매수 차단: {plan['reason']}[/dim]")
+            lines.append(f"  [bold yellow]🛑 매수 차단:[/bold yellow] {plan['reason']}")
+            lines.append(f"  [dim]해석: {_describe_buy_block(plan)}[/dim]")
 
         console.print(
             Panel(

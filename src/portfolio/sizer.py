@@ -207,6 +207,7 @@ def check_portfolio_health(
         "cash_usd": round(cash_usd, 2),
         "cash_ratio": round(cash_ratio, 1),
         "cash_floor": cash_floor_pct,
+        "cash_floor_amount": round(cash_floor_amount),
         "available_cash": round(available_cash),
         "total_assets": round(total_assets),
         "total_pnl_pct": round(total_pnl_pct, 1),
@@ -306,7 +307,7 @@ def compute_buy_plan(
     # Step 1: 목표 수량 (손절 기반)
     risk_pct = sc["risk_per_trade"].get(confidence, 1) / 100
     max_risk = total_assets * risk_pct
-    target_shares = int(max_risk / loss_per_share)
+    risk_target_shares = int(max_risk / loss_per_share)
 
     # Step 2: 포트폴리오 제약
     max_weight_amount = total_assets * max_weight_pct / 100
@@ -336,13 +337,21 @@ def compute_buy_plan(
             "reason": "기존 보유 비중이 높아 추가 매수 불가",
         }
 
-    if target_shares < 1:
+    if risk_target_shares < 1:
         return {
             "type": "buy_blocked",
             "reason": "손절 기준 대비 허용 리스크가 너무 작아 목표 수량 산정 불가",
         }
 
-    target_shares = min(target_shares, max_shares_by_weight, max_shares_by_cash)
+    share_limits = {
+        "risk": risk_target_shares,
+        "weight": max_shares_by_weight,
+        "cash": max_shares_by_cash,
+    }
+    target_shares = min(share_limits.values())
+    binding_constraints = [
+        name for name, limit in share_limits.items() if limit == target_shares
+    ]
 
     # Step 2.5: 환율 팩터 조정 (Phase 17)
     fx_mult = _fx_sizing_multiplier(fx_signal, fx_regime, config)
@@ -379,6 +388,10 @@ def compute_buy_plan(
         if total_assets > 0
         else 0,
         "weight_pct": round(weight_after, 1),
+        "share_limits": share_limits,
+        "binding_constraints": binding_constraints,
+        "available_cash": round(available_cash),
+        "cash_floor_amount": round(portfolio_check.get("cash_floor_amount", 0)),
         "portfolio_cash_after": round(cash_after),
         "portfolio_cash_ratio_after": round(cash_ratio_after, 1),
         "note": "추세 확인 후 2차 매수 검토" if first_shares < target_shares else None,
