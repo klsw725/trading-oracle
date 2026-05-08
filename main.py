@@ -116,9 +116,14 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
             f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')}"
         )
 
-    if consensus.get("majority_reasoning"):
+    reasoning = consensus.get("majority_reasoning")
+    if consensus.get("deliberation") and consensus.get("initial_consensus"):
+        reasoning = consensus["initial_consensus"].get("majority_reasoning") or reasoning
+    if reasoning:
         lines.append("")
-        for r in consensus["majority_reasoning"][:3]:
+        reasoning_title = "숙의 전 초기 논거" if consensus.get("deliberation") else "주요 논거"
+        lines.append(f"  [bold dim]📌 {reasoning_title}[/bold dim]")
+        for r in reasoning[:3]:
             lines.append(f"  [dim]{r}[/dim]")
 
     # 매매 전략 (action_plan)
