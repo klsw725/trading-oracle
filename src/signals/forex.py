@@ -11,14 +11,18 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.data.sectors import resolve_sector
+
 FX_BETA_CACHE = Path("data/fx_beta_cache.json")
 
 # 섹터-통화 매핑 (종목명 키워드 → 관련 통화)
 SECTOR_FX_MAP = {
+    "자동차": ["USD_KRW", "JPY_KRW"],
+    "방산": ["USD_KRW"],
+    "바이오": ["USD_KRW"],
     "반도체": ["USD_KRW"],
     "전자": ["USD_KRW"],
     "하이닉스": ["USD_KRW"],
-    "자동차": ["USD_KRW", "JPY_KRW"],
     "기아": ["USD_KRW", "JPY_KRW"],
     "현대": ["USD_KRW", "JPY_KRW"],
     "화학": ["USD_KRW", "CNY_KRW"],
@@ -30,7 +34,6 @@ SECTOR_FX_MAP = {
     "금융": ["USD_KRW"],
     "은행": ["USD_KRW"],
     "에어로": ["USD_KRW"],
-    "바이오": ["USD_KRW"],
     "제약": ["USD_KRW"],
 }
 
@@ -42,6 +45,7 @@ SECTOR_FX_CLASS = {
     "반도체": "export", "전자": "export", "하이닉스": "export",
     "자동차": "export", "기아": "export", "현대": "export",
     "조선": "export", "에어로": "export",
+    "방산": "export",
     "배터리": "export", "에너지": "export",
     # 내수/수입주: 원화 약세 → 원가 부담 증가
     "항공": "import", "여행": "import",
@@ -53,9 +57,13 @@ SECTOR_FX_CLASS = {
 }
 
 
-def _get_sector_currencies(name: str) -> list[str]:
-    """종목명에서 관련 통화 목록을 추출."""
+def _get_sector_currencies(name: str, ticker: str | None = None) -> list[str]:
+    """데이터 소스 섹터 우선으로 관련 통화 목록을 추출."""
     currencies = set()
+    sector = resolve_sector(name, ticker=ticker, allow_fetch=bool(ticker))
+    if sector in SECTOR_FX_MAP:
+        currencies.update(SECTOR_FX_MAP[sector])
+
     for keyword, curs in SECTOR_FX_MAP.items():
         if keyword in name:
             currencies.update(curs)
@@ -97,13 +105,17 @@ def compute_fx_beta(
     return float(cov[0, 1] / var_fx)
 
 
-def classify_fx_sensitivity(name: str) -> str:
+def classify_fx_sensitivity(name: str, ticker: str | None = None) -> str:
     """섹터 기반 환율 민감도 분류.
 
     한국 시장에서는 리스크오프 시 원화 약세와 주가 하락이 동시 발생하므로
     순수 통계 베타로는 수출주/내수주를 구분할 수 없음.
-    종목명 키워드로 펀더멘털 기반 분류.
+    데이터 소스 섹터를 우선 쓰고, 종목명 키워드는 fallback으로만 사용.
     """
+    sector = resolve_sector(name, ticker=ticker, allow_fetch=bool(ticker))
+    if sector in SECTOR_FX_CLASS:
+        return SECTOR_FX_CLASS[sector]
+
     for keyword, fx_class in SECTOR_FX_CLASS.items():
         if keyword in name:
             return fx_class
@@ -130,7 +142,7 @@ def compute_fx_betas(
     fx_config = config.get("forex", {})
     window = fx_config.get("beta_window", 60)
 
-    sector_curs = _get_sector_currencies(name)
+    sector_curs = _get_sector_currencies(name, ticker=ticker)
     betas = {}
 
     for cur in sector_curs:
@@ -146,7 +158,7 @@ def compute_fx_betas(
 
     return {
         "primary_beta": primary,
-        "fx_class": classify_fx_sensitivity(name),
+        "fx_class": classify_fx_sensitivity(name, ticker=ticker),
         "betas": betas,
         "sector_currencies": sector_curs,
     }

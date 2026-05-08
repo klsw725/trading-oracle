@@ -429,7 +429,7 @@ def _get_fx_multiplier(
     try:
         from src.signals.forex import classify_fx_sensitivity, detect_fx_regime
 
-        fx_class = classify_fx_sensitivity(name)
+        fx_class = classify_fx_sensitivity(name, ticker=ticker)
         if fx_class == "neutral":
             return 1.0
 
