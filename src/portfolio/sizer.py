@@ -143,6 +143,7 @@ def check_portfolio_health(
                 compute_sector_concentration,
                 compute_diversification_score,
             )
+            from src.data.sectors import load_sector_lookup
 
             corr_config = config.get("correlation", {})
             window = corr_config.get("window_days", 60)
@@ -180,7 +181,12 @@ def check_portfolio_health(
                     "high_corr_pairs": high_pairs,
                 }
 
-            sector_concentration = compute_sector_concentration(positions)
+            sector_lookup = load_sector_lookup(["KR"])
+            sector_concentration = compute_sector_concentration(
+                positions,
+                sector_lookup=sector_lookup,
+                allow_fetch=True,
+            )
             diversification_score = compute_diversification_score(
                 corr_matrix, sector_concentration
             )

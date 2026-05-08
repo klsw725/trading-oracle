@@ -10,61 +10,25 @@ import numpy as np
 import pandas as pd
 
 from src.data.market import fetch_ohlcv
-
-# 섹터 분류 (종목명 키워드 기반)
-SECTOR_MAP = {
-    "반도체": "반도체",
-    "전자": "반도체",
-    "하이닉스": "반도체",
-    "자동차": "자동차",
-    "기아": "자동차",
-    "현대차": "자동차",
-    "현대모비스": "자동차",
-    "금융": "금융",
-    "은행": "금융",
-    "KB": "금융",
-    "신한": "금융",
-    "하나": "금융",
-    "에어로": "방산",
-    "한화": "방산",
-    "바이오": "바이오",
-    "제약": "바이오",
-    "셀트리온": "바이오",
-    "화학": "화학",
-    "LG화학": "화학",
-    "배터리": "에너지",
-    "SDI": "에너지",
-    "에코프로": "에너지",
-    "포스코퓨처엠": "에너지",
-    "NAVER": "IT",
-    "카카오": "IT",
-    "네이버": "IT",
-    "조선": "조선",
-    "중공업": "조선",
-    "철강": "철강",
-    "포스코": "철강",
-}
+from src.data.sectors import NAME_SECTOR_MAP as SECTOR_MAP, resolve_sector
 
 
 def classify_sector(
     name: str,
+    ticker: str | None = None,
     listing_sector: str | None = None,
     listing_industry: str | None = None,
+    sector_lookup: dict | None = None,
+    allow_fetch: bool = False,
 ) -> str:
-    if listing_sector:
-        sector = str(listing_sector).strip()
-        if sector:
-            return sector
-
-    if listing_industry:
-        industry = str(listing_industry).strip()
-        if industry:
-            return industry
-
-    for keyword, sector in SECTOR_MAP.items():
-        if keyword in name:
-            return sector
-    return "기타"
+    return resolve_sector(
+        name,
+        ticker=ticker,
+        listing_sector=listing_sector,
+        listing_industry=listing_industry,
+        sector_lookup=sector_lookup,
+        allow_fetch=allow_fetch,
+    )
 
 
 def compute_correlation_matrix(
@@ -166,6 +130,8 @@ def get_max_correlation(
 def compute_sector_concentration(
     positions: list[dict],
     ticker_names: dict[str, str] | None = None,
+    sector_lookup: dict | None = None,
+    allow_fetch: bool = False,
 ) -> dict:
     """보유 포지션의 섹터 집중도 계산.
 
@@ -189,10 +155,16 @@ def compute_sector_concentration(
     total_value = 0
 
     for pos in positions:
+        ticker = str(pos.get("ticker", ""))
         name = pos.get("name", "")
         if not name and ticker_names:
-            name = ticker_names.get(pos.get("ticker", ""), "")
-        sector = classify_sector(name)
+            name = ticker_names.get(ticker, "")
+        sector = str(pos.get("sector") or "").strip() or classify_sector(
+            name,
+            ticker=ticker,
+            sector_lookup=sector_lookup,
+            allow_fetch=allow_fetch,
+        )
         value = pos.get(
             "market_value", pos.get("entry_price", 0) * pos.get("shares", 0)
         )

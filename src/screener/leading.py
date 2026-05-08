@@ -18,6 +18,7 @@ import pandas as pd
 
 from src.data.market import fetch_ohlcv
 from src.data.fundamentals import fetch_naver_fundamentals
+from src.data.sectors import load_sector_lookup
 from src.portfolio.correlation import classify_sector
 
 
@@ -59,6 +60,7 @@ def screen_leading_stocks(market: str = "ALL", top_n: int = 30) -> list[Candidat
 
     listing = listing[listing["Code"].map(lambda code: str(code).endswith("0"))]
     listing = listing.sort_values("Marcap", ascending=False).head(top_n)
+    sector_lookup = load_sector_lookup([market])
 
     candidates = []
     for _, row in listing.iterrows():
@@ -67,6 +69,7 @@ def screen_leading_stocks(market: str = "ALL", top_n: int = 30) -> list[Candidat
             name=str(row["Name"]),
             market=str(row["Market"]),
             market_cap=row.get("Marcap", 0),
+            sector_lookup=sector_lookup,
         )
         if candidate:
             candidates.append(candidate)
@@ -271,6 +274,7 @@ def _load_kr_market_universe(market: str, universe_size: int) -> list[Candidate]
     listing = listing[listing["Market"] == market]
     listing = listing[listing["Code"].map(lambda code: str(code).endswith("0"))]
     listing = listing.sort_values("Marcap", ascending=False).head(universe_size)
+    sector_lookup = load_sector_lookup([market])
 
     candidates = []
     for _, row in listing.iterrows():
@@ -279,6 +283,7 @@ def _load_kr_market_universe(market: str, universe_size: int) -> list[Candidate]
             name=str(row["Name"]),
             market=market,
             market_cap=row.get("Marcap", 0),
+            sector_lookup=sector_lookup,
         )
         if candidate:
             candidates.append(candidate)
@@ -320,6 +325,7 @@ def _build_candidate(
     market_cap,
     listing_sector: str | None = None,
     listing_industry: str | None = None,
+    sector_lookup: dict[str, Any] | None = None,
 ) -> Candidate | None:
     try:
         ohlcv = fetch_ohlcv(ticker, days_back=60)
@@ -354,8 +360,10 @@ def _build_candidate(
             "market": market,
             "sector": classify_sector(
                 name,
+                ticker=ticker,
                 listing_sector=_normalize_listing_text(listing_sector),
                 listing_industry=_normalize_listing_text(listing_industry),
+                sector_lookup=sector_lookup,
             ),
             "price": current_price,
             "market_cap": _safe_number(market_cap),
