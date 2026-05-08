@@ -12,6 +12,7 @@ from pathlib import Path
 from ddgs import DDGS
 
 from src.data.market import is_us_ticker
+from src.data.sectors import resolve_sector
 
 CACHE_PATH = Path("data/web_cache.json")
 
@@ -35,7 +36,21 @@ SECTOR_MESH = {
 
 
 def _detect_sector(name: str, ticker: str) -> str | None:
-    """종목명/티커에서 섹터 자동 감지."""
+    """데이터 소스 우선, 종목명/티커 fallback으로 섹터 감지."""
+    sector = resolve_sector(name, ticker=ticker, allow_fetch=True)
+    if sector != "기타":
+        if is_us_ticker(ticker):
+            us_mesh_sector = {
+                "반도체": "TECH",
+                "IT": "TECH",
+                "자동차": "EV",
+                "바이오": "PHARMA",
+                "금융": "FINTECH",
+            }.get(sector)
+            if us_mesh_sector:
+                return us_mesh_sector
+        return sector
+
     if is_us_ticker(ticker):
         mapping = {
             "TECH": ["AAPL", "MSFT", "GOOGL", "META", "AMZN"],
@@ -57,7 +72,7 @@ def _detect_sector(name: str, ticker: str) -> str | None:
         "반도체": ["전자", "하이닉스", "반도체"],
         "자동차": ["자동차", "기아", "현대"],
         "방산": ["에어로", "한화", "LIG"],
-        "금융": ["금융", "은행", "지주", "KB", "신한", "하나"],
+        "금융": ["금융", "은행", "지주", "KB", "신한"],
         "바이오": ["바이오", "제약", "셀트리온"],
         "에너지": ["에너지", "배터리", "LG에너지"],
         "소비재": ["아모레", "LG생활", "CJ", "오리온"],
