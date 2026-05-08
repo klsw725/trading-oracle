@@ -4,6 +4,7 @@ Phase 4 PRD: docs/specs/multi-perspective/prds/phase4-performance.md
 """
 
 import json
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
@@ -49,7 +50,7 @@ def save_snapshot(date: str, market_data: dict, multi_results: dict, signals_dat
                 "reason": p.get("reason", ""),
             })
 
-        recommendations[ticker] = {
+        recommendation = {
             "name": names.get(ticker, ticker),
             "price": prices.get(ticker, 0),
             "consensus_verdict": consensus["consensus_verdict"],
@@ -58,6 +59,12 @@ def save_snapshot(date: str, market_data: dict, multi_results: dict, signals_dat
             "vote_summary": consensus["vote_summary"],
             "perspectives": perspectives,
         }
+        if consensus.get("initial_consensus"):
+            recommendation["initial_consensus"] = deepcopy(consensus["initial_consensus"])
+        if consensus.get("deliberation"):
+            recommendation["deliberation"] = deepcopy(consensus["deliberation"])
+
+        recommendations[ticker] = recommendation
 
     snapshot = {
         "date": date,
