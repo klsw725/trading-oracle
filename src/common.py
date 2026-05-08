@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
@@ -674,6 +675,8 @@ def run_multi_perspective(
 
         results = run_all_perspectives(pi)
         consensus = compute_consensus(results, weights=weights)
+        initial_consensus = deepcopy(consensus)
+        initial_consensus.pop("initial_consensus", None)
 
         # 숙의 합의 (Phase 13) — 분기/약한 합의 시 발동
         if config.get("deliberation", {}).get("enabled", True):
@@ -682,8 +685,25 @@ def run_multi_perspective(
 
                 if should_deliberate(consensus):
                     consensus = deliberate(consensus, pi)
-            except Exception:
-                pass
+            except Exception as exc:
+                consensus["deliberation"] = {
+                    "triggered": True,
+                    "trigger_reason": "분기 또는 약한 합의",
+                    "before_vote_summary": initial_consensus.get("vote_summary", {}),
+                    "after_vote_summary": consensus.get("vote_summary", {}),
+                    "excluded_perspectives": [],
+                    "accepted_changes": [],
+                    "rejected_changes": [],
+                    "errors": [{"error": str(exc)}],
+                    "rounds": [],
+                    "total_rounds": 0,
+                    "original_verdict": initial_consensus.get("consensus_verdict"),
+                    "original_label": initial_consensus.get("consensus_label"),
+                    "final_verdict": consensus.get("consensus_verdict"),
+                    "final_label": consensus.get("consensus_label"),
+                    "verdict_changed": False,
+                }
+        consensus["initial_consensus"] = deepcopy(initial_consensus)
 
         # consensus에 fx_signal 첨부 (Phase 17 — 출력용)
         if fx_signal:
