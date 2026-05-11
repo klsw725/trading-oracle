@@ -254,7 +254,7 @@ def get_usd_krw_rate(market_data: dict) -> float | None:
         return None
     try:
         return float(value)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return None
 
 
