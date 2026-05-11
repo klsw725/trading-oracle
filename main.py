@@ -154,7 +154,10 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
                 else "전량 매도"
             )
             lines.append(f"  [bold red]🔴 매도 전략 ({ratio_label})[/bold red]")
-            lines.append(f"    매도가: {c}{plan['sell_price']:{fmt}}{u} (현재가)")
+            price_basis = plan.get("price_basis", "현재가 기준")
+            lines.append(
+                f"    권장 매도가: {c}{plan['sell_price']:{fmt}}{u} ({price_basis})"
+            )
             lines.append(
                 f"    매도 수량: {plan['sell_shares']}주 (보유 {plan['total_shares']}주)"
             )
@@ -869,7 +872,8 @@ def main():
 ━━━ 포트폴리오 ━━━
   uv run main.py add 005930 55000 10          매수 기록
   uv run main.py remove 005930                전량 매도
-  uv run main.py remove 005930 -n 5           5주 분할 매도
+  uv run main.py remove 005930 -p 60000       매도가 지정
+  uv run main.py remove 005930 -p 60000 -n 5  5주 분할 매도
   uv run main.py cash 10000000                현금 설정
   uv run main.py portfolio                    포트폴리오 조회
   uv run main.py history                      거래 내역

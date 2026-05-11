@@ -500,6 +500,7 @@ def compute_sell_plan(
     return {
         "type": "sell",
         "sell_price": current_price,
+        "price_basis": "현재가 기준",
         "total_shares": total_shares,
         "sell_shares": sell_shares,
         "sell_ratio": round(sell_shares / total_shares * 100)
