@@ -152,7 +152,7 @@ def remove_position(
                 f"매도 수량({sell_shares})이 보유 수량({pos['shares']})을 초과합니다"
             )
 
-        if sell_price:
+        if sell_price is not None:
             record = {
                 **pos,
                 "sell_shares": sell_shares,

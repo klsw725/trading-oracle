@@ -279,7 +279,7 @@ def cmd_remove(args):
     sell_price = args.price
     reason = args.reason or ""
     sell_shares = args.shares  # None이면 전량
-    if not sell_price:
+    if sell_price is None:
         ohlcv = fetch_ohlcv(ticker, days_back=5)
         sell_price = (
             float(ohlcv["close"].values[-1]) if not ohlcv.empty else pos["entry_price"]
