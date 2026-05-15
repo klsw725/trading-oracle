@@ -14,6 +14,7 @@
 | Phase 8 | [phase8-recommend.md](prds/phase8-recommend.md) | ✅ 완료 | 1-step 종목 추천 파이프라인 |
 | Phase 9 | [phase9-signal-v2.md](prds/phase9-signal-v2.md) | ✅ 완료 | 시그널 엔진 v2 (ATR 임계값 + 레짐 필터 + 정보 필드) |
 | Phase 10 | [phase10-web-search.md](prds/phase10-web-search.md) | ✅ 완료 | DuckDuckGo 웹 검색 + OUROBOROS 검증 |
+| Phase 1 Amendment | [phase1-divided-output-clarity.md](prds/phase1-divided-output-clarity.md) | ✅ 완료 | `DIVIDED` 합의 결과의 출력 용어 명확화 |
 
 > 각 PRD는 마일스톤, 검증 기준, 진행 로그를 포함한다. 구현 착수 시 PRD의 마일스톤을 체크리스트로 사용한다.
 

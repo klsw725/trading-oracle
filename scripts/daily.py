@@ -292,7 +292,7 @@ def main():
                 name = next(
                     (s["name"] for s in signals_data if s["ticker"] == ticker), ticker
                 )
-                _print_consensus_card(name, ticker, consensus)
+                _print_consensus_card(name, ticker, consensus, portfolio)
 
             # 일간 변동
             if delta and (
@@ -314,21 +314,27 @@ def _print_delta(delta: dict):
     from src.output.formatter import console
 
     verdict_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡", "DIVIDED": "🔶"}
+    verdict_labels = {"DIVIDED": "판단 갈림", "INSUFFICIENT": "판정 보류"}
     console.print(f"\n  [bold]📋 전일({delta['previous_date']}) 대비 변동[/bold]")
 
     for ch in delta["changes"]:
         prev_e = verdict_emoji.get(ch["previous_verdict"], "⚪")
         curr_e = verdict_emoji.get(ch["current_verdict"], "⚪")
+        previous_label = verdict_labels.get(ch["previous_verdict"], ch["previous_verdict"])
+        current_label = verdict_labels.get(ch["current_verdict"], ch["current_verdict"])
         console.print(
-            f"    {prev_e} → {curr_e} [bold]{ch['name']}[/bold]: {ch['previous_verdict']} → {ch['current_verdict']}"
+            f"    {prev_e} → {curr_e} [bold]{ch['name']}[/bold]: {previous_label} → {current_label}"
         )
         for pc in ch.get("perspective_changes", []):
+            previous_p = verdict_labels.get(pc["previous"], pc["previous"])
+            current_p = verdict_labels.get(pc["current"], pc["current"])
             console.print(
-                f"      [dim]└ {pc['perspective']}: {pc['previous']} → {pc['current']}[/dim]"
+                f"      [dim]└ {pc['perspective']}: {previous_p} → {current_p}[/dim]"
             )
 
     for nt in delta.get("new_tickers", []):
-        console.print(f"    [green]+ {nt['ticker']} — {nt['verdict']}[/green]")
+        verdict_label = verdict_labels.get(nt["verdict"], nt["verdict"])
+        console.print(f"    [green]+ {nt['ticker']} — {verdict_label}[/green]")
 
     for rt in delta.get("removed_tickers", []):
         console.print(f"    [red]- {rt['name']} ({rt['ticker']})[/red]")
@@ -336,7 +342,7 @@ def _print_delta(delta: dict):
     console.print()
 
 
-def _print_consensus_card(name: str, ticker: str, consensus: dict):
+def _print_consensus_card(name: str, ticker: str, consensus, portfolio=None):
     """다관점 합의 결과 터미널 출력"""
     from rich.panel import Panel
     from src.output.formatter import console
@@ -348,6 +354,14 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
         "N/A": "⚪",
         "DIVIDED": "🔶",
         "INSUFFICIENT": "⚫",
+    }
+    verdict_labels = {
+        "BUY": "BUY",
+        "SELL": "SELL",
+        "HOLD": "HOLD",
+        "N/A": "N/A",
+        "DIVIDED": "판단 갈림",
+        "INSUFFICIENT": "판정 보류",
     }
     confidence_colors = {
         "very_high": "bold green",
@@ -371,8 +385,9 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
 
     for p in consensus.get("perspectives", []):
         emoji = verdict_emoji.get(p["verdict"], "⚪")
+        verdict_label = verdict_labels.get(p["verdict"], p["verdict"])
         lines.append(
-            f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')}"
+            f"  {emoji} [bold]{p['perspective']}[/bold]: {verdict_label} — {p.get('reason', '')}"
         )
 
     # 환율 시그널 (Phase 17)
@@ -401,6 +416,28 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
         for r in reasoning[:3]:
             lines.append(f"  [dim]{r}[/dim]")
 
+    if consensus.get("consensus_verdict") == "DIVIDED":
+        lines.append("")
+        lines.append("  [bold magenta]🔶 판단 갈림 안내[/bold magenta]")
+        lines.append("    매수/매도 합의가 없어 자동 수량·가격 계획을 계산하지 않습니다.")
+        pos = None
+        if portfolio:
+            pos = next(
+                (p for p in portfolio.get("positions", []) if p["ticker"] == ticker),
+                None,
+            )
+        if pos:
+            shares = int(pos.get("shares", 0))
+            lines.append(f"    현재 보유: {shares}주")
+            if shares <= 1:
+                lines.append(
+                    "    1주 보유 상태에서는 분할 매도 대신 관망 또는 전량 1주 매도만 가능합니다."
+                )
+            else:
+                lines.append("    매도하려면 SELL 합의가 나온 뒤 권장 매도가와 수량을 확인하세요.")
+        else:
+            lines.append("    미보유 종목은 BUY 합의가 나온 뒤 매수가와 수량을 확인하세요.")
+
     vs = {
         "BUY": "green",
         "SELL": "red",
@@ -411,7 +448,7 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
     console.print(
         Panel(
             "\n".join(lines),
-            title=f"📊 {name} ({ticker}) — [{vs}]{consensus['consensus_verdict']}[/{vs}]",
+            title=f"📊 {name} ({ticker}) — [{vs}]{verdict_labels.get(consensus['consensus_verdict'], consensus['consensus_verdict'])}[/{vs}]",
             style=vs,
         )
     )

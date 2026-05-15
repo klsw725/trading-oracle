@@ -72,7 +72,7 @@ from src.output.formatter import (
 )
 
 
-def _print_consensus_card(name: str, ticker: str, consensus: dict):
+def _print_consensus_card(name: str, ticker: str, consensus, portfolio=None):
     """다관점 합의 결과를 터미널에 출력"""
     from rich.panel import Panel
     from src.data.market import is_us_ticker
@@ -89,6 +89,14 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
         "N/A": "⚪",
         "DIVIDED": "🔶",
         "INSUFFICIENT": "⚫",
+    }
+    verdict_labels = {
+        "BUY": "BUY",
+        "SELL": "SELL",
+        "HOLD": "HOLD",
+        "N/A": "N/A",
+        "DIVIDED": "판단 갈림",
+        "INSUFFICIENT": "판정 보류",
     }
     confidence_colors = {
         "very_high": "bold green",
@@ -112,8 +120,9 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
 
     for p in consensus.get("perspectives", []):
         emoji = verdict_emoji.get(p["verdict"], "⚪")
+        verdict_label = verdict_labels.get(p["verdict"], p["verdict"])
         lines.append(
-            f"  {emoji} [bold]{p['perspective']}[/bold]: {p['verdict']} — {p.get('reason', '')}"
+            f"  {emoji} [bold]{p['perspective']}[/bold]: {verdict_label} — {p.get('reason', '')}"
         )
 
     reasoning = consensus.get("majority_reasoning")
@@ -128,6 +137,27 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
 
     # 매매 전략 (action_plan)
     plan = consensus.get("action_plan")
+    if consensus.get("consensus_verdict") == "DIVIDED" and not plan:
+        lines.append("")
+        lines.append("  [bold magenta]🔶 판단 갈림 안내[/bold magenta]")
+        lines.append("    매수/매도 합의가 없어 자동 수량·가격 계획을 계산하지 않습니다.")
+        pos = None
+        if portfolio:
+            pos = next(
+                (p for p in portfolio.get("positions", []) if p["ticker"] == ticker),
+                None,
+            )
+        if pos:
+            shares = int(pos.get("shares", 0))
+            lines.append(f"    현재 보유: {shares}주")
+            if shares <= 1:
+                lines.append(
+                    "    1주 보유 상태에서는 분할 매도 대신 관망 또는 전량 1주 매도만 가능합니다."
+                )
+            else:
+                lines.append("    매도하려면 SELL 합의가 나온 뒤 권장 매도가와 수량을 확인하세요.")
+        else:
+            lines.append("    미보유 종목은 BUY 합의가 나온 뒤 매수가와 수량을 확인하세요.")
     if plan:
         lines.append("")
         if plan["type"] == "buy":
@@ -188,7 +218,7 @@ def _print_consensus_card(name: str, ticker: str, consensus: dict):
     console.print(
         Panel(
             "\n".join(lines),
-            title=f"📊 {name} ({ticker}) — [{vs}]{consensus['consensus_verdict']}[/{vs}]",
+            title=f"📊 {name} ({ticker}) — [{vs}]{verdict_labels.get(consensus['consensus_verdict'], consensus['consensus_verdict'])}[/{vs}]",
             style=vs,
         )
     )
@@ -728,7 +758,7 @@ def cmd_analyze(args):
                             (s["name"] for s in signals_data if s["ticker"] == ticker),
                             ticker,
                         )
-                        _print_consensus_card(name, ticker, consensus)
+                        _print_consensus_card(name, ticker, consensus, portfolio)
             except Exception as e:
                 if is_json:
                     analysis_text = f"LLM 오류: {e}"
