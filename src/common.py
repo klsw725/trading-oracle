@@ -867,6 +867,24 @@ def run_recommend(
             "no_recommendation_reason": "스크리닝 실패",
         }
 
+    held_tickers = {pos["ticker"] for pos in portfolio.get("positions", [])}
+    candidates = [c for c in candidates if c["ticker"] not in held_tickers]
+    if not candidates:
+        return {
+            "date": market_data["date"],
+            "market": market,
+            "regime": market_data.get("regime", {}),
+            "portfolio_sizing": portfolio_sizing,
+            "universe_size": screening_meta.get("universe_size", 0),
+            "universe_breakdown": screening_meta.get("universe_breakdown", {}),
+            "screened": 0,
+            "signal_filtered": 0,
+            "analyzed": 0,
+            "selection_constraints": screening_meta.get("selection_constraints", {}),
+            "recommendations": [],
+            "no_recommendation_reason": "보유 종목 제외 후 추천 후보 없음",
+        }
+
     # 기술적 분석
     tickers = {c["ticker"] for c in candidates}
     signals_data = analyze_tickers(tickers, config)
