@@ -16,7 +16,7 @@ from typing import Any
 import FinanceDataReader as fdr
 import pandas as pd
 
-from src.data.market import fetch_ohlcv
+from src.data.market import fetch_ohlcv, load_krx_listing
 from src.data.fundamentals import fetch_naver_fundamentals
 from src.data.sectors import load_sector_lookup
 from src.portfolio.correlation import classify_sector
@@ -49,7 +49,7 @@ def screen_leading_stocks(market: str = "ALL", top_n: int = 30) -> list[Candidat
     if market in ("NASDAQ", "NYSE", "US"):
         return _screen_us_stocks(market, top_n)
 
-    listing = pd.DataFrame(fdr.StockListing("KRX"))
+    listing = load_krx_listing()
     if listing.empty:
         return []
 
@@ -267,7 +267,7 @@ def _load_market_universe(market: str, universe_size: int) -> list[Candidate]:
 
 
 def _load_kr_market_universe(market: str, universe_size: int) -> list[Candidate]:
-    listing = pd.DataFrame(fdr.StockListing("KRX"))
+    listing = load_krx_listing()
     if listing.empty:
         return []
 

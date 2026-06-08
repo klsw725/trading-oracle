@@ -450,7 +450,12 @@ def build_trade_record_display(record: dict, market_data=None) -> dict:
     }
 
 
-def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict | None:
+def analyze_ticker(
+    ticker: str,
+    config: dict,
+    regime: str | None = None,
+    market_cap_override: float | None = None,
+) -> dict | None:
     """종목 기술적 분석 + 펀더멘털. 실패 시 None."""
     name = get_ticker_name(ticker)
     if not name:
@@ -465,8 +470,11 @@ def analyze_ticker(ticker: str, config: dict, regime: str | None = None) -> dict
         return None
 
     fund = fetch_fundamentals_cached(ticker)
-    cap_data = fetch_market_cap(ticker)
-    market_cap = cap_data.get("market_cap", 0)
+    if market_cap_override is None:
+        cap_data = fetch_market_cap(ticker)
+        market_cap = cap_data.get("market_cap", 0)
+    else:
+        market_cap = market_cap_override
 
     # 웹 검색 (Phase 10)
     web_context = {}
@@ -538,7 +546,10 @@ def has_us_tickers(
 
 
 def analyze_tickers(
-    tickers: set[str], config: dict, regime: str | None = None
+    tickers: set[str],
+    config: dict,
+    regime: str | None = None,
+    market_caps: dict[str, float] | None = None,
 ) -> list[dict]:
     """여러 종목 병렬 분석. 성공한 것만 반환."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -546,7 +557,12 @@ def analyze_tickers(
     if len(tickers) <= 1:
         results = []
         for ticker in tickers:
-            result = analyze_ticker(ticker, config, regime=regime)
+            result = analyze_ticker(
+                ticker,
+                config,
+                regime=regime,
+                market_cap_override=(market_caps or {}).get(ticker),
+            )
             if result:
                 results.append(result)
         return results
@@ -554,7 +570,13 @@ def analyze_tickers(
     results = []
     with ThreadPoolExecutor(max_workers=min(len(tickers), 6)) as executor:
         futures = {
-            executor.submit(analyze_ticker, ticker, config, regime): ticker
+            executor.submit(
+                analyze_ticker,
+                ticker,
+                config,
+                regime,
+                (market_caps or {}).get(ticker),
+            ): ticker
             for ticker in tickers
         }
         for future in as_completed(futures):
@@ -887,7 +909,8 @@ def run_recommend(
 
     # 기술적 분석
     tickers = {c["ticker"] for c in candidates}
-    signals_data = analyze_tickers(tickers, config)
+    market_caps = {c["ticker"]: c.get("market_cap", 0) for c in candidates}
+    signals_data = analyze_tickers(tickers, config, market_caps=market_caps)
 
     if not signals_data:
         return {

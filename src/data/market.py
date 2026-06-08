@@ -14,6 +14,9 @@ import FinanceDataReader as fdr
 from pykrx import stock as krx
 
 
+KRX_LISTING_CACHE_DAYS = 10
+
+
 def _safe_int(value: object) -> int:
     if value is None:
         return 0
@@ -99,7 +102,9 @@ def fetch_fundamentals(ticker: str) -> dict:
 def fetch_market_cap(ticker: str) -> dict:
     if is_us_ticker(ticker):
         return _fetch_market_cap_us(ticker)
-    listing = fdr.StockListing("KRX")
+    listing = load_krx_listing()
+    if listing.empty or "Code" not in listing.columns:
+        return {}
     row = listing[listing["Code"] == ticker]
     if row.empty:
         return {}
@@ -121,6 +126,27 @@ def _fetch_market_cap_us(ticker: str) -> dict:
         }
     except Exception:
         return {}
+
+
+def load_krx_listing() -> pd.DataFrame:
+    try:
+        return pd.DataFrame(fdr.StockListing("KRX"))
+    except Exception:
+        pass
+
+    base_url = "https://raw.githubusercontent.com/FinanceData/fdr_krx_data_cache/refs/heads/master/data/listing/krx"
+    today = datetime.now()
+    for days_ago in range(1, KRX_LISTING_CACHE_DAYS + 1):
+        date = (today - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+        try:
+            return pd.read_csv(
+                f"{base_url}/{date}.csv",
+                dtype={"Code": str, "Dept": str, "ChangeCode": str, "MarketId": str},
+            )
+        except Exception:
+            continue
+
+    return pd.DataFrame()
 
 
 def fetch_index_ohlcv(index_symbol: str = "KS11", days_back: int = 120) -> pd.DataFrame:
