@@ -4,8 +4,9 @@ import json
 import os
 import sys
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, time
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import yaml
@@ -14,6 +15,7 @@ from src.data.market import (
     fetch_index_ohlcv,
     fetch_market_cap,
     fetch_ohlcv,
+    get_ticker_exchange,
     get_ticker_name,
     is_us_ticker,
 )
@@ -92,7 +94,11 @@ def get_index_summary(index_code: str, name: str) -> dict:
     }
 
 
-def _detect_regime(index_data: dict, ohlcv_closes: np.ndarray | None = None) -> dict:
+def _detect_regime(
+    index_data: dict,
+    ohlcv_closes: np.ndarray | None = None,
+    source_name: str = "코스피",
+) -> dict:
     """코스피 지수 데이터에서 시장 레짐을 분류한다.
 
     판정 기준:
@@ -117,19 +123,19 @@ def _detect_regime(index_data: dict, ohlcv_closes: np.ndarray | None = None) -> 
         return {
             "regime": "bull",
             "label": "상승 추세",
-            "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 상회",
+            "description": f"{source_name} 20일 {change_20d:+.1f}%, EMA(20) 상회",
         }
     elif change_20d < -3 and above_ema is not True:
         return {
             "regime": "bear",
             "label": "하락 추세",
-            "description": f"코스피 20일 {change_20d:+.1f}%, EMA(20) 하회",
+            "description": f"{source_name} 20일 {change_20d:+.1f}%, EMA(20) 하회",
         }
     else:
         return {
             "regime": "sideways",
             "label": "횡보",
-            "description": f"코스피 20일 {change_20d:+.1f}%, 방향성 부재",
+            "description": f"{source_name} 20일 {change_20d:+.1f}%, 방향성 부재",
         }
 
 
@@ -455,6 +461,7 @@ def analyze_ticker(
     config: dict,
     regime: str | None = None,
     market_cap_override: float | None = None,
+    exchange: str | None = None,
 ) -> dict | None:
     """종목 기술적 분석 + 펀더멘털. 실패 시 None."""
     name = get_ticker_name(ticker)
@@ -462,6 +469,7 @@ def analyze_ticker(
         return None
 
     ohlcv = fetch_ohlcv(ticker, days_back=120)
+    fetched_at = datetime.now().astimezone().isoformat()
     if ohlcv.empty or len(ohlcv) < 60:
         return None
 
@@ -485,15 +493,21 @@ def analyze_ticker(
     except Exception:
         pass
 
-    return {
+    result: dict = {
         "ticker": ticker,
         "name": name,
         "signals": signals,
         "fundamentals": fund,
         "market_cap": market_cap,
         "web_context": web_context,
+        "_fetched_at": fetched_at,
         "_ohlcv": ohlcv,  # 메모리 내 재사용 (JSON 직렬화 대상 아님)
     }
+    if exchange is not None:
+        result["market"] = exchange
+    elif config.get("v4", {}).get("native_capture", {}).get("enabled") is True:
+        result["market"] = get_ticker_exchange(ticker)
+    return result
 
 
 def run_screening(config: dict) -> list[dict]:
@@ -550,6 +564,8 @@ def analyze_tickers(
     config: dict,
     regime: str | None = None,
     market_caps: dict[str, float] | None = None,
+    regimes: dict[str, str | None] | None = None,
+    exchanges: dict[str, str | None] | None = None,
 ) -> list[dict]:
     """여러 종목 병렬 분석. 성공한 것만 반환."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -560,8 +576,9 @@ def analyze_tickers(
             result = analyze_ticker(
                 ticker,
                 config,
-                regime=regime,
+                regime=(regimes or {}).get(ticker, regime),
                 market_cap_override=(market_caps or {}).get(ticker),
+                exchange=(exchanges or {}).get(ticker),
             )
             if result:
                 results.append(result)
@@ -574,8 +591,9 @@ def analyze_tickers(
                 analyze_ticker,
                 ticker,
                 config,
-                regime,
+                (regimes or {}).get(ticker, regime),
                 (market_caps or {}).get(ticker),
+                (exchanges or {}).get(ticker),
             ): ticker
             for ticker in tickers
         }
@@ -589,12 +607,256 @@ def analyze_tickers(
     return results
 
 
+def _market_context_for_ticker(item: dict, market_data: dict) -> dict:
+    ticker = item["ticker"]
+    declared_market = item.get("market") or get_ticker_exchange(ticker)
+    if not isinstance(declared_market, str):
+        declared_market = None
+    contracts = {
+        "KOSPI": ("kospi", "KS11", "코스피", "KR"),
+        "KOSDAQ": ("kosdaq", "KQ11", "코스닥", "KR"),
+        "KOSDAQ GLOBAL": ("kosdaq", "KQ11", "코스닥", "KR"),
+        "NASDAQ": ("nasdaq", "IXIC", "나스닥", "US"),
+        "NYSE": ("sp500", "US500", "S&P 500", "US"),
+    }
+    contract = contracts.get(declared_market) if declared_market is not None else None
+    context = {}
+    if contract is not None:
+        index_key, benchmark_id, source_name, market = contract
+        benchmark = market_data.get(index_key)
+        if benchmark is not None:
+            context[index_key] = benchmark
+        if declared_market == "KOSPI" and market_data.get("regime") is not None:
+            context["regime"] = market_data["regime"]
+        else:
+            context["regime"] = (
+                _detect_regime(benchmark, source_name=source_name)
+                if benchmark
+                else {
+                    "regime": "unknown",
+                    "label": "판정 불가",
+                    "description": f"{source_name} 지수 데이터 부족",
+                }
+            )
+        context["decision_regime_source"] = benchmark_id
+        context["market"] = market
+    else:
+        context["regime"] = market_data.get(
+            "regime",
+            {
+                "regime": "unknown",
+                "label": "판정 불가",
+                "description": "한국 지수 데이터 부족",
+            },
+        )
+        context["decision_regime_source"] = "KS11"
+        context["market"] = "US" if is_us_ticker(ticker) else "KR"
+    for field in ("web_macro", "fx_regime", "fx_regimes"):
+        if field in market_data:
+            context[field] = market_data[field]
+    return context
+
+
+def build_analysis_contexts(
+    tickers: set[str],
+    market_data: dict,
+    declared_exchanges: dict[str, str | None] | None = None,
+) -> tuple[dict[str, str | None], dict[str, str | None]]:
+    exchanges = {
+        ticker: (declared_exchanges or {}).get(ticker) or get_ticker_exchange(ticker)
+        for ticker in tickers
+    }
+    regimes = {
+        ticker: _market_context_for_ticker(
+            {"ticker": ticker, "market": exchanges[ticker]}, market_data
+        )["regime"].get("regime")
+        for ticker in tickers
+    }
+    return regimes, exchanges
+
+
+def _capture_data_cutoff(ticker: str, ohlcv) -> str | None:
+    if ohlcv is None or ohlcv.empty or len(ohlcv.index) == 0:
+        return None
+    latest = ohlcv.index[-1]
+    try:
+        session_date = latest.date()
+    except AttributeError:
+        try:
+            session_date = datetime.fromisoformat(str(latest)).date()
+        except ValueError:
+            return None
+    us_market = is_us_ticker(ticker)
+    timezone = ZoneInfo("America/New_York" if us_market else "Asia/Seoul")
+    close_time = time(16, 0) if us_market else time(15, 30)
+    return datetime.combine(session_date, close_time, tzinfo=timezone).isoformat()
+
+
+def _capture_market_contract(
+    item: dict,
+    market_context: dict,
+    data_cutoff_at: str,
+    market_data: dict,
+) -> dict | None:
+    from src.v4.models import canonical_hash
+
+    ticker = item["ticker"]
+    declared_exchange = item.get("exchange") or item.get("market")
+    if not isinstance(declared_exchange, str):
+        return None
+    contracts = {
+        "KOSPI": ("KR", "KRX", "Asia/Seoul", "KRW", "KS11", "kospi"),
+        "KOSDAQ": ("KR", "KRX", "Asia/Seoul", "KRW", "KQ11", "kosdaq"),
+        "KOSDAQ GLOBAL": ("KR", "KRX", "Asia/Seoul", "KRW", "KQ11", "kosdaq"),
+        "NASDAQ": ("US", "NASDAQ", "America/New_York", "USD", "IXIC", "nasdaq"),
+        "NYSE": ("US", "NYSE", "America/New_York", "USD", "US500", "sp500"),
+    }
+    contract = contracts.get(declared_exchange)
+    if contract is None:
+        return None
+    market, calendar_id, timezone_name, currency, benchmark_id, benchmark_key = contract
+    benchmark = json.loads(json.dumps(market_data.get(benchmark_key), cls=NumEncoder))
+    observed_fx_rate = 1.0 if market == "KR" else get_usd_krw_rate(market_data)
+    fx_pair = "KRW_KRW" if market == "KR" else "USD_KRW"
+    regime = market_context["regime"]
+    degraded_fields = ["benchmark_as_of", "target_session_close_at"]
+    if market == "US":
+        degraded_fields.extend(["fx_rate", "fx_as_of"])
+    fx_rate = observed_fx_rate if market == "KR" else None
+    return {
+        "schema_version": "v4.market_context.phase25.1",
+        "ticker": ticker,
+        "market": market,
+        "exchange": declared_exchange,
+        "calendar_id": calendar_id,
+        "calendar_version": "exchange-contract.v1",
+        "timezone": timezone_name,
+        "quote_currency": currency,
+        "base_reporting_currency": "KRW",
+        "benchmark_id": benchmark_id,
+        "benchmark_source": "src.data.market.fetch_index_ohlcv",
+        "benchmark_as_of": None,
+        "decision_data_cutoff_at": data_cutoff_at,
+        "target_session_close_at": None,
+        "decision_regime": regime.get("regime", "unknown"),
+        "decision_regime_source": benchmark_id,
+        "analysis_regime": regime.get("regime", "unknown"),
+        "fx_pair": fx_pair,
+        "fx_rate": fx_rate,
+        "fx_as_of": data_cutoff_at if market == "KR" else None,
+        "fx_freshness_state": "fresh" if market == "KR" else "missing",
+        "context_state": "degraded" if degraded_fields else "available",
+        "blocked_fields": [],
+        "degraded_fields": degraded_fields,
+        "provenance_hashes": {
+            "benchmark": str(canonical_hash(benchmark)),
+            "calendar": str(
+                canonical_hash(
+                    {
+                        "calendar_id": calendar_id,
+                        "timezone": timezone_name,
+                        "version": "exchange-contract.v1",
+                    }
+                )
+            ),
+            "fx": str(canonical_hash({"pair": fx_pair, "rate": fx_rate})),
+        },
+    }
+
+
+def _capture_ticker_provenance(
+    item: dict,
+    ohlcv,
+    fetched_at: str | None,
+    market_context: dict,
+    market_data: dict,
+    universe: dict,
+    llm: dict,
+) -> dict:
+    from src.v4.models import canonical_hash
+
+    ticker = item["ticker"]
+    data_cutoff_at = _capture_data_cutoff(ticker, ohlcv)
+    market_contract = (
+        _capture_market_contract(item, market_context, data_cutoff_at, market_data)
+        if data_cutoff_at is not None
+        else None
+    )
+    selected_by = item.get("selected_by") or ["run_multi_perspective_input"]
+    source = None
+    if data_cutoff_at is not None and fetched_at is not None:
+        source = {
+            "source_id": "src.data.market.fetch_ohlcv",
+            "adapter_version": "runtime-market-adapter.v1",
+            "record_type": "ohlcv",
+            "as_of": data_cutoff_at,
+            "fetched_at": fetched_at,
+            "freshness_state": "fresh",
+            "provenance_hash": str(
+                canonical_hash(ohlcv.to_json(orient="split", date_format="iso"))
+            ),
+            "raw_retention": "hash_only",
+        }
+    features = json.loads(
+        json.dumps(
+            {
+                "fundamentals": item.get("fundamentals", {}),
+                "market_cap": item.get("market_cap"),
+            },
+            cls=NumEncoder,
+        )
+    )
+    quality_states = [
+        {
+            "field": "candidate_universe",
+            "state": "degraded",
+            "reason": "pre-analysis rejected candidates are outside run_multi_perspective input",
+        },
+        {
+            "field": "source.adapter",
+            "state": "degraded",
+            "reason": "inner Toss/FDR/pykrx fallback is not exposed by fetch_ohlcv",
+        },
+    ]
+    if market_contract is not None and market_contract["context_state"] == "degraded":
+        quality_states.extend(
+            {
+                "field": f"market_context.{field}",
+                "state": "degraded",
+                "reason": "runtime market provenance is unavailable",
+            }
+            for field in market_contract["degraded_fields"]
+        )
+    return {
+        "market": market_contract.get("market") if market_contract else None,
+        "exchange": market_contract.get("exchange") if market_contract else None,
+        "data_cutoff_at": data_cutoff_at,
+        "market_context": market_contract,
+        "sources": [source] if source is not None else None,
+        "candidate_universe": universe,
+        "selection": {
+            "selected_by": selected_by,
+            "rank_before_filter": item.get("rank_before_filter"),
+        },
+        "rejections": item.get("rejections", []),
+        "features": features,
+        "llm": llm,
+        "risk_state": {
+            "state": "not_applicable",
+            "reason": "position sizing occurs after consensus",
+        },
+        "quality_states": quality_states,
+    }
+
+
 def run_multi_perspective(
     signals_data: list[dict],
     portfolio: dict,
     market_data: dict,
     config: dict,
     use_weights: bool = True,
+    capture_results=None,
+    capture_sources=None,
 ) -> dict:
     """다관점 분석 실행. ticker → consensus dict 반환.
 
@@ -605,6 +867,33 @@ def run_multi_perspective(
     from src.perspectives.base import PerspectiveInput
     from src.consensus.voter import run_all_perspectives
     from src.consensus.scorer import compute_consensus
+
+    capture_config = config.get("v4", {}).get("native_capture", {})
+    capture_enabled = capture_config.get("enabled") is True
+    capture_decision_at = (
+        datetime.now().astimezone().isoformat() if capture_enabled else None
+    )
+    capture_universe = None
+    if capture_enabled:
+        from src.v4.models import canonical_hash
+
+        capture_tickers = sorted(item["ticker"] for item in signals_data)
+        capture_markets = {
+            "US" if is_us_ticker(ticker) else "KR" for ticker in capture_tickers
+        }
+        capture_scope = (
+            "ALL" if len(capture_markets) > 1 else next(iter(capture_markets), "KR")
+        )
+        members_hash = str(canonical_hash(capture_tickers))
+        capture_universe = {
+            "universe_id": f"universe_v4_{members_hash[7:27]}",
+            "market_scope": capture_scope,
+            "source": "run_multi_perspective.input",
+            "adapter_version": "runtime-analysis-input.v1",
+            "total_seen": len(capture_tickers),
+            "members_hash": members_hash,
+        }
+        use_weights = False
 
     # 가중치 로드 (Phase 15: 레짐별 → Phase 5: 전체 → 동등)
     weights = None
@@ -628,19 +917,6 @@ def run_multi_perspective(
                 pass
 
     positions = portfolio.get("positions", [])
-    market_context = {}
-    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
-        if _idx_key in market_data:
-            market_context[_idx_key] = market_data[_idx_key]
-    if "regime" in market_data:
-        market_context["regime"] = market_data["regime"]
-    if "web_macro" in market_data:
-        market_context["web_macro"] = market_data["web_macro"]
-    if "fx_regime" in market_data:
-        market_context["fx_regime"] = market_data["fx_regime"]
-    if "fx_regimes" in market_data:
-        market_context["fx_regimes"] = market_data["fx_regimes"]
-
     # 환율 팩터용 매크로 시계열 (Phase 17)
     macro_df = None
     try:
@@ -652,8 +928,11 @@ def run_multi_perspective(
 
     fx_regime = market_data.get("fx_regime")
 
-    def _analyze_one(item: dict) -> tuple[str, dict]:
+    def _analyze_one(item: dict) -> tuple[str, dict, dict | None]:
+        from src.perspectives.base import LlmProvenanceCollector
+
         ticker = item["ticker"]
+        market_context = _market_context_for_ticker(item, market_data)
         pos = next((p for p in positions if p["ticker"] == ticker), None)
         fund = (
             fetch_fundamentals_cached(ticker)
@@ -662,8 +941,14 @@ def run_multi_perspective(
         )
 
         ohlcv = item.get("_ohlcv")
+        fetched_at = item.get("_fetched_at")
         if ohlcv is None or ohlcv.empty:
             ohlcv = fetch_ohlcv(ticker, days_back=120)
+            fetched_at = datetime.now().astimezone().isoformat()
+
+        provenance_collector = (
+            LlmProvenanceCollector(config) if capture_enabled else None
+        )
 
         # 환율 시그널 계산 (Phase 17)
         fx_signal = {}
@@ -693,6 +978,7 @@ def run_multi_perspective(
             config=config,
             web_context=item.get("web_context", {}),
             fx_signal=fx_signal,
+            provenance_collector=provenance_collector,
         )
 
         results = run_all_perspectives(pi)
@@ -731,13 +1017,28 @@ def run_multi_perspective(
         if fx_signal:
             consensus["fx_signal"] = fx_signal
 
-        return ticker, consensus
+        capture_provenance = None
+        if provenance_collector is not None and capture_universe is not None:
+            capture_provenance = _capture_ticker_provenance(
+                item,
+                ohlcv,
+                fetched_at,
+                market_context,
+                market_data,
+                capture_universe,
+                provenance_collector.export(),
+            )
+
+        return ticker, consensus, capture_provenance
 
     multi_results = {}
+    capture_provenance_by_ticker = {}
     if len(signals_data) <= 1:
         for item in signals_data:
-            ticker, consensus = _analyze_one(item)
+            ticker, consensus, capture_provenance = _analyze_one(item)
             multi_results[ticker] = consensus
+            if capture_provenance is not None:
+                capture_provenance_by_ticker[ticker] = capture_provenance
     else:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -748,8 +1049,10 @@ def run_multi_perspective(
             }
             for future in as_completed(futures):
                 try:
-                    ticker, consensus = future.result()
+                    ticker, consensus, capture_provenance = future.result()
                     multi_results[ticker] = consensus
+                    if capture_provenance is not None:
+                        capture_provenance_by_ticker[ticker] = capture_provenance
                 except Exception:
                     pass
 
@@ -763,6 +1066,63 @@ def run_multi_perspective(
             )
         except Exception:
             pass  # 스냅샷 저장 실패는 분석을 중단시키지 않음
+
+    if capture_enabled:
+        from src.v4.native_capture import CaptureFailed, NativeCaptureInput
+        from src.v4.native_capture import capture_native_snapshot
+
+        try:
+            capture_emitted_at = datetime.now().astimezone().isoformat()
+            capture_cutoffs = [
+                provenance.get("data_cutoff_at")
+                for provenance in capture_provenance_by_ticker.values()
+                if provenance.get("data_cutoff_at")
+            ]
+            capture_market_data = {
+                "v4_provenance": {
+                    "created_at": datetime.now().astimezone().isoformat(),
+                    "decision_at": capture_decision_at,
+                    "emitted_at": capture_emitted_at,
+                    "data_cutoff_at": max(
+                        capture_cutoffs,
+                        key=lambda value: datetime.fromisoformat(value),
+                    )
+                    if capture_cutoffs
+                    else None,
+                    "market_scope": capture_universe.get("market_scope")
+                    if capture_universe
+                    else None,
+                }
+            }
+            capture_signals_data = [
+                {
+                    "ticker": item["ticker"],
+                    "name": item["name"],
+                    "signals": json.loads(
+                        json.dumps(item.get("signals", {}), cls=NumEncoder)
+                    ),
+                    "v4_provenance": capture_provenance_by_ticker.get(
+                        item["ticker"]
+                    ),
+                }
+                for item in signals_data
+            ]
+            capture_source = NativeCaptureInput(
+                multi_results=multi_results,
+                signals_data=capture_signals_data,
+                market_data=capture_market_data,
+                portfolio=json.loads(json.dumps(portfolio, cls=NumEncoder)),
+                config=config,
+            )
+            if capture_sources is not None:
+                capture_sources.append(capture_source)
+                capture_result = None
+            else:
+                capture_result = capture_native_snapshot(capture_source)
+        except Exception as exc:
+            capture_result = CaptureFailed(type(exc).__name__, str(exc))
+        if capture_results is not None and capture_result is not None:
+            capture_results.append(capture_result)
 
     return multi_results
 
@@ -787,16 +1147,11 @@ def run_single_perspective(
         }
 
     positions = portfolio.get("positions", [])
-    market_context = {}
-    for _idx_key in ("kospi", "kosdaq", "nasdaq", "sp500"):
-        if _idx_key in market_data:
-            market_context[_idx_key] = market_data[_idx_key]
-    if "regime" in market_data:
-        market_context["regime"] = market_data["regime"]
 
     results = {}
     for item in signals_data:
         ticker = item["ticker"]
+        market_context = _market_context_for_ticker(item, market_data)
         pos = next((p for p in positions if p["ticker"] == ticker), None)
         fund = (
             fetch_fundamentals_cached(ticker)
@@ -823,6 +1178,70 @@ def run_single_perspective(
         results[ticker] = result.to_dict()
 
     return results
+
+
+def _complete_recommendation_capture(source, audit: dict):
+    from src.v4.models import canonical_hash
+    from src.v4.native_capture import NativeCaptureInput
+
+    members = json.loads(json.dumps(audit["universe"], cls=NumEncoder))
+    member_tickers = sorted(member["ticker"] for member in members)
+    members_hash = str(canonical_hash(member_tickers))
+    universe = {
+        "universe_id": f"universe_v4_{members_hash[7:27]}",
+        "market_scope": audit["market_scope"],
+        "source": "screen_recommendation_candidates",
+        "adapter_version": "recommendation-screen.v1",
+        "total_seen": len(members),
+        "members_hash": members_hash,
+        "members": members,
+    }
+    rejections = []
+    for rejection in audit["rejections"]:
+        record = json.loads(json.dumps(rejection, cls=NumEncoder))
+        record["provenance_hash"] = str(canonical_hash(record))
+        rejections.append(record)
+
+    signals_data = []
+    for item in source.signals_data:
+        enriched = deepcopy(item)
+        provenance = enriched["v4_provenance"]
+        ticker = enriched["ticker"]
+        provenance["candidate_universe"] = universe
+        provenance["selection"]["rank_before_filter"] = audit["ranks"].get(ticker)
+        provenance["selection"]["pipeline_stages"] = audit["stages"]
+        provenance["rejections"] = rejections
+        provenance["risk_state"] = {
+            "state": "available",
+            "portfolio_check": audit["portfolio_check"],
+            "action_plan": audit["action_plans"].get(ticker),
+        }
+        provenance["quality_states"] = [
+            {
+                "field": "source.adapter",
+                "state": "degraded",
+                "reason": "inner Toss/FDR/pykrx fallback is not exposed by fetch_ohlcv",
+            }
+        ]
+        signals_data.append(enriched)
+    return NativeCaptureInput(
+        multi_results=source.multi_results,
+        signals_data=signals_data,
+        market_data=source.market_data,
+        portfolio=source.portfolio,
+        config=source.config,
+    )
+
+
+def _early_capture_status(config: dict, missing_stage: str) -> dict:
+    if config.get("v4", {}).get("native_capture", {}).get("enabled") is not True:
+        return {}
+    return {
+        "v4_capture": {
+            "status": "inconclusive",
+            "missing_provenance": [f"recommendation_pipeline.{missing_stage}"],
+        }
+    }
 
 
 def run_recommend(
@@ -887,9 +1306,14 @@ def run_recommend(
             "selection_constraints": screening_meta.get("selection_constraints", {}),
             "recommendations": [],
             "no_recommendation_reason": "스크리닝 실패",
+            **_early_capture_status(config, "screening"),
         }
 
+    screened_candidates = list(candidates)
     held_tickers = {pos["ticker"] for pos in portfolio.get("positions", [])}
+    held_candidates = [
+        candidate for candidate in candidates if candidate["ticker"] in held_tickers
+    ]
     candidates = [c for c in candidates if c["ticker"] not in held_tickers]
     if not candidates:
         return {
@@ -905,12 +1329,33 @@ def run_recommend(
             "selection_constraints": screening_meta.get("selection_constraints", {}),
             "recommendations": [],
             "no_recommendation_reason": "보유 종목 제외 후 추천 후보 없음",
+            **_early_capture_status(config, "portfolio_exclusion"),
         }
 
     # 기술적 분석
     tickers = {c["ticker"] for c in candidates}
     market_caps = {c["ticker"]: c.get("market_cap", 0) for c in candidates}
-    signals_data = analyze_tickers(tickers, config, market_caps=market_caps)
+    candidates_by_ticker = {candidate["ticker"]: candidate for candidate in candidates}
+    declared_exchanges = {
+        ticker: candidate.get("market")
+        for ticker, candidate in candidates_by_ticker.items()
+    }
+    regimes, exchanges = build_analysis_contexts(
+        tickers, market_data, declared_exchanges
+    )
+    signals_data = analyze_tickers(
+        tickers,
+        config,
+        market_caps=market_caps,
+        regimes=regimes,
+        exchanges=exchanges,
+    )
+    for item in signals_data:
+        candidate = candidates_by_ticker.get(item["ticker"])
+        if candidate is not None:
+            item["market"] = candidate.get("market")
+            item["sector"] = candidate.get("sector")
+            item["selected_by"] = candidate.get("selected_by", [])
 
     if not signals_data:
         return {
@@ -926,6 +1371,7 @@ def run_recommend(
             "selection_constraints": screening_meta.get("selection_constraints", {}),
             "recommendations": [],
             "no_recommendation_reason": "시그널 분석 실패",
+            **_early_capture_status(config, "technical_analysis"),
         }
 
     # 2단계: 시그널 필터
@@ -989,6 +1435,7 @@ def run_recommend(
             "selection_constraints": screening_meta.get("selection_constraints", {}),
             "recommendations": recs,
             "no_recommendation_reason": None if recs else "시그널 Bull 종목 없음",
+            **_early_capture_status(config, "llm_disabled"),
         }
 
     if not bull_data:
@@ -1005,10 +1452,23 @@ def run_recommend(
             "selection_constraints": screening_meta.get("selection_constraints", {}),
             "recommendations": [],
             "no_recommendation_reason": "시그널 Bull 종목 없음",
+            **_early_capture_status(config, "signal_filter"),
         }
 
     # 3단계: 다관점 분석 (Bull 종목만)
-    multi_results = run_multi_perspective(bull_data, portfolio, market_data, config)
+    capture_enabled = (
+        config.get("v4", {}).get("native_capture", {}).get("enabled") is True
+    )
+    capture_results = [] if capture_enabled else None
+    capture_sources = [] if capture_enabled else None
+    multi_results = run_multi_perspective(
+        bull_data,
+        portfolio,
+        market_data,
+        config,
+        capture_results=capture_results,
+        capture_sources=capture_sources,
+    )
 
     # 4단계: BUY 합의 필터 + action_plan 부착
     recs = []
@@ -1083,11 +1543,106 @@ def run_recommend(
 
     recs.sort(key=lambda x: x["score"], reverse=True)
 
+    if capture_sources:
+        from src.v4.native_capture import CaptureFailed, capture_native_snapshot
+
+        assert capture_results is not None
+        try:
+            universe = screening_meta.get("capture_universe", [])
+            ranks = {
+                member["ticker"]: member.get("rank_before_filter")
+                for member in universe
+            }
+            rejections = [
+                {
+                    "ticker": member["ticker"],
+                    "stage": "diversified_selection",
+                    "reason": member.get("skipped_reason", "selection_cutoff"),
+                }
+                for member in universe
+                if not member.get("selected")
+            ]
+            rejections.extend(
+                {
+                    "ticker": candidate["ticker"],
+                    "stage": "portfolio_exclusion",
+                    "reason": "already_held",
+                }
+                for candidate in held_candidates
+            )
+            analyzed_tickers = {item["ticker"] for item in signals_data}
+            rejections.extend(
+                {
+                    "ticker": candidate["ticker"],
+                    "stage": "technical_analysis",
+                    "reason": "analysis_unavailable",
+                }
+                for candidate in candidates
+                if candidate["ticker"] not in analyzed_tickers
+            )
+            bull_tickers = {item["ticker"] for item in bull_data}
+            rejections.extend(
+                {
+                    "ticker": item["ticker"],
+                    "stage": "signal_filter",
+                    "reason": "insufficient_bull_votes",
+                    "bull_votes": item["signals"]["bull_votes"],
+                    "threshold": min_votes,
+                }
+                for item in signals_data
+                if item["ticker"] not in bull_tickers
+            )
+            rejections.extend(
+                {
+                    "ticker": ticker,
+                    "stage": "consensus",
+                    "reason": f"verdict_{consensus.get('consensus_verdict', 'unknown').lower()}",
+                }
+                for ticker, consensus in multi_results.items()
+                if consensus.get("consensus_verdict") != "BUY"
+            )
+            action_plans = {
+                recommendation["ticker"]: recommendation.get("action_plan")
+                for recommendation in recs
+            }
+            stages = {
+                "screening": {"status": "complete", "seen": len(universe)},
+                "diversified_selection": {
+                    "status": "complete",
+                    "selected": len(screened_candidates),
+                },
+                "portfolio_exclusion": {
+                    "status": "complete",
+                    "excluded": len(held_candidates),
+                },
+                "signal_filter": {
+                    "status": "complete",
+                    "passed": len(bull_data),
+                },
+                "consensus": {"status": "complete", "analyzed": len(multi_results)},
+                "risk_action": {"status": "complete", "planned": len(action_plans)},
+            }
+            capture_source = _complete_recommendation_capture(
+                capture_sources[0],
+                {
+                    "universe": universe,
+                    "market_scope": market,
+                    "ranks": ranks,
+                    "rejections": rejections,
+                    "stages": stages,
+                    "portfolio_check": pf_check,
+                    "action_plans": action_plans,
+                },
+            )
+            capture_results.append(capture_native_snapshot(capture_source))
+        except Exception as exc:
+            capture_results.append(CaptureFailed(type(exc).__name__, str(exc)))
+
     reason = None
     if not recs:
         reason = "BUY 합의 종목 없음"
 
-    return {
+    output = {
         "date": market_data["date"],
         "market": market,
         "usd_krw_rate": usd_krw_rate,
@@ -1102,6 +1657,11 @@ def run_recommend(
         "recommendations": recs,
         "no_recommendation_reason": reason,
     }
+    if capture_results:
+        from src.v4.native_capture import capture_result_json
+
+        output["v4_capture"] = capture_result_json(capture_results[0])
+    return output
 
 
 def build_signals_json(signals_data: list[dict], market_data=None) -> list[dict]:

@@ -24,6 +24,8 @@ from src.common import (
     json_dump,
     collect_market_data,
     analyze_tickers,
+    build_analysis_contexts,
+    has_us_tickers,
     run_single_perspective,
 )
 from src.portfolio.tracker import load_portfolio
@@ -45,9 +47,12 @@ def main():
 
     config = load_config()
     portfolio = load_portfolio()
-    market_data = collect_market_data()
-
-    signals_data = analyze_tickers(set(args.tickers), config)
+    tickers = set(args.tickers)
+    market_data = collect_market_data(include_us=has_us_tickers(tickers))
+    regimes, exchanges = build_analysis_contexts(tickers, market_data)
+    signals_data = analyze_tickers(
+        tickers, config, regimes=regimes, exchanges=exchanges
+    )
     if not signals_data:
         if args.json:
             print(json_dump({"status": "error", "message": "분석 가능한 종목이 없습니다"}))

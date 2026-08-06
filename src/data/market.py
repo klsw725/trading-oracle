@@ -243,6 +243,8 @@ def _get_us_listing() -> pd.DataFrame:
     if _us_listing_cache is None:
         nasdaq = fdr.StockListing("NASDAQ")
         nyse = fdr.StockListing("NYSE")
+        nasdaq["Exchange"] = "NASDAQ"
+        nyse["Exchange"] = "NYSE"
         _us_listing_cache = pd.concat([nasdaq, nyse], ignore_index=True)
     return _us_listing_cache
 
@@ -258,6 +260,19 @@ def get_ticker_name(ticker: str) -> str:
             return str(row.iloc[0].get("Name", ticker))
         return ticker
     return krx.get_market_ticker_name(ticker)
+
+
+def get_ticker_exchange(ticker: str) -> str | None:
+    if is_us_ticker(ticker):
+        listing = _get_us_listing()
+        row = listing[listing["Symbol"] == ticker.upper()]
+        return str(row.iloc[0]["Exchange"]) if not row.empty else None
+    listing = load_krx_listing()
+    row = listing[listing["Code"] == ticker]
+    if row.empty:
+        return None
+    market = str(row.iloc[0].get("Market", ""))
+    return market if market in ("KOSPI", "KOSDAQ", "KOSDAQ GLOBAL") else None
 
 
 def fetch_top_market_cap(market: str = "KOSPI", top_n: int = 50) -> pd.DataFrame:

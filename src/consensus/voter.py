@@ -6,7 +6,13 @@ SPEC §4-2: asyncio/ThreadPool 병렬, 파싱 실패 1회 재시도 (각 관점 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from src.perspectives.base import PerspectiveInput, PerspectiveResult, Perspective, make_na_result
+from src.perspectives.base import (
+    Perspective,
+    PerspectiveInput,
+    PerspectiveResult,
+    llm_capture_scope,
+    make_na_result,
+)
 from src.perspectives.kwangsoo import KwangsooPerspective
 from src.perspectives.ouroboros import OuroborosPerspective
 from src.perspectives.quant_perspective import QuantPerspective
@@ -51,7 +57,11 @@ def run_all_perspectives(data: PerspectiveInput, max_workers: int = 5) -> list[P
 
 def _safe_analyze(perspective: Perspective, data: PerspectiveInput) -> PerspectiveResult:
     """관점 분석 실행. 예외 발생 시 N/A 반환."""
-    try:
-        return perspective.analyze(data)
-    except Exception as e:
-        return make_na_result(perspective.name, f"분석 실패: {e}")
+    with llm_capture_scope(data.provenance_collector, perspective.name):
+        try:
+            result = perspective.analyze(data)
+        except Exception as e:
+            result = make_na_result(perspective.name, f"분석 실패: {e}")
+    if data.provenance_collector is not None:
+        data.provenance_collector.record_result(result)
+    return result

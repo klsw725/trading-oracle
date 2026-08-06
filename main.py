@@ -36,6 +36,7 @@ from src.common import (
     collect_market_data,
     collect_tickers,
     analyze_tickers,
+    build_analysis_contexts,
     run_multi_perspective,
     build_signals_json,
     build_portfolio_summary_for_display,
@@ -621,8 +622,10 @@ def cmd_analyze(args):
     if not quiet:
         print_phase("기술적 분석", f"{len(tickers)}개 종목 앙상블 보팅")
 
-    regime = market_data.get("regime", {}).get("regime")
-    signals_data = analyze_tickers(tickers, config, regime=regime)
+    regimes, exchanges = build_analysis_contexts(tickers, market_data)
+    signals_data = analyze_tickers(
+        tickers, config, regimes=regimes, exchanges=exchanges
+    )
     if not quiet:
         for item in signals_data:
             print_signal_card(item)
@@ -659,6 +662,10 @@ def cmd_analyze(args):
     analysis_text = None
     multi_results = {}
     delta = None
+    capture_enabled = (
+        config.get("v4", {}).get("native_capture", {}).get("enabled") is True
+    )
+    capture_results = [] if capture_enabled else None
 
     if not no_llm:
         if use_legacy:
@@ -693,6 +700,7 @@ def cmd_analyze(args):
                     market_data,
                     config,
                     use_weights=use_weights,
+                    capture_results=capture_results,
                 )
                 if multi_results:
                     try:
@@ -787,6 +795,10 @@ def cmd_analyze(args):
             output["delta"] = delta
         if analysis_text:
             output["analysis"] = analysis_text
+        if capture_results:
+            from src.v4.native_capture import capture_result_json
+
+            output["v4_capture"] = capture_result_json(capture_results[0])
         print(json_dump(output))
         return
 

@@ -27,6 +27,7 @@ from src.common import (
     collect_market_data,
     collect_tickers,
     analyze_tickers,
+    build_analysis_contexts,
     run_multi_perspective,
     build_signals_json,
     build_portfolio_summary_for_display,
@@ -81,8 +82,10 @@ def main():
         sys.exit(1)
 
     # 기술적 분석
-    regime = market_data.get("regime", {}).get("regime")
-    signals_data = analyze_tickers(tickers, config, regime=regime)
+    regimes, exchanges = build_analysis_contexts(tickers, market_data)
+    signals_data = analyze_tickers(
+        tickers, config, regimes=regimes, exchanges=exchanges
+    )
     if not signals_data:
         if args.json:
             print(
@@ -107,6 +110,10 @@ def main():
     multi_results = {}
     analysis_text = None
     delta = None
+    capture_enabled = (
+        config.get("v4", {}).get("native_capture", {}).get("enabled") is True
+    )
+    capture_results = [] if capture_enabled else None
 
     if not args.no_llm:
         if args.legacy:
@@ -116,7 +123,12 @@ def main():
         else:
             use_weights = not args.no_weights
             multi_results = run_multi_perspective(
-                signals_data, portfolio, market_data, config, use_weights=use_weights
+                signals_data,
+                portfolio,
+                market_data,
+                config,
+                use_weights=use_weights,
+                capture_results=capture_results,
             )
 
             # 일간 변동 계산
@@ -149,6 +161,10 @@ def main():
             output["delta"] = delta
         if analysis_text:
             output["analysis"] = analysis_text
+        if capture_results:
+            from src.v4.native_capture import capture_result_json
+
+            output["v4_capture"] = capture_result_json(capture_results[0])
         # Phase 17: 환율 레짐
         if market_data.get("fx_regime"):
             output["fx_regime"] = market_data["fx_regime"]

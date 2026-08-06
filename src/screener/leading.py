@@ -113,13 +113,31 @@ def screen_recommendation_candidates(
         diversification=diversification,
     )
 
-    metadata = {
+    metadata: dict[str, Any] = {
         "market": market,
         "universe_size": len(universe),
         "universe_breakdown": breakdown,
         "screened": len(selected),
         "selection_constraints": selection_meta,
     }
+    if config and config.get("v4", {}).get("native_capture", {}).get("enabled") is True:
+        selected_by_ticker = {
+            candidate["ticker"]: candidate for candidate in selected
+        }
+        capture_universe: Any = []
+        for candidate in sorted(universe, key=_candidate_sort_key, reverse=True):
+            member = dict(candidate)
+            selected_candidate = selected_by_ticker.get(candidate["ticker"])
+            member["selected"] = selected_candidate is not None
+            member["selected_by"] = (
+                selected_candidate.get("selected_by", [])
+                if selected_candidate is not None
+                else []
+            )
+            if selected_candidate is not None:
+                member.pop("skipped_reason", None)
+            capture_universe.append(member)
+        metadata["capture_universe"] = capture_universe
     return selected, metadata
 
 
@@ -149,6 +167,8 @@ def select_diversified_candidates(
         settings.update(diversification)
 
     ordered = sorted(candidates, key=_candidate_sort_key, reverse=True)
+    for rank, candidate in enumerate(ordered, start=1):
+        candidate["rank_before_filter"] = rank
     components = get_recommend_market_components(market)
     composite_market = len(components) > 1
     base_sector_cap = int(settings.get("sector_cap", 1))
@@ -233,7 +253,7 @@ def select_diversified_candidates(
     for candidate in ordered:
         if candidate["ticker"] in selected_tickers:
             continue
-        candidate["skipped_reason"] = "selection_cutoff"
+        candidate.setdefault("skipped_reason", "selection_cutoff")
 
     metadata = {
         "sector_cap": base_sector_cap,

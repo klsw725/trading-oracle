@@ -6,7 +6,12 @@
 
 from typing import Any, TypeAlias
 
-from src.perspectives.base import PerspectiveInput, call_llm, extract_json
+from src.perspectives.base import (
+    PerspectiveInput,
+    call_llm,
+    extract_json,
+    llm_capture_scope,
+)
 
 
 DELIBERATION_PROMPT = """\
@@ -130,12 +135,13 @@ def deliberate(consensus: DictAny, data: PerspectiveInput, max_rounds: int = 2) 
             )
 
             try:
-                response = call_llm(
-                    f"당신은 {p_name} 관점의 투자 분석가입니다. 이전 판정을 재검토합니다.",
-                    prompt,
-                    data.config,
-                    max_tokens=700,
-                )
+                with llm_capture_scope(data.provenance_collector, p_name):
+                    response = call_llm(
+                        f"당신은 {p_name} 관점의 투자 분석가입니다. 이전 판정을 재검토합니다.",
+                        prompt,
+                        data.config,
+                        max_tokens=700,
+                    )
                 parsed_obj: object = extract_json(response)
             except Exception as exc:
                 change = _build_change(p_name, round_num, p_verdict, p_verdict, False, "LLM/parsing exception")

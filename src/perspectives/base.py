@@ -4,12 +4,22 @@
 SPEC §4-0 공통 필드 규격 준수.
 """
 
+from __future__ import annotations
+
 import json
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
+from copy import deepcopy
 from dataclasses import dataclass, field
+from threading import Lock
+from typing import Final
 
 import pandas as pd
+
+from src.v4.models import JsonValue
 
 
 @dataclass
@@ -26,6 +36,7 @@ class PerspectiveInput:
     config: dict
     web_context: dict = field(default_factory=dict)  # 웹 검색 결과 (Phase 10)
     fx_signal: dict = field(default_factory=dict)  # 환율 팩터 (Phase 17)
+    provenance_collector: LlmProvenanceCollector | None = None
 
 
 @dataclass
@@ -62,6 +73,125 @@ class PerspectiveResult:
         return base
 
 
+class LlmProvenanceCollector:
+    def __init__(self, config: Mapping[str, JsonValue]) -> None:
+        self._config = deepcopy(dict(config))
+        v4_config = self._config.get("v4")
+        if isinstance(v4_config, dict):
+            capture_config = v4_config.get("native_capture")
+            if isinstance(capture_config, dict):
+                self._config["v4"] = {
+                    **v4_config,
+                    "native_capture": {
+                        "enabled": capture_config.get("enabled") is True
+                    },
+                }
+        self._lock = Lock()
+        self._prompts: list[JsonValue] = []
+        self._raw_results: list[JsonValue] = []
+        self._parsed_results: list[JsonValue] = []
+        self._attempts: dict[str, int] = {}
+
+    def record_prompt(
+        self,
+        perspective: str,
+        provider: str,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+    ) -> int:
+        with self._lock:
+            attempt = self._attempts.get(perspective, 0) + 1
+            self._attempts[perspective] = attempt
+            self._prompts.append(
+                {
+                    "perspective": perspective,
+                    "attempt": attempt,
+                    "provider": provider,
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                }
+            )
+            return attempt
+
+    def record_response(
+        self,
+        perspective: str,
+        attempt: int,
+        provider: str,
+        model: str,
+        raw_text: str,
+        provider_request_id: str | None,
+    ) -> None:
+        with self._lock:
+            self._raw_results.append(
+                {
+                    "perspective": perspective,
+                    "attempt": attempt,
+                    "provider": provider,
+                    "model": model,
+                    "provider_request_id": provider_request_id,
+                    "raw_text": raw_text,
+                    "quality_state": "available",
+                }
+            )
+
+    def record_result(self, result: PerspectiveResult) -> None:
+        with self._lock:
+            self._parsed_results.append(deepcopy(result.to_dict()))
+            if not any(
+                isinstance(raw, dict)
+                and raw.get("perspective") == result.perspective
+                for raw in self._raw_results
+            ):
+                self._raw_results.append(
+                    {"perspective": result.perspective, "raw_text": None,
+                     "provider_error_type": "unknown", "quality_state": "unknown"}
+                )
+
+    def export(self) -> dict[str, JsonValue]:
+        llm_config = self._config.get("llm")
+        config_record = llm_config if isinstance(llm_config, dict) else {}
+        with self._lock:
+            return {
+                "provider_adapter_version": "src.perspectives.base.call_llm.v1",
+                "provider": config_record.get("provider", "anthropic"),
+                "model": config_record.get("model"),
+                "provider_request_id": None,
+                "prompt_bundle_version": "runtime-perspectives.v1",
+                "prompt_messages": deepcopy(self._prompts),
+                "config_version": "runtime-config.v1",
+                "config": deepcopy(self._config),
+                "parser_version": "src.perspectives.base.extract_json.v1",
+                "raw_results": deepcopy(self._raw_results),
+                "parsed_results": deepcopy(self._parsed_results),
+            }
+
+
+type _LlmCaptureBinding = tuple[LlmProvenanceCollector, str]
+_LLM_CAPTURE: Final[ContextVar[_LlmCaptureBinding | None]] = ContextVar(
+    "llm_capture", default=None
+)
+
+
+@contextmanager
+def llm_capture_scope(
+    collector: LlmProvenanceCollector | None,
+    perspective: str,
+) -> Iterator[None]:
+    if collector is None:
+        yield
+        return
+    token = _LLM_CAPTURE.set((collector, perspective))
+    try:
+        yield
+    finally:
+        _LLM_CAPTURE.reset(token)
+
+
 def make_na_result(perspective: str, reason: str = "판정 불가") -> PerspectiveResult:
     """LLM 호출 실패 등으로 판정 불가 시 N/A 결과 생성"""
     return PerspectiveResult(
@@ -95,15 +225,35 @@ def call_llm(system_prompt: str, user_prompt: str, config: dict, max_tokens: int
     """LLM 호출 → 텍스트 반환. config.llm.provider에 따라 Anthropic/Codex 분기."""
     llm_config = config.get("llm", {})
     provider = llm_config.get("provider", "anthropic")
+    model = llm_config.get(
+        "model",
+        "gpt-5.1-codex" if provider == "codex" else "claude-sonnet-4-20250514",
+    )
+    binding = _LLM_CAPTURE.get()
+    attempt = (
+        binding[0].record_prompt(
+            binding[1],
+            provider,
+            model,
+            system_prompt,
+            user_prompt,
+        )
+        if binding is not None
+        else 0
+    )
 
     if provider == "codex":
         from src.agent.codex import generate
-        model = llm_config.get("model", "gpt-5.1-codex")
-        return generate(system_prompt, user_prompt, model=model)
+
+        text = generate(system_prompt, user_prompt, model=model)
+        if binding is not None:
+            binding[0].record_response(
+                binding[1], attempt, provider, model, text, None
+            )
+        return text
 
     from src.agent.oracle import get_client, _parse_sse_response
     client = get_client()
-    model = llm_config.get("model", "claude-sonnet-4-20250514")
 
     response = client.messages.create(
         model=model,
@@ -113,8 +263,18 @@ def call_llm(system_prompt: str, user_prompt: str, config: dict, max_tokens: int
     )
 
     if isinstance(response, str):
-        return _parse_sse_response(response)
-    return response.content[0].text
+        text = _parse_sse_response(response)
+        provider_raw_text = response
+        request_id = None
+    else:
+        text = response.content[0].text
+        provider_raw_text = text
+        request_id = getattr(response, "id", None)
+    if binding is not None:
+        binding[0].record_response(
+            binding[1], attempt, provider, model, provider_raw_text, request_id
+        )
+    return text
 
 
 class Perspective(ABC):
