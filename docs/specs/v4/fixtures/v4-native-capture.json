@@ -1,0 +1,239 @@
+{
+  "multi_results": {
+    "005930": {
+      "consensus_verdict": "BUY",
+      "consensus_label": "만장일치",
+      "confidence": "very_high",
+      "vote_summary": {
+        "BUY": 5,
+        "SELL": 0,
+        "HOLD": 0,
+        "N/A": 0
+      },
+      "perspectives": [
+        {
+          "perspective": "kwangsoo",
+          "verdict": "BUY",
+          "confidence": 0.8,
+          "reasoning": ["fake fixture trend and risk inputs are aligned"],
+          "reason": "fake fixture supports a staged entry",
+          "action": {"type": "buy"}
+        },
+        {
+          "perspective": "ouroboros",
+          "verdict": "BUY",
+          "confidence": 0.8,
+          "reasoning": ["fake fixture contains no dilution warning"],
+          "reason": "fake fixture risk checks are clear",
+          "action": {"type": "buy"}
+        },
+        {
+          "perspective": "quant",
+          "verdict": "BUY",
+          "confidence": 0.8,
+          "reasoning": ["fake fixture has five bullish votes"],
+          "reason": "fake fixture technical signals are bullish",
+          "action": {"type": "buy"}
+        },
+        {
+          "perspective": "macro",
+          "verdict": "BUY",
+          "confidence": 0.8,
+          "reasoning": ["fake fixture market regime is supportive"],
+          "reason": "fake fixture macro context is supportive",
+          "action": {"type": "buy"}
+        },
+        {
+          "perspective": "value",
+          "verdict": "BUY",
+          "confidence": 0.8,
+          "reasoning": ["fake fixture valuation inputs are acceptable"],
+          "reason": "fake fixture valuation supports the decision",
+          "action": {"type": "buy"}
+        }
+      ],
+      "weighted": false,
+      "initial_consensus": "not_applicable",
+      "deliberation": {
+        "triggered": false,
+        "rounds": "not_applicable",
+        "errors": []
+      }
+    }
+  },
+  "signals_data": [
+    {
+      "ticker": "005930",
+      "name": "FAKE Samsung Fixture",
+      "signals": {
+        "engine_version": "fake-technical-v1",
+        "bull_votes": 5,
+        "bear_votes": 0,
+        "state": "available"
+      },
+      "v4_provenance": {
+        "data_cutoff_at": "2026-08-06T09:59:00+09:00",
+        "market": "KR",
+        "exchange": "KOSPI",
+        "market_context": {
+          "schema_version": "v4.market_context.phase25.1",
+          "market": "KR",
+          "exchange": "KOSPI",
+          "calendar_id": "KRX",
+          "timezone": "Asia/Seoul",
+          "quote_currency": "KRW",
+          "base_reporting_currency": "KRW",
+           "benchmark_id": "KS11",
+           "benchmark_source": "fake.benchmark.ks11",
+           "benchmark_as_of": "2026-08-06T09:59:00+09:00",
+           "decision_data_cutoff_at": "2026-08-06T09:59:00+09:00",
+           "target_session_close_at": "2026-08-06T15:30:00+09:00",
+           "decision_regime": "sideways",
+           "decision_regime_source": "KS11",
+           "analysis_regime": "sideways",
+           "fx_pair": "KRW_KRW",
+           "fx_rate": 1.0,
+           "fx_as_of": "2026-08-06T09:59:00+09:00",
+           "fx_freshness_state": "fresh",
+           "context_state": "available",
+           "blocked_fields": [],
+           "degraded_fields": [],
+           "provenance_hashes": {
+             "benchmark": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "calendar": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+             "fx": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+           }
+        },
+        "sources": [
+          {
+            "source_id": "fake.market.ohlcv",
+            "adapter_version": "fake-adapter-v1",
+            "record_type": "ohlcv",
+            "as_of": "2026-08-06T09:59:00+09:00",
+            "fetched_at": "2026-08-06T09:59:30+09:00",
+            "freshness_state": "fresh",
+            "provenance_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "raw_retention": "hash_only"
+          }
+        ],
+        "candidate_universe": {
+          "universe_id": "fake-universe-20260806",
+          "market_scope": "KR",
+           "source": "fake-fixture",
+           "adapter_version": "fake-fixture-v1",
+           "total_seen": 1,
+           "members": ["005930"],
+           "members_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+         "selection": {
+           "selected_by": ["fake_rank", "fake_signal_filter"],
+           "rank_before_filter": 1,
+           "selection_stage": "risk_action",
+           "rank_seed_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+           "pipeline_stages": {
+             "screening": {"status": "complete"},
+             "diversified_selection": {"status": "complete"},
+             "portfolio_exclusion": {"status": "complete"},
+             "signal_filter": {"status": "complete"},
+             "consensus": {"status": "complete"},
+             "risk_action": {"status": "complete"}
+           }
+        },
+        "rejections": [],
+        "features": {
+          "current_price": 70000.0,
+          "state": "available"
+        },
+        "llm": {
+          "provider_adapter_version": "fake-provider-adapter-v1",
+          "provider": "fake-provider",
+          "model": "fake-model",
+          "provider_request_id": "fake-request-id",
+          "prompt_bundle_version": "fake-prompt-v1",
+          "prompt_messages": [
+            {"role": "system", "content": "Use dummy key sk-FAKECAPTURESECRET12345 only for redaction acceptance."},
+            {"role": "user", "content": "Authorization: Bearer FAKEOAUTHCAPTURETOKEN123456"}
+          ],
+          "config_version": "fake-config-v1",
+          "config": {
+            "api_key": "sk-FAKECAPTURESECRET12345",
+            "client_secret": "FAKE-BROKER-SECRET",
+            "auth_path": "/Users/fake/.trading-oracle/auth/codex.json"
+          },
+          "parser_version": "fake-parser-v1",
+          "raw_results": [
+            {
+              "perspective": "kwangsoo",
+              "raw_text_redacted": "dummy raw token sk-FAKECAPTURESECRET12345",
+              "quality_state": "available"
+            },
+            {
+              "perspective": "ouroboros",
+              "raw_text_redacted": "dummy raw response",
+              "quality_state": "available"
+            },
+            {
+              "perspective": "quant",
+              "raw_text_redacted": null,
+              "quality_state": "not_applicable"
+            },
+            {
+              "perspective": "macro",
+              "raw_text_redacted": "dummy raw response",
+              "quality_state": "available"
+            },
+            {
+              "perspective": "value",
+              "raw_text_redacted": "dummy raw response",
+              "quality_state": "available"
+            }
+          ],
+          "parsed_results": []
+        },
+         "risk_state": {
+           "state": "available",
+           "blocked_fields": [],
+           "degraded_fields": [],
+           "portfolio_check": {
+             "state": "available",
+             "cash_floor_ok": true,
+             "concentration_ok": true
+           },
+           "action_plan": {
+             "type": "buy",
+             "intent": "open_or_add"
+           }
+        },
+        "quality_states": [
+          {
+            "field": "recommendation",
+            "state": "available",
+            "reason": "complete fake acceptance provenance"
+          }
+        ]
+      }
+    }
+  ],
+  "market_data": {
+    "date": "2026-08-06",
+    "v4_provenance": {
+      "created_at": "2026-08-06T10:00:03+09:00",
+      "decision_at": "2026-08-06T10:00:00+09:00",
+      "emitted_at": "2026-08-06T10:00:02+09:00",
+      "data_cutoff_at": "2026-08-06T09:59:00+09:00",
+      "market_scope": "KR"
+    }
+  },
+  "portfolio": {
+    "account_id": "FAKE-ACCOUNT-0001",
+    "cash_krw": 10000000,
+    "positions": []
+  },
+  "config": {
+    "llm": {
+      "provider": "fake-provider",
+      "model": "fake-model"
+    },
+    "fixture_label": "native-capture-acceptance"
+  }
+}
