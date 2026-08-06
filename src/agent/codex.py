@@ -14,6 +14,10 @@ _DATA_DIR = Path.home() / ".trading-oracle"
 _SHACS_DATA_DIR = Path.home() / ".shacs-bot"
 
 
+class CodexError(RuntimeError):
+    pass
+
+
 def _get_storage() -> FileTokenStorage:
     """토큰 스토리지 반환. shacs-bot 토큰이 있으면 마이그레이션."""
     storage = FileTokenStorage(
@@ -37,12 +41,12 @@ def _ensure_token() -> tuple[str, str]:
     try:
         token = get_token(storage=storage)
     except RuntimeError:
-        raise RuntimeError(
+        raise CodexError(
             "Codex OAuth 토큰이 없습니다.\n"
             "  uv run main.py codex-login 으로 로그인하세요."
         )
     if not token.account_id:
-        raise RuntimeError("Codex 토큰에 account_id가 없습니다. 재로그인 필요.")
+        raise CodexError("Codex 토큰에 account_id가 없습니다. 재로그인 필요.")
     return token.access, token.account_id
 
 
@@ -54,7 +58,8 @@ def codex_login():
         prompt_fn=input,
         storage=storage,
     )
-    print(f"로그인 성공 (account: {token.account_id[:8]}...)")
+    account_id = token.account_id or "unknown"
+    print(f"로그인 성공 (account: {account_id[:8]}...)")
     return token
 
 
@@ -80,13 +85,25 @@ def _parse_sse_stream(response: httpx.Response) -> str:
                     continue
                 try:
                     event = json.loads(data)
-                except Exception:
+                except json.JSONDecodeError:
                     continue
                 event_type = event.get("type")
                 if event_type == "response.output_text.delta":
                     content += event.get("delta") or ""
                 elif event_type in ("error", "response.failed"):
-                    raise RuntimeError("Codex API 응답 실패")
+                    error = (
+                        event.get("error")
+                        or event.get("response", {}).get("error")
+                        or {}
+                    )
+                    code = error.get("code") or error.get("type")
+                    message = error.get("message")
+                    detail = ": ".join(str(value) for value in (code, message) if value)
+                    raise CodexError(
+                        f"Codex API 응답 실패: {detail}"
+                        if detail
+                        else "Codex API 응답 실패"
+                    )
             continue
         buffer.append(line)
 
@@ -126,8 +143,8 @@ def generate(system_prompt: str, user_prompt: str, model: str = "gpt-5.1-codex")
     with httpx.Client(timeout=120.0) as client:
         with client.stream("POST", CODEX_URL, headers=headers, json=body) as response:
             if response.status_code == 429:
-                raise RuntimeError("ChatGPT 사용량 한도 초과. 잠시 후 다시 시도하세요.")
+                raise CodexError("ChatGPT 사용량 한도 초과. 잠시 후 다시 시도하세요.")
             if response.status_code != 200:
                 raw = response.read().decode("utf-8", "ignore")
-                raise RuntimeError(f"Codex API 오류 HTTP {response.status_code}: {raw[:300]}")
+                raise CodexError(f"Codex API 오류 HTTP {response.status_code}: {raw[:300]}")
             return _parse_sse_stream(response)
