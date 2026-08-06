@@ -1,5 +1,5 @@
 # Trading Oracle v4 - Measurement & Attribution
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 
 > 이전 기준: [v1 다관점 SPEC](../multi-perspective/SPEC.md), [v2 SPEC](../v2/SPEC.md), [v3 SPEC](../v3/SPEC.md), [Recommendation Pipeline SPEC](../recommend/SPEC.md), 초기 성과 추적 PRD
 
@@ -11,14 +11,23 @@ v4는 v5-v9 completion dependency 없음. v5부터 v9까지 문서 상태나 게
 
 | Phase | PRD | 상태 | 설명 |
 | --- | --- | --- | --- |
-| Phase 22 | [phase22-measurement-contract.md](prds/phase22-measurement-contract.md) | 📝 초안 | 추천 다음 동일 시장 정규 session 종가를 entry로 쓰고, entry 이후 N번째 session 종가를 exit로 쓰는 측정 계약 |
-| Phase 23 | [phase23-snapshot-reproducibility.md](prds/phase23-snapshot-reproducibility.md) | 📝 초안 | data cutoff, source freshness, prompt, raw result, parser, candidate audit, portfolio state를 보존하는 native v4 snapshot 계약 |
-| Phase 24 | [phase24-legacy-backfill.md](prds/phase24-legacy-backfill.md) | 📝 초안 | 기존 82개 snapshot을 수정하지 않고 audit-only derived artifact로 분리하는 legacy 정책 |
-| Phase 25 | [phase25-market-context-separation.md](prds/phase25-market-context-separation.md) | 📝 초안 | KR과 US의 calendar, timezone, benchmark, currency, FX, regime source를 분리하는 market context 계약 |
-| Phase 26 | [phase26-recommendation-attribution.md](prds/phase26-recommendation-attribution.md) | 📝 초안 | BUY, SELL, HOLD, BLOCKED, CANDIDATE_REJECTED denominator와 append-only attribution ledger 계약 |
-| Phase 27 | [phase27-full-workflow-replay.md](prds/phase27-full-workflow-replay.md) | 📝 초안 | verbatim, outcome, recompute replay를 분리하고 full workflow state machine을 검증하는 replay 계약 |
-| Phase 28 | [phase28-hold-confidence-calibration.md](prds/phase28-hold-confidence-calibration.md) | 📝 초안 | HOLD를 new trade none으로 고정하고 confidence를 action별 correctness event 확률로 보정하는 calibration 계약 |
-| Phase 29 | [phase29-evidence-gate.md](prds/phase29-evidence-gate.md) | 📝 초안 | measurement, snapshot, migration, attribution, replay, calibration 증거와 review matrix를 v4 gate로 묶는 evidence 계약 |
+| Phase 22 | [phase22-measurement-contract.md](prds/phase22-measurement-contract.md) | ✅ 완료 | 추천 다음 동일 시장 정규 session 종가를 entry로 쓰고, entry 이후 N번째 session 종가를 exit로 쓰는 측정 계약 |
+| Phase 23 | [phase23-snapshot-reproducibility.md](prds/phase23-snapshot-reproducibility.md) | ✅ 완료 | data cutoff, source freshness, prompt, raw result, parser, candidate audit, portfolio state를 보존하는 native v4 snapshot 계약 |
+| Phase 24 | [phase24-legacy-backfill.md](prds/phase24-legacy-backfill.md) | ✅ 완료 | 기존 82개 snapshot을 수정하지 않고 audit-only derived artifact로 분리하는 legacy 정책 |
+| Phase 25 | [phase25-market-context-separation.md](prds/phase25-market-context-separation.md) | ✅ 완료 | KR과 US의 calendar, timezone, benchmark, currency, FX, regime source를 분리하는 market context 계약 |
+| Phase 26 | [phase26-recommendation-attribution.md](prds/phase26-recommendation-attribution.md) | ✅ 완료 | BUY, SELL, HOLD, BLOCKED, CANDIDATE_REJECTED denominator와 append-only attribution ledger 계약 |
+| Phase 27 | [phase27-full-workflow-replay.md](prds/phase27-full-workflow-replay.md) | ✅ 완료 | verbatim, outcome, recompute replay를 분리하고 full workflow state machine을 검증하는 replay 계약 |
+| Phase 28 | [phase28-hold-confidence-calibration.md](prds/phase28-hold-confidence-calibration.md) | ✅ 완료 | HOLD를 new trade none으로 고정하고 confidence를 action별 correctness event 확률로 보정하는 calibration 계약 |
+| Phase 29 | [phase29-evidence-gate.md](prds/phase29-evidence-gate.md) | ✅ 완료 | measurement, snapshot, migration, attribution, replay, calibration 증거와 review matrix를 v4 gate로 묶는 evidence 계약 |
+
+## 완료 근거
+
+- `uv run scripts/v4.py verify-fixture`: Phase 22~29 전체 `pass`
+- `uv run scripts/v4.py evidence-gate --provenance complete`: `pass`
+- 부족한 provenance: `inconclusive`, 종료 코드 `2`
+- native capture: 동일 입력 `created` 후 `unchanged`
+- 외부 substantive review 20개와 mutation probe 검증 완료
+- Oracle 최종 검토: `APPROVE`
 
 ## 문제
 
@@ -185,6 +194,16 @@ Calibration cohorts do not pool across contract version, snapshot schema version
 ### Evidence contract
 
 Phase 29 accepts only evidence artifacts with identity, schema version, producer tool, producer tool version, generated timestamp, input refs, content hash, tool config hash, and review refs. Worker self-report and grep hit cannot pass. Manual Read, deterministic parser, fixture mutation, independent review, and resume review are part of the gate.
+
+## 구현 errata
+
+문서 간 순환 또는 미정 상태를 피하기 위해 구현은 다음 세 규칙을 우선 적용한다.
+
+1. Snapshot ID는 두 단계로 계산한다. 먼저 recommendation ID가 없는 입력으로 `snapshot_identity_base_hash`를 계산하고 candidate와 recommendation ID seed에 사용한다. 이후 정렬된 recommendation ID 목록을 포함한 최종 `snapshot_identity_hash`에서 `snapshot_id`를 만든다.
+2. 추천 노출 시점에 operator 결정을 추정하지 않는다. Operator event가 없으면 `operator_decision`은 `null`이며, 즉시 `ignored`로 기록하지 않는다.
+3. Evidence hash 방향은 단방향이다. Release manifest는 upstream Phase 22~28 artifact와 review matrix만 참조하고, `gate_decision_report`가 release manifest를 참조한다. Manifest가 자기 자신이나 이후 gate decision을 hash input으로 포함하지 않는다.
+
+이 errata는 fixture와 제품 구현의 deterministic ID, append-only ledger, evidence manifest에 동일하게 적용한다.
 
 ## Implementation order
 

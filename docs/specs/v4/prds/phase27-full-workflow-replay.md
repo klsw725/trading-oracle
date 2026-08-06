@@ -1,5 +1,5 @@
 # PRD: Phase 27 full workflow replay
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 > **SPEC 참조**: [../SPEC.md](../SPEC.md)
 
 ## 문제

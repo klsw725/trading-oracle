@@ -1,5 +1,5 @@
 # PRD: Phase 26 recommendation attribution
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 > **SPEC 참조**: [../SPEC.md](../SPEC.md)
 
 ## 문제
