@@ -14,11 +14,13 @@ from math import ceil
 from typing import Any
 
 import FinanceDataReader as fdr
+import httpx
 import pandas as pd
 
 from src.data.market import fetch_ohlcv, load_krx_listing
 from src.data.fundamentals import fetch_naver_fundamentals
 from src.data.sectors import load_sector_lookup
+from src.data.toss import TossApiError, get_toss_client
 from src.portfolio.correlation import classify_sector
 
 
@@ -54,12 +56,13 @@ def screen_leading_stocks(market: str = "ALL", top_n: int = 30) -> list[Candidat
         return []
 
     if market == "KOSPI":
-        listing = listing[listing["Market"] == "KOSPI"]
+        listing = pd.DataFrame(listing.loc[listing["Market"] == "KOSPI"])
     elif market == "KOSDAQ":
-        listing = listing[listing["Market"] == "KOSDAQ"]
+        listing = pd.DataFrame(listing.loc[listing["Market"] == "KOSDAQ"])
 
-    listing = listing[listing["Code"].map(lambda code: str(code).endswith("0"))]
-    listing = listing.sort_values("Marcap", ascending=False).head(top_n)
+    common_shares = pd.Series(listing["Code"]).map(lambda code: str(code).endswith("0"))
+    listing = pd.DataFrame(listing.loc[common_shares])
+    listing = pd.DataFrame(listing.sort_values("Marcap", ascending=False).head(top_n))
     sector_lookup = load_sector_lookup([market])
 
     candidates = []
@@ -261,9 +264,49 @@ def _passes_selection_constraints(
 
 
 def _load_market_universe(market: str, universe_size: int) -> list[Candidate]:
+    toss_universe = _load_toss_market_universe(market, universe_size)
+    if toss_universe:
+        return toss_universe
     if market in ("KOSPI", "KOSDAQ"):
         return _load_kr_market_universe(market, universe_size)
     return _load_us_market_universe(market, universe_size)
+
+
+def _load_toss_market_universe(market: str, universe_size: int) -> list[Candidate]:
+    toss = get_toss_client()
+    if toss is None:
+        return []
+    country = "KR" if market in ("KOSPI", "KOSDAQ") else "US"
+    try:
+        rankings = toss.rankings(country, 100)
+        symbols = [str(item.get("symbol", "")) for item in rankings]
+        stocks = toss.stocks([symbol for symbol in symbols if symbol])
+    except (httpx.HTTPError, TossApiError, KeyError, TypeError, ValueError):
+        return []
+
+    stock_lookup = {str(item.get("symbol", "")): item for item in stocks}
+    candidates = []
+    for ranking in rankings:
+        symbol = str(ranking.get("symbol", ""))
+        stock = stock_lookup.get(symbol)
+        if not stock or stock.get("market") != market:
+            continue
+        price_data = ranking.get("price", {})
+        if not isinstance(price_data, dict):
+            continue
+        price = _safe_number(price_data.get("lastPrice"))
+        shares = _safe_number(stock.get("sharesOutstanding"))
+        candidate = _build_candidate(
+            ticker=symbol,
+            name=str(stock.get("name") or symbol),
+            market=market,
+            market_cap=price * shares,
+        )
+        if candidate:
+            candidates.append(candidate)
+        if len(candidates) >= universe_size:
+            break
+    return candidates
 
 
 def _load_kr_market_universe(market: str, universe_size: int) -> list[Candidate]:
@@ -271,9 +314,12 @@ def _load_kr_market_universe(market: str, universe_size: int) -> list[Candidate]
     if listing.empty:
         return []
 
-    listing = listing[listing["Market"] == market]
-    listing = listing[listing["Code"].map(lambda code: str(code).endswith("0"))]
-    listing = listing.sort_values("Marcap", ascending=False).head(universe_size)
+    listing = pd.DataFrame(listing.loc[listing["Market"] == market])
+    common_shares = pd.Series(listing["Code"]).map(lambda code: str(code).endswith("0"))
+    listing = pd.DataFrame(listing.loc[common_shares])
+    listing = pd.DataFrame(
+        listing.sort_values("Marcap", ascending=False).head(universe_size)
+    )
     sector_lookup = load_sector_lookup([market])
 
     candidates = []
