@@ -3,18 +3,25 @@
 import re
 import warnings
 import math
+from threading import Lock
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pykrx")
 
 from datetime import datetime, timedelta
 from numbers import Integral
+from pathlib import Path
 
 import pandas as pd
 import FinanceDataReader as fdr
 from pykrx import stock as krx
 
+from src.data.toss import fetch_toss_candles, fetch_toss_market_cap, fetch_toss_name
+
 
 KRX_LISTING_CACHE_DAYS = 10
+KRX_LISTING_CACHE_PATH = Path("data/krx_listing_cache.csv")
+_krx_listing_cache: pd.DataFrame | None = None
+_krx_listing_lock = Lock()
 
 
 def _safe_int(value: object) -> int:
@@ -49,6 +56,9 @@ def get_trading_dates(days_back: int = 120) -> tuple[str, str]:
 
 
 def fetch_ohlcv(ticker: str, days_back: int = 120) -> pd.DataFrame:
+    df = fetch_toss_candles(ticker.upper(), days_back)
+    if not df.empty:
+        return df
     if is_us_ticker(ticker):
         return _fetch_ohlcv_us(ticker, days_back)
     return _fetch_ohlcv_kr(ticker, days_back)
@@ -84,7 +94,7 @@ def _fetch_ohlcv_us(ticker: str, days_back: int = 120) -> pd.DataFrame:
     return result
 
 
-def fetch_fundamentals(ticker: str) -> dict:
+def fetch_fundamentals(ticker: str) -> dict[str, float | int]:
     start, end = get_trading_dates(5)
     df = krx.get_market_fundamental(start, end, ticker)
     if df.empty:
@@ -99,7 +109,10 @@ def fetch_fundamentals(ticker: str) -> dict:
     }
 
 
-def fetch_market_cap(ticker: str) -> dict:
+def fetch_market_cap(ticker: str) -> dict[str, int]:
+    toss_result = fetch_toss_market_cap(ticker.upper())
+    if toss_result:
+        return toss_result
     if is_us_ticker(ticker):
         return _fetch_market_cap_us(ticker)
     listing = load_krx_listing()
@@ -115,7 +128,7 @@ def fetch_market_cap(ticker: str) -> dict:
     }
 
 
-def _fetch_market_cap_us(ticker: str) -> dict:
+def _fetch_market_cap_us(ticker: str) -> dict[str, int]:
     try:
         import yfinance as yf
 
@@ -128,32 +141,74 @@ def _fetch_market_cap_us(ticker: str) -> dict:
         return {}
 
 
-def load_krx_listing() -> pd.DataFrame:
+def _save_krx_listing_cache(listing: pd.DataFrame) -> None:
     try:
-        return pd.DataFrame(fdr.StockListing("KRX"))
-    except Exception:
-        pass
+        KRX_LISTING_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        listing.to_csv(KRX_LISTING_CACHE_PATH, index=False)
+    except OSError:
+        return
 
-    base_url = "https://raw.githubusercontent.com/FinanceData/fdr_krx_data_cache/refs/heads/master/data/listing/krx"
-    today = datetime.now()
-    for days_ago in range(1, KRX_LISTING_CACHE_DAYS + 1):
-        date = (today - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+
+def load_krx_listing() -> pd.DataFrame:
+    global _krx_listing_cache
+    with _krx_listing_lock:
+        if _krx_listing_cache is not None:
+            return _krx_listing_cache
+
+        if KRX_LISTING_CACHE_PATH.exists():
+            cache_date = datetime.fromtimestamp(
+                KRX_LISTING_CACHE_PATH.stat().st_mtime
+            ).date()
+            if cache_date == datetime.now().date():
+                try:
+                    _krx_listing_cache = pd.read_csv(
+                        KRX_LISTING_CACHE_PATH,
+                        dtype={"Code": str, "Dept": str, "ChangeCode": str},
+                    )
+                    return _krx_listing_cache
+                except (OSError, pd.errors.ParserError, UnicodeDecodeError):
+                    KRX_LISTING_CACHE_PATH.unlink(missing_ok=True)
+
         try:
-            return pd.read_csv(
-                f"{base_url}/{date}.csv",
-                dtype={"Code": str, "Dept": str, "ChangeCode": str, "MarketId": str},
-            )
+            _krx_listing_cache = pd.DataFrame(fdr.StockListing("KRX"))
         except Exception:
-            continue
+            pass
+        else:
+            _save_krx_listing_cache(_krx_listing_cache)
+            return _krx_listing_cache
 
-    return pd.DataFrame()
+        base_url = "https://raw.githubusercontent.com/FinanceData/fdr_krx_data_cache/refs/heads/master/data/listing/krx"
+        today = datetime.now()
+        for days_ago in range(1, KRX_LISTING_CACHE_DAYS + 1):
+            date = (today - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+            try:
+                _krx_listing_cache = pd.read_csv(
+                    f"{base_url}/{date}.csv",
+                    dtype={
+                        "Code": str,
+                        "Dept": str,
+                        "ChangeCode": str,
+                        "MarketId": str,
+                    },
+                )
+                _save_krx_listing_cache(_krx_listing_cache)
+                return _krx_listing_cache
+            except Exception:
+                continue
+
+        return pd.DataFrame()
 
 
 def fetch_index_ohlcv(index_symbol: str = "KS11", days_back: int = 120) -> pd.DataFrame:
-    """지수 데이터 — FinanceDataReader 사용
+    """지수 데이터 — 한국 지수는 Toss, 그 외는 FinanceDataReader 사용
     한국: KS11(코스피), KQ11(코스닥)
     미국: IXIC(나스닥), US500(S&P500)
     """
+    toss_symbol = {"KS11": "KOSPI", "KQ11": "KOSDAQ"}.get(index_symbol)
+    if toss_symbol:
+        df = fetch_toss_candles(toss_symbol, days_back, indicator=True)
+        if not df.empty:
+            return df
     start = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
     df = fdr.DataReader(index_symbol, start)
     if df.empty:
@@ -180,19 +235,22 @@ def get_kosdaq_tickers() -> list[str]:
     )
 
 
-_US_LISTING_CACHE: pd.DataFrame | None = None
+_us_listing_cache: pd.DataFrame | None = None
 
 
 def _get_us_listing() -> pd.DataFrame:
-    global _US_LISTING_CACHE
-    if _US_LISTING_CACHE is None:
+    global _us_listing_cache
+    if _us_listing_cache is None:
         nasdaq = fdr.StockListing("NASDAQ")
         nyse = fdr.StockListing("NYSE")
-        _US_LISTING_CACHE = pd.concat([nasdaq, nyse], ignore_index=True)
-    return _US_LISTING_CACHE
+        _us_listing_cache = pd.concat([nasdaq, nyse], ignore_index=True)
+    return _us_listing_cache
 
 
 def get_ticker_name(ticker: str) -> str:
+    toss_name = fetch_toss_name(ticker.upper())
+    if toss_name:
+        return toss_name
     if is_us_ticker(ticker):
         listing = _get_us_listing()
         row = listing[listing["Symbol"] == ticker.upper()]

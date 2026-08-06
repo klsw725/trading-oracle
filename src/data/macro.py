@@ -10,6 +10,9 @@ from pathlib import Path
 import pandas as pd
 import FinanceDataReader as fdr
 
+from src.data.market import fetch_index_ohlcv
+from src.data.toss import fetch_toss_exchange_rate
+
 MACRO_PARQUET = Path("data/macro_series.parquet")
 
 # 수집 대상 (SPEC §3-1)
@@ -56,7 +59,7 @@ def fetch_macro_series(days_back: int = 730) -> pd.DataFrame:
                         combined = combined.sort_index()
                         # 2년치만 유지
                         cutoff = pd.Timestamp.now() - pd.Timedelta(days=days_back)
-                        combined = combined[combined.index >= cutoff]
+                        combined = pd.DataFrame(combined.loc[combined.index >= cutoff])
                         _save(combined)
                         return _add_derived(combined)
                     return _add_derived(cached)
@@ -73,14 +76,31 @@ def fetch_macro_series(days_back: int = 730) -> pd.DataFrame:
 
 def _fetch_all(start: str) -> pd.DataFrame:
     """모든 매크로 변수 수집. 개별 실패 시 스킵."""
-    series = {}
+    series: dict[str, pd.Series] = {}
     for name, symbol in MACRO_SYMBOLS.items():
         try:
-            raw = fdr.DataReader(symbol, start)
-            if not raw.empty and "Close" in raw.columns:
-                series[name] = raw["Close"]
+            if name in ("KOSPI", "KOSDAQ"):
+                days_back = max((datetime.now() - datetime.fromisoformat(start)).days, 1)
+                raw = fetch_index_ohlcv(symbol, days_back)
+                if not raw.empty:
+                    series[name] = pd.Series(raw["close"])
+            else:
+                raw = fdr.DataReader(symbol, start)
+                if not raw.empty and "Close" in raw.columns:
+                    series[name] = pd.Series(raw["Close"])
         except Exception:
             continue
+
+    toss_rate = fetch_toss_exchange_rate()
+    if toss_rate is not None:
+        today = pd.Timestamp.now().normalize()
+        current = pd.Series([toss_rate], index=[today])
+        existing = series.get("USD_KRW", pd.Series(dtype=float))
+        usd_krw = pd.Series(pd.concat([existing, current]))
+        usd_krw = pd.Series(
+            usd_krw.loc[~usd_krw.index.duplicated(keep="last")]
+        ).sort_index()
+        series["USD_KRW"] = usd_krw
     if not series:
         return pd.DataFrame()
     df = pd.DataFrame(series)
@@ -120,7 +140,8 @@ def _add_derived(df: pd.DataFrame) -> pd.DataFrame:
     # CNY/KRW 크로스레이트 (USD/KRW ÷ USD/CNY)
     if "USD_KRW" in df.columns and "CNY_KRW" not in df.columns:
         try:
-            usd_cny = fdr.DataReader("USD/CNY", (df.index.min()).strftime("%Y-%m-%d"))
+            first_date = str(df.index.min())[:10]
+            usd_cny = fdr.DataReader("USD/CNY", first_date)
             if not usd_cny.empty and "Close" in usd_cny.columns:
                 cny_series = usd_cny["Close"].reindex(df.index, method="ffill")
                 valid = cny_series.notna() & df["USD_KRW"].notna() & (cny_series > 0)
@@ -131,7 +152,7 @@ def _add_derived(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def get_macro_snapshot(df: pd.DataFrame | None = None) -> dict:
+def get_macro_snapshot(df: pd.DataFrame | None = None) -> dict[str, dict[str, float | str]]:
     """최신 매크로 데이터를 프롬프트 삽입용 dict로 반환.
 
     Returns:
@@ -179,7 +200,7 @@ def get_macro_snapshot(df: pd.DataFrame | None = None) -> dict:
     return snapshot
 
 
-def format_macro_for_prompt(snapshot: dict) -> str:
+def format_macro_for_prompt(snapshot: dict[str, dict[str, float | str]]) -> str:
     """매크로 스냅샷을 프롬프트 삽입용 텍스트로 포맷."""
     if not snapshot:
         return ""
@@ -223,7 +244,7 @@ def format_macro_for_prompt(snapshot: dict) -> str:
                 parts.append(f"20일 {data['chg20d']:+.2f}%%)")
             else:
                 parts[-1] += ")"
-        parts.append(direction)
+        parts.append(str(direction))
         lines.append(" ".join(parts))
 
     # 금리차
