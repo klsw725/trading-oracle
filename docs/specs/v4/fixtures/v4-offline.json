@@ -1,0 +1,216 @@
+{
+  "schema_version": "v4.offline_acceptance.1",
+  "clock": {
+    "generated_at": "2026-08-06T12:00:00+09:00",
+    "decision_at": "2026-06-02T10:31:54+09:00",
+    "recommendation_emitted_at": "2026-06-02T10:32:10+09:00",
+    "decision_data_cutoff_at": "2026-06-02T10:00:00+09:00"
+  },
+  "identity": {
+    "snapshot_input": {
+      "market_scope": "ALL",
+      "tickers_requested": ["005930", "AAPL"],
+      "top_n": 2,
+      "recommendations": [
+        {"ticker": "005930", "name": "Samsung Electronics", "market": "KR", "exchange": "KOSPI", "action": "BUY", "market_context_ref": "KR", "parsed_result": {"verdict": "BUY", "confidence": 0.79}},
+        {"ticker": "AAPL", "name": "Apple", "market": "US", "exchange": "NASDAQ", "action": "HOLD", "market_context_ref": "US", "parsed_result": {"verdict": "HOLD", "confidence": 0.61}}
+      ]
+    },
+    "expected": {
+      "snapshot_id": "snap_v4_5cfd5d3c3da67cd6cc7d",
+      "snapshot_identity_hash": "sha256:5cfd5d3c3da67cd6cc7d7ca8c24c2d8379f5728537be0eedc111878b6a6e483c",
+      "snapshot_content_hash": "sha256:a32feccfb4333333dc27c814388150c019f0ccd923024bbfe1b5a9301b05c480",
+      "candidate_ids": ["cand_v4_f7471905a5bd7ec8e899", "cand_v4_de004e3fe6612519755d"],
+      "recommendation_ids": ["rec_v4_676f9c379c8827f64b97", "rec_v4_83f02a697060d50a0253"]
+    }
+  },
+  "market_contexts": {
+    "KR": {
+      "market": "KR",
+      "exchange": "KOSPI",
+      "calendar_id": "KRX",
+      "calendar_version": "krx-calendar-2026.08",
+      "timezone": "Asia/Seoul",
+      "quote_currency": "KRW",
+      "base_reporting_currency": "KRW",
+      "benchmark_id": "KS11",
+      "decision_regime": "sideways",
+      "decision_regime_source": "KS11",
+      "ordered_regular_sessions": [
+        {"session_date": "2026-06-03", "regular_close_at": "2026-06-03T15:30:00+09:00"},
+        {"session_date": "2026-06-04", "regular_close_at": "2026-06-04T15:30:00+09:00"},
+        {"session_date": "2026-06-05", "regular_close_at": "2026-06-05T15:30:00+09:00"},
+        {"session_date": "2026-06-08", "regular_close_at": "2026-06-08T15:30:00+09:00"},
+        {"session_date": "2026-06-09", "regular_close_at": "2026-06-09T15:30:00+09:00"},
+        {"session_date": "2026-06-10", "regular_close_at": "2026-06-10T15:30:00+09:00"},
+        {"session_date": "2026-06-11", "regular_close_at": "2026-06-11T15:30:00+09:00"},
+        {"session_date": "2026-06-12", "regular_close_at": "2026-06-12T15:30:00+09:00"},
+        {"session_date": "2026-06-15", "regular_close_at": "2026-06-15T15:30:00+09:00"},
+        {"session_date": "2026-06-16", "regular_close_at": "2026-06-16T15:30:00+09:00"},
+        {"session_date": "2026-06-17", "regular_close_at": "2026-06-17T15:30:00+09:00"},
+        {"session_date": "2026-06-18", "regular_close_at": "2026-06-18T15:30:00+09:00"},
+        {"session_date": "2026-06-19", "regular_close_at": "2026-06-19T15:30:00+09:00"},
+        {"session_date": "2026-06-22", "regular_close_at": "2026-06-22T15:30:00+09:00"},
+        {"session_date": "2026-06-23", "regular_close_at": "2026-06-23T15:30:00+09:00"},
+        {"session_date": "2026-06-24", "regular_close_at": "2026-06-24T15:30:00+09:00"},
+        {"session_date": "2026-06-25", "regular_close_at": "2026-06-25T15:30:00+09:00"},
+        {"session_date": "2026-06-26", "regular_close_at": "2026-06-26T15:30:00+09:00"},
+        {"session_date": "2026-06-29", "regular_close_at": "2026-06-29T15:30:00+09:00"},
+        {"session_date": "2026-06-30", "regular_close_at": "2026-06-30T15:30:00+09:00"},
+        {"session_date": "2026-07-01", "regular_close_at": "2026-07-01T15:30:00+09:00"}
+      ],
+      "calendar_provenance": {"source_id": "fixture.calendar.krx", "as_of": "2026-01-01T00:00:00+09:00", "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+    },
+    "KOSDAQ": {
+      "market": "KR", "exchange": "KOSDAQ", "calendar_id": "KRX", "calendar_version": "krx-calendar-2026.08", "timezone": "Asia/Seoul", "quote_currency": "KRW", "base_reporting_currency": "KRW", "benchmark_id": "KQ11", "decision_regime": "sideways", "decision_regime_source": "KQ11",
+      "ordered_regular_sessions": [{"session_date": "2026-06-03", "regular_close_at": "2026-06-03T15:30:00+09:00"}],
+      "calendar_provenance": {"source_id": "fixture.calendar.krx.kosdaq", "as_of": "2026-01-01T00:00:00+09:00", "content_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+    },
+    "US": {
+      "market": "US",
+      "exchange": "NASDAQ",
+      "calendar_id": "NASDAQ",
+      "calendar_version": "us-calendar-2026.08",
+      "timezone": "America/New_York",
+      "quote_currency": "USD",
+      "base_reporting_currency": "KRW",
+      "benchmark_id": "IXIC",
+      "decision_regime": "bull",
+      "decision_regime_source": "IXIC",
+      "cross_market_context": {"KS11": {"regime": "bear", "usage": "macro_context_only"}},
+      "fx": {"pair": "USD_KRW", "rate": 1380.25, "as_of": "2026-06-02T15:30:00+09:00", "freshness_state": "fresh"},
+      "ordered_regular_sessions": [
+        {"session_date": "2026-06-03", "regular_close_at": "2026-06-03T16:00:00-04:00"},
+        {"session_date": "2026-06-04", "regular_close_at": "2026-06-04T16:00:00-04:00"},
+        {"session_date": "2026-06-05", "regular_close_at": "2026-06-05T16:00:00-04:00"},
+        {"session_date": "2026-06-08", "regular_close_at": "2026-06-08T16:00:00-04:00"},
+        {"session_date": "2026-06-09", "regular_close_at": "2026-06-09T16:00:00-04:00"},
+        {"session_date": "2026-06-10", "regular_close_at": "2026-06-10T16:00:00-04:00"}
+      ],
+      "calendar_provenance": {"source_id": "fixture.calendar.nasdaq", "as_of": "2026-01-01T00:00:00-05:00", "content_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+    },
+    "NYSE": {
+      "market": "US", "exchange": "NYSE", "calendar_id": "NYSE", "calendar_version": "nyse-calendar-2026.08", "timezone": "America/New_York", "quote_currency": "USD", "base_reporting_currency": "KRW", "benchmark_id": "US500", "decision_regime": "bull", "decision_regime_source": "US500",
+      "ordered_regular_sessions": [{"session_date": "2026-06-03", "regular_close_at": "2026-06-03T16:00:00-04:00"}],
+      "calendar_provenance": {"source_id": "fixture.calendar.nyse", "as_of": "2026-01-01T00:00:00-05:00", "content_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}
+    }
+  },
+  "measurement": {
+    "default_horizons": [5, 20],
+    "cases": [
+      {
+        "fixture_id": "kr_intraday_buy_5_session",
+        "market_context_ref": "KR",
+        "emitted_at": "2026-06-02T10:30:00+09:00",
+        "ticker": "005930",
+        "action": "BUY",
+        "horizon": 5,
+        "entry_session": "2026-06-03",
+        "target_exit_session": "2026-06-10",
+        "instrument_prices": {"entry_total_return_close": 100000.0, "exit_total_return_close": 106000.0, "source_id": "fixture.price.005930", "as_of": "2026-06-11T15:30:00+09:00", "entry_session": "2026-06-03", "target_exit_session": "2026-06-10", "actual_exit_session": "2026-06-11"},
+        "benchmark_prices": {"entry_total_return_close": 2500.0, "exit_total_return_close": 2575.0, "source_id": "fixture.benchmark.KS11", "as_of": "2026-06-10T15:30:00+09:00", "entry_session": "2026-06-03", "target_exit_session": "2026-06-10"},
+        "corporate_action_provenance": {"source_id": "fixture.corporate_actions.krx", "checked_through": "2026-06-11", "events": [], "return_basis": "total_return"},
+        "cost_model": {"version": "kr-equity-v2026.1", "total_rate": 0.0031},
+        "expected": {"state": "matured", "entry_session": "2026-06-03", "target_exit_session": "2026-06-10", "actual_exit_session": "2026-06-11", "price_lag_sessions": 1, "gross_absolute_return": 0.06, "gross_benchmark_excess_return": 0.03, "net_execution_return": 0.0569, "net_execution_benchmark_excess_return": 0.0269}
+      },
+      {
+        "fixture_id": "us_after_close_buy_5_session",
+        "market_context_ref": "US",
+        "emitted_at": "2026-06-02T17:10:00-04:00",
+        "ticker": "AAPL",
+        "action": "BUY",
+        "horizon": 5,
+        "entry_session": "2026-06-03",
+        "target_exit_session": "2026-06-10",
+        "instrument_prices": {"entry_total_return_close": 200.0, "exit_total_return_close": 190.0, "source_id": "fixture.price.AAPL", "as_of": "2026-06-10T16:00:00-04:00", "entry_session": "2026-06-03", "target_exit_session": "2026-06-10"},
+        "benchmark_prices": {"entry_total_return_close": 17000.0, "exit_total_return_close": 17170.0, "source_id": "fixture.benchmark.IXIC", "as_of": "2026-06-10T16:00:00-04:00", "entry_session": "2026-06-03", "target_exit_session": "2026-06-10"},
+        "corporate_action_provenance": {"source_id": "fixture.corporate_actions.nasdaq", "checked_through": "2026-06-10", "events": [], "return_basis": "total_return"},
+        "cost_model": {"version": "us-equity-v2026.1", "total_rate": 0.00062946},
+        "expected": {"state": "matured", "gross_absolute_return": -0.05, "gross_benchmark_excess_return": -0.06, "net_execution_return": -0.05062946, "net_execution_benchmark_excess_return": -0.06062946}
+      },
+      {
+        "fixture_id": "kr_holiday_immature_20_session",
+        "market_context_ref": "KR",
+        "emitted_at": "2026-06-02T11:00:00+09:00",
+        "ticker": "005930",
+        "action": "BUY",
+        "horizon": 20,
+        "entry_session": "2026-06-03",
+        "known_closed_sessions_after_entry": 7,
+        "latest_close_must_not_substitute": true,
+        "expected": {"state": "pending", "entry_session": "2026-06-03", "target_exit_session": "2026-07-01", "closed_sessions_after_entry": 7, "remaining_sessions": 13}
+      }
+    ]
+  },
+  "attribution": {
+    "schema_version": "v4.recommendation_attribution.phase26.1",
+    "records": [
+      {"candidate_id": "cand_v4_241d2519920a4d36d3da", "recommendation_id": "rec_v4_62ec99717d763a8550d0", "ticker": "005930", "market": "KR", "exchange": "KOSPI", "action": "BUY", "confidence_probability": 0.79, "horizons": [5, 20], "action_plan": {"intent": "open_or_add"}, "operator_decision": {"state": "accepted"}, "portfolio_linkage": {"portfolio_trade_id": "trade_fixture_005930", "order_ids": ["order_fixture_005930"], "fill_ids": ["fill_fixture_005930"]}, "lifecycle": {"position_closed": true, "outcome_horizon": 5}, "denominator": {"decision": true, "execution": true, "selection": true}},
+      {"candidate_id": "cand_v4_2e372eaf5a1641300074", "recommendation_id": "rec_v4_0aa8d4fafe00d5c1b85f", "ticker": "055550", "market": "KR", "exchange": "KOSPI", "action": "SELL", "confidence_probability": 0.68, "horizons": [5, 20], "action_plan": {"intent": "reduce_or_close"}, "operator_decision": null, "portfolio_linkage": {"portfolio_trade_id": null, "order_ids": [], "fill_ids": []}, "denominator": {"decision": true, "execution": true, "selection": true}},
+      {"candidate_id": "cand_v4_ea4ea2f3ed8d0522a187", "recommendation_id": "rec_v4_c923bbcc202b6f68eb98", "ticker": "MSFT", "market": "US", "exchange": "NASDAQ", "action": "HOLD", "confidence_probability": 0.61, "horizons": [5, 20], "action_plan": {"intent": "none"}, "operator_decision": null, "portfolio_linkage": {"portfolio_trade_id": null, "order_ids": [], "fill_ids": []}, "denominator": {"decision": true, "execution": false, "selection": true}},
+      {"candidate_id": "cand_v4_979f331ae2614df5a371", "recommendation_id": "rec_v4_642669f93e6944165ac0", "ticker": "AMGN", "market": "US", "exchange": "NASDAQ", "action": "BLOCKED", "intended_action": "BUY", "confidence_probability": 0.72, "horizons": [5, 20], "action_plan": {"intent": "blocked", "reasons": ["fx_missing_for_base_reporting", "concentration_unknown"]}, "operator_decision": null, "portfolio_linkage": {"portfolio_trade_id": null, "order_ids": [], "fill_ids": []}, "denominator": {"decision": true, "execution": false, "selection": true}},
+      {"candidate_id": "cand_v4_afa914c9b9a7c3f28fe9", "recommendation_id": null, "ticker": "000660", "market": "KR", "exchange": "KOSPI", "action": "CANDIDATE_REJECTED", "confidence_probability": null, "horizons": [5, 20], "action_plan": {"intent": "none", "reason": "insufficient_bull_votes"}, "operator_decision": null, "portfolio_linkage": {"portfolio_trade_id": null, "order_ids": [], "fill_ids": []}, "denominator": {"decision": true, "execution": false, "selection": true}}
+    ],
+    "expected_denominator": {"BUY": 1, "SELL": 1, "HOLD": 1, "BLOCKED": 1, "CANDIDATE_REJECTED": 1, "decision_quality_total": 5, "execution_quality_total": 2, "selection_quality_total": 5}
+  },
+  "replay": {
+    "fixed_perspective_order": ["kwangsoo", "ouroboros", "quant", "macro", "value"],
+    "verbatim": {"data_cutoff_at": "2026-06-02T10:00:00+09:00", "prompt_json": "{\"ticker\":\"005930\"}", "raw_results": [{"perspective": "kwangsoo", "raw_json": "{\"verdict\":\"BUY\",\"score\":0.8}"}, {"perspective": "ouroboros", "raw_json": "{\"verdict\":\"HOLD\",\"score\":0.6}"}, {"perspective": "quant", "raw_json": "{\"verdict\":\"BUY\",\"score\":0.9}"}, {"perspective": "macro", "raw_json": "{\"verdict\":\"BUY\",\"score\":0.7}"}, {"perspective": "value", "raw_json": "{\"verdict\":\"BUY\",\"score\":0.75}"}], "stored_parsed_hash": "sha256:594c0d2bb1f3012379a9b3e3510837a30156b11a65fb7b6e3aca46d2186e8b76"},
+    "outcomes": [
+      {"action": "BUY", "horizon": 5, "entry_session": "2026-06-03", "target_exit_session": "2026-06-10", "actual_exit_session": "2026-06-10", "actual_exit_session_offset": 0, "instrument_entry_close": 100000.0, "instrument_exit_close": 106000.0, "benchmark_entry_close": 2500.0, "benchmark_exit_close": 2575.0, "execution_cost_return": 0.0031},
+      {"action": "SELL", "horizon": 5, "entry_session": "2026-06-03", "target_exit_session": "2026-06-10", "actual_exit_session": "2026-06-10", "actual_exit_session_offset": 0, "instrument_entry_close": 100.0, "instrument_exit_close": 95.0, "benchmark_entry_close": 100.0, "benchmark_exit_close": 99.0, "execution_cost_return": 0.001},
+      {"action": "HOLD", "horizon": 5, "entry_session": "2026-06-03", "target_exit_session": "2026-06-10", "actual_exit_session": "2026-06-10", "actual_exit_session_offset": 0, "instrument_entry_close": 100.0, "instrument_exit_close": 95.0, "benchmark_entry_close": 100.0, "benchmark_exit_close": 100.0, "execution_cost_return": 0.0}
+    ],
+    "recompute": {"data_cutoff_at": "2026-06-02T10:00:00+09:00", "stored_verdict": "BUY", "captured_verdict": "HOLD"},
+    "idempotency_key": "idem_phase27_cancel_resume_1"
+  },
+  "calibration": {
+    "schema_version": "v4.hold_confidence_calibration.phase28.1",
+    "horizon": 5,
+    "bucket_edges": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+    "observations": [
+      {"sample_id": "cal_v4_buy_hit", "market": "KR", "exchange": "KOSPI", "action": "BUY", "confidence_probability": 0.7, "instrument_return": 0.06, "benchmark_return": 0.03, "sample_weight": 1.0},
+      {"sample_id": "cal_v4_sell_miss", "market": "KR", "exchange": "KOSPI", "action": "SELL", "confidence_probability": 0.7, "instrument_return": 0.02, "benchmark_return": 0.0, "sample_weight": 1.0},
+      {"sample_id": "cal_v4_hold_avoided_loss", "market": "US", "exchange": "NASDAQ", "action": "HOLD", "confidence_probability": 0.9, "instrument_return": -0.06, "benchmark_return": 0.0, "sample_weight": 1.0, "held_position_sell_eligible": false},
+      {"sample_id": "cal_v4_hold_missed_upside", "market": "US", "exchange": "NASDAQ", "action": "HOLD", "confidence_probability": 0.9, "instrument_return": 0.07, "benchmark_return": 0.0, "sample_weight": 1.0, "held_position_sell_eligible": false}
+    ],
+    "expected": {"weighted_count": 4.0, "brier_score": 0.35, "ece": 0.3, "promotion_state": "insufficient_sample_no_op"}
+  },
+  "evidence": {
+    "scope": {"included_version": "v4", "unaffected_versions": ["v5", "v6", "v7", "v8", "v9"]},
+    "hash_direction": {"release_manifest_refs": ["phase22", "phase23", "phase24", "phase25", "phase26", "phase27", "phase28", "review_matrix"], "gate_decision_refs": ["release_manifest"], "release_manifest_must_not_ref": ["release_manifest", "gate_decision_report"]},
+    "review_paths": [
+      "docs/specs/v4/fixtures/reviews/attribution_ledger_report.json",
+      "docs/specs/v4/fixtures/reviews/blocked_degraded_field_report.json",
+      "docs/specs/v4/fixtures/reviews/calibration_fixture_result.json",
+      "docs/specs/v4/fixtures/reviews/calibration_report.json",
+      "docs/specs/v4/fixtures/reviews/checkpoint_report.json",
+      "docs/specs/v4/fixtures/reviews/denominator_report.json",
+      "docs/specs/v4/fixtures/reviews/invalid_legacy_report.json",
+      "docs/specs/v4/fixtures/reviews/ledger_hash_chain_report.json",
+      "docs/specs/v4/fixtures/reviews/legacy_coverage_report.json",
+      "docs/specs/v4/fixtures/reviews/legacy_source_inventory.json",
+      "docs/specs/v4/fixtures/reviews/market_context_report.json",
+      "docs/specs/v4/fixtures/reviews/measurement_fixture_result.json",
+      "docs/specs/v4/fixtures/reviews/measurement_report.json",
+      "docs/specs/v4/fixtures/reviews/promotion_noop_report.json",
+      "docs/specs/v4/fixtures/reviews/replay_report.json",
+      "docs/specs/v4/fixtures/reviews/resume_report.json",
+      "docs/specs/v4/fixtures/reviews/review_matrix.json",
+      "docs/specs/v4/fixtures/reviews/snapshot_hash_report.json",
+      "docs/specs/v4/fixtures/reviews/snapshot_manifest.json",
+      "docs/specs/v4/fixtures/reviews/snapshot_schema_validation.json"
+    ],
+    "self_review_paths": ["docs/specs/v4/fixtures/reviews/self-review-measurement-report.json"],
+    "trusted_reviewers": [
+      {"identity": "external-phase29-reviewer", "key_fingerprint": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "allowed_lanes": ["manual_read", "deterministic_parser", "fixture_mutation", "independent_review", "resume_review"]},
+      {"identity": "fixture-domain-producer", "key_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "allowed_lanes": ["manual_read"]}
+    ],
+    "mutation_cases": [
+      {"fixture_id": "rehashed_legacy_promotion", "expected_state": "fail", "expected_reason": "legacy_promoted_to_native:invalid_legacy_report.native_v4_eligible"},
+      {"fixture_id": "stale_generated_at", "expected_state": "fail", "expected_reason": "stale_evidence"},
+      {"fixture_id": "dirty_provenance", "expected_state": "fail", "expected_reason": "dirty_provenance:source/config provenance is dirty or mismatched"},
+      {"fixture_id": "measurement_expected_999", "expected_state": "fail", "expected_reason": "semantic_failure:measurement_report.actual_gross_benchmark_excess_return_mismatch"}
+    ]
+  }
+}
