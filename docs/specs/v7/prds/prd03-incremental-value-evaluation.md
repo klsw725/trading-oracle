@@ -1,5 +1,5 @@
 # PRD 03: Incremental Value Evaluation
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-08)
 
 Parent SPEC: [v7 Information Source Expansion SPEC](../SPEC.md)
 
@@ -39,8 +39,11 @@ Incremental value report는 아래 입력만 소비한다.
 | `source_masked_outputs` | yes | source는 fetch하지만 candidate facts를 prompt나 scorer에서 제거한 산출물이다. Latency와 routing 영향만 분리한다. |
 | `fact_audit_set` | yes | 사람이 고른 예제가 아니라 frozen manifest의 fact claim과 expected correction label이다. |
 | `outcome_adapter` | optional | v4 measurement 또는 같은 의미의 deterministic outcome fixture다. 없으면 verdict lift와 calibration은 no-op이다. |
+| `ValueTrustDocument` | yes | 평가 fixture와 독립적으로 persisted된 cohort root, outcome root, PRD 01 manifest root, PRD 02 artifact hash 및 quality registry/bundle roots를 가진다. |
 
 Source ON과 OFF는 같은 ticker, 같은 emitted_at, 같은 market calendar, 같은 prompt bundle, 같은 scorer version, 같은 portfolio input, 같은 decision cutoff를 써야 한다. ON output이 OFF보다 늦게 만들어졌더라도 decision cutoff 이후 article, filing, price, benchmark, outcome은 feature로 들어갈 수 없다.
+
+평가 fixture에는 authoritative `expected_*` root를 넣지 않는다. Cohort, outcome, provenance 또는 quality body와 그 안의 claimed hash를 함께 재계산해도 별도 `v7.incremental_value_evaluation.trust.1` 문서의 root/hash가 그대로면 context 발급은 fail closed한다. Canonical 평가 fixture는 [`prd03-incremental-value-evaluation.json`](../fixtures/prd03-incremental-value-evaluation.json), 독립 trust 문서는 [`prd03-incremental-value-evaluation-trust.json`](../fixtures/prd03-incremental-value-evaluation-trust.json)이다.
 
 ## Source ON/OFF Cohorts
 
@@ -114,7 +117,7 @@ Source value는 품질 lift에서 운영 부담과 해를 뺀 뒤 판정한다.
 | `p95_added_wall_ms` | OFF 대비 ON 추가 p95 wall time. 기본 `2500` 이하다. |
 | `mean_added_wall_ms` | OFF 대비 ON 추가 평균 wall time. 기본 `900` 이하다. |
 | `added_prompt_tokens_per_ticker` | 기본 `1500` 이하다. |
-| `added_fetches_per_ticker` | declared budget 이하다. |
+| `added_fetches_per_ticker` | 기본 declared budget인 ticker당 `1`회 이하다. |
 | `timeout_rate` | `0.02` 이하다. Timeout을 verdict로 숨기면 malformed다. |
 | `harm_rate` | ON edge가 OFF보다 `0.02` 이상 나쁜 pair 비율. 기본 `0.20` 이하다. |
 | `severe_harm_rate` | ON edge가 OFF보다 `0.05` 이상 나쁜 pair 비율. 기본 `0.05` 이하다. |
@@ -134,6 +137,8 @@ Latency만 낮아진 source는 거절한다. 빠른 source가 factual correction
 | non-empty calibration bucket | `20` |
 
 표본이 부족하면 report는 만들 수 있지만 source policy는 no-op이다. No-op은 source order, traffic share, prompt injection, cache TTL, scorer weight, 사용자 출력 우선순위를 바꾸지 않는다는 뜻이다.
+
+Outcome adapter가 없으면 factual audit report는 만들 수 있지만 최종 code는 `INCONCLUSIVE_MISSING_OUTCOME_ADAPTER`다. 이 결과는 PRD 04 promotion의 value gate를 통과할 수 없다.
 
 ## Verdict Codes
 
