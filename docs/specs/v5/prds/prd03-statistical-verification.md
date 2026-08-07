@@ -1,5 +1,5 @@
 # PRD 03: Statistical Verification
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 > **SPEC 참조**: [../SPEC.md](../SPEC.md)
 
 ## Problem
@@ -485,6 +485,8 @@ Expected result:
 | QA area | Fixture | Required result |
 | --- | --- | --- |
 | Read QA | PRD 01 artifact has `schema_version = causal-node-canonicalization.1`. | Pair input reads canonical node IDs. |
+| Read QA | Canonical node is missing or its label no longer matches its ID. | Pair becomes `rejected_malformed` before statistics run. |
+| Read QA | PRD 02 `source_node_artifact_hash` differs from the supplied PRD 01 artifact. | Pair becomes `rejected_malformed`. |
 | Read QA | PRD 02 mapping has expired manual approval. | Pair becomes inconclusive or rejected before Granger runs. |
 | Read QA | Existing verified artifact stores `lag` as string. | New parser rejects it as malformed for this schema. |
 | JSON QA | `direction_match` is string `"True"`. | Rejected as malformed. |
@@ -506,3 +508,39 @@ Expected result:
 7. Train pass alone cannot promote a pair without holdout and stability pass.
 8. Fixtures include happy stable pair and in sample only failure.
 9. Mutation QA covers p hacking, leakage, flaky output, malformed JSON, and in sample only rejection.
+10. Missing nodes, canonical identity drift, and PRD 01/02 lineage hash drift are terminal `rejected_malformed` results.
+
+## 구현 및 실행
+
+- strict build, raw pair-local mapping boundary, series observation, and audit lock models: `src/causal/statistical_models.py`
+- complete PRD 04 pair-result reader and decimal range checks: `src/causal/statistical_output_models.py`
+- mapping hash recomputation and input/config/split/window/result fingerprints: `src/causal/statistical_hashes.py`
+- pandas alignment/mapping transforms and statsmodels ADF/Granger primitives: `src/causal/statistical_math.py`
+- pair preparation, 70/10/20 split, embargo, lag scope, and rolling checks: `src/causal/statistical_engine.py`
+- terminal state evidence and append-only mutations: `src/causal/statistical_results.py`
+- immutable versioned artifact assembly: `src/causal/statistical_pipeline.py`
+- deterministic executable acceptance checks: `src/causal/statistical_acceptance.py`
+- production JSON CLI: `scripts/verify_causal_statistical.py`
+
+```bash
+uv run scripts/verify_causal_statistical.py verify-fixture
+uv run scripts/verify_causal_statistical.py build \
+  --input data/causal_statistical_verification_input.json \
+  --output data/causal_statistical_verification.json
+```
+
+`build` 입력은 canonical graph, approved mapping artifact, cutoff 이전의 explicit timestamp/value observations, predeclared config, audit locks를 한 JSON 문서로 전달한다. 출력 경로는 upstream 입력과 분리되며, 같은 canonical build를 다시 쓰면 `write_status = unchanged`, 다른 내용으로 기존 경로를 바꾸려 하면 immutable conflict를 반환한다.
+
+### 구현된 split 및 audit lock 계약
+
+- `split_policy`는 `chronological_70_10_20`으로 고정하며 `train_fraction`, `embargo_fraction`, `holdout_fraction`은 각각 `0.700000`, `0.100000`, `0.200000`이다.
+- `embargo_sessions`가 실제 `train_end`와 `holdout_start` 사이의 row 경계를 결정한다. 정렬된 row 수의 10%와 일치하지 않으면 자동 보정하지 않고 terminal result를 만든다.
+- `window_policy`는 `split_segments_and_equal_rolling`이다. `train`, `embargo`, `holdout` predeclared window와 전체 aligned frame의 equal rolling window를 모두 검사한다.
+- 각 structural window는 실제 timestamp 범위에 대한 direction, mean shift, variance ratio evidence를 생성한다. embargo도 full structural frame에 보존된다.
+- audit은 `input_fingerprint`, `run_config_hash`, `correction_scope_hash`, `split_policy_hash`, `window_policy_hash`를 독립적으로 잠근다. 잠금 이후 변경은 `rejected_p_hacking` mutation을 append한다.
+- flaky 비교는 동일 `input_fingerprint`의 prior result에만 적용한다. 동일 입력에서 pair ID 집합 또는 complete result fingerprint가 달라지면 `rejected_flaky`가 된다.
+- PRD 02 `mapping_hash`는 저장값을 신뢰하지 않고 approved mapping body로 재계산한다. 불일치는 pair-local `rejected_malformed`로 남는다.
+- PRD 02 `source_node_artifact_hash`를 현재 PRD 01 canonical artifact에서 재계산한다. node 누락, canonical ID/label/direction 불일치, root hash drift는 통계 실행 전에 pair-local `rejected_malformed`로 닫힌다.
+- 식별 가능한 malformed mapping과 duplicate timestamp는 build 전체를 중단하지 않고 각각 `rejected_malformed`, `rejected_leakage` pair result와 mutation을 생성한다.
+- `verified_stable` reader는 `structural_break_check = pass`와 `oos_stability = pass`를 모두 요구하며 window 상태와 모순되는 structural 결과를 거부한다.
+- `rolling_windows_checked`와 `rolling_windows_passed`는 `train`, `embargo`, `holdout` segment를 제외하고 `rolling_*` window만으로 재계산·검증한다.
