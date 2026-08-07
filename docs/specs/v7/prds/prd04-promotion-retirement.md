@@ -1,5 +1,5 @@
 # PRD 04: Promotion Retirement
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (offline source lifecycle policy compiler, 71/71 acceptance)
 
 Parent SPEC: [v7 Information Source Expansion SPEC](../SPEC.md)
 
@@ -39,8 +39,12 @@ Promotion policy는 아래 입력만 소비한다.
 | `current_policy_snapshot` | yes | 현재 lifecycle state, traffic share, fallback order, cache generation, state hash를 가진다. |
 | `incident_report` | optional | 장애, severe harm, secret leakage, prompt injection, outage, contract breach를 기록한다. |
 | `owner_approval` | yes for promotion | accountable owner, reviewer, approval timestamp, expiry review date를 가진다. |
+| `source_trust_document` | yes | fixture와 별도 저장하며 PRD03 trust document hash, source bundle, 초기 policy/registry, contract, owner approval, fallback 후보, incident authorization을 고정한다. |
+| `prd03_fixture_and_trust` | yes | 별도 경로에서 로드하며 PRD01/02 lineage와 PRD03 value artifact를 독립적으로 다시 계산한다. |
 
 PRD 03 pass가 없으면 source policy는 no-op이다. PRD 03 pass가 있더라도 PRD 01 또는 PRD 02 hash가 바뀌었거나 stale이면 no-op이다.
+
+Lifecycle compiler와 standalone artifact verifier는 fixture 내부 authority를 신뢰하지 않는다. 별도로 로드한 PRD04 trust document가 PRD03 trust document의 canonical hash와 source bundle, 초기 policy/registry를 고정하고, PRD03 fixture와 trust에서 PRD01 provenance, PRD02 source metadata/capability/quality, PRD03 outcome/value/risk를 다시 계산한다. Fixture와 하위 trust 입력을 함께 바꾸더라도 PRD04 trust hash가 일치하지 않으면 `SOURCE_TRUST_MISMATCH`다. Incident operation은 issued context에 고정된 `(incident_code, evidence_hash, source_bundle_id)` authorization과 정확히 일치해야 한다.
 
 ## Lifecycle State
 
@@ -48,7 +52,7 @@ PRD 03 pass가 없으면 source policy는 no-op이다. PRD 03 pass가 있더라�
 | --- | --- | --- | --- |
 | `candidate` | Source bundle이 식별됐지만 운영 traffic을 받지 않는다. | `0.00` | fallback 대상이 아니다. |
 | `shadow` | Fetch와 quality check만 실행하고 사용자 판단에는 넣지 않는다. | `0.00` | fallback 대상이 아니다. |
-| `canary` | 작은 traffic에서 prompt eligible이 될 수 있다. | `0.01` to `0.05` | 같은 capability의 primary 실패 때만 후보가 된다. |
+| `canary` | 작은 traffic에서 prompt eligible이 될 수 있다. | 정확히 `0.05` | 같은 capability의 primary 실패 때만 후보가 된다. |
 | `limited` | 검증된 시장, action, horizon에서만 쓴다. | `0.05` to `0.50` | primary 다음 후보가 될 수 있다. |
 | `primary` | 해당 capability의 기본 source 후보가 된다. | `0.50` to `1.00` | fallback chain의 첫 유효 후보가 된다. |
 | `disabled` | 장애나 정책 위반으로 즉시 닫힌 상태다. | `0.00` | fallback 대상이 아니다. |
@@ -84,6 +88,8 @@ Traffic share는 점진적으로만 늘린다.
 
 단계를 건너뛰면 parser는 `ILLEGAL_PROMOTION_JUMP`를 반환한다. Emergency disable은 예외다. 장애와 정책 위반은 언제든 `disabled`로 즉시 이동한다.
 
+각 promotion step의 required observation은 최소 100 attempts를 포함해야 한다. 그보다 작으면 traffic을 늘리지 않고 현재 안전 상태를 유지한다.
+
 ## Traffic and Fallback
 
 Traffic share는 source가 prompt eligible이 되는 비율이다. Fetch traffic과 prompt traffic을 같은 값으로 보지 않는다. Shadow state는 fetch는 할 수 있지만 prompt에는 들어가지 않는다.
@@ -96,6 +102,10 @@ Fallback order는 아래 정렬 key로 계산한다.
 4. `quality_rank`: high, usable 순서다. Degraded는 current decision fallback이 아니다.
 5. `value_rank`: PRD 03 cohort가 같은 market, action, horizon에 가까울수록 앞선다.
 6. `cost_latency_rank`: threshold 안에서 낮은 운영 비용이 앞선다.
+
+모든 정렬 key가 같으면 `source_bundle_id` 오름차순으로 결정한다. 이 tie-break는 fixture 입력 순서와 무관하다.
+
+현재 평가 중인 `source_bundle_id`는 자신의 fallback order에서 제외한다. Persisted fallback projection은 eligible 후보의 canonical order와 정확히 같아야 하며, 길이가 짧거나 길면 `FALLBACK_ORDER_MISMATCH`, 동일 key 후보의 순서만 바뀌면 `FALLBACK_TIE_BREAK_MISMATCH`다.
 
 Fallback은 원본 실패를 덮어쓰지 않는다. Current decision에 fallback source를 쓰면 audit log에 원본 source state, 실패 code, fallback source bundle ID, fallback reason, cache generation을 같이 남긴다.
 
@@ -128,9 +138,13 @@ Contract metadata는 raw 계약서나 secret을 담지 않고 hash와 날짜만 
 | `expiry_review_at` | owner가 재검토해야 하는 시각이다. |
 | `retirement_reason` | `contract_expired`, `replaced_by_better_source`, `harmful`, `no_incremental_value`, `coverage_lost`, `owner_request` 중 하나다. |
 
-`valid_until`이 지났거나 license scope가 current use를 허용하지 않으면 source는 `expired`다. Expired source는 audit hash chain에는 남지만 current prompt, fallback, fresh count, quality count에 들어갈 수 없다.
+`valid_until`이 지났거나 license scope가 current prompt use를 명시적으로 허용하지 않으면 source는 `expired`다. `hash_only`와 같이 hash 보존만 허용하는 scope는 promotion traffic을 열 수 없다. Expired source는 audit hash chain에는 남지만 current prompt, fallback, fresh count, quality count에 들어갈 수 없다.
+
+Contract expiry와 voluntary retirement 조건이 동시에 성립하면 `expired` 전이를 먼저 적용한 뒤 `expired -> retired` 순서로 닫는다.
 
 Retirement는 새 decision traffic을 먼저 `0.00`으로 만든 뒤 cache invalidation을 수행한다. Audit TTL 안의 과거 artifact는 삭제하지 않는다. 삭제 대신 current eligibility를 닫고 retention rule에 맞는 hash만 남긴다.
+
+Voluntary retirement는 `canary`, `limited`, `primary`에서 `retiring`으로 이동한 뒤 두 번째 retirement operation으로 `retired`가 된다. Artifact terminal code는 operation 종류가 아니라 최종 state와 contract-expiry history에서 계산한다.
 
 ## Cache Invalidation
 
@@ -162,6 +176,10 @@ Cache entry는 `policy_hash`, `source_bundle_hash`, `quality_result_hash`, `cach
 | `interrupted_transition` | 전환 중단 여부다. 중단이면 traffic share는 이전 안전 상태나 `0.00`이어야 한다. |
 
 Audit log는 raw external text, secret, token, cookie, 계좌 정보, 사용자 prompt 원문을 담지 않는다. Incident audit도 credential 원문을 기록하지 않는다.
+
+Interrupted operation은 checkpoint만 남기고 policy, registry, history, ledger, cache, fallback projection을 변경하지 않는다. Persisted artifact verification은 trusted context에서 전체 operation을 처음부터 replay하고 history, ledger, checkpoint, cache, fallback, final policy가 모두 같은지 비교한다.
+
+Idempotent retry는 `operation_id`, `idempotency_key`, canonical `operation_hash`가 모두 기존 audit event와 같을 때만 no-op이다. 같은 ID나 key로 payload를 바꾸면 `DUPLICATE_OPERATION_CONFLICT`다.
 
 ## Machine-readable Fixture
 
@@ -315,6 +333,17 @@ Parser must read every fenced JSON block in this PRD and run these in-memory mut
 4. It includes a parseable JSON fixture with gradual promotion and immediate disable traces.
 5. It requires deterministic parser and mutation checks for state, hash, stale cache, interruption, expired contract, disabled fallback, missing owner approval, and missing audit hash.
 6. It does not read or expose config, secret, token, cookie, account, or credential material.
+
+Persisted artifact는 다음 명령으로 fixture와 분리해 검증한다.
+
+```bash
+uv run scripts/run_source_lifecycle.py verify \
+  --artifact /tmp/source-policy.json \
+  --fixture docs/specs/v7/fixtures/prd04-promotion-retirement.json \
+  --trust docs/specs/v7/fixtures/prd04-promotion-retirement-trust.json \
+  --value-fixture docs/specs/v7/fixtures/prd03-incremental-value-evaluation.json \
+  --value-trust docs/specs/v7/fixtures/prd03-incremental-value-evaluation-trust.json
+```
 
 ## Evidence Requirement
 
