@@ -24,4 +24,9 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = []
+dev = [
+    "pandas-stubs>=3.0.5.260730",
+]
+
+[tool.basedpyright]
+stubPath = "typings"
