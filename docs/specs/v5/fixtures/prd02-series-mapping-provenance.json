@@ -1,0 +1,152 @@
+{
+  "schema_version": "causal-series-mapping-fixture.1",
+  "build_input": {
+    "schema_version": "causal-series-mapping-build.1",
+    "generated_at": "2026-08-06T12:00:00+09:00",
+    "run_cutoff": "2026-08-06T12:00:00+09:00",
+    "source_node_artifact": {
+      "schema_version": "causal-node-canonicalization.1",
+      "nodes": [
+        {"canonical_node_id": "cnode_0b6a943c2860b6e61893", "canonical_label": "원달러 환율 상승", "normalized_label": "원달러 환율 상승", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_444f9e9f245dcdc58c7e", "canonical_label": "미국 장단기 금리차 확대", "normalized_label": "미국 장단기 금리차 확대", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_9ae6e9aa79452980e619", "canonical_label": "한국 금융지주의 대손충당금 확대", "normalized_label": "한국 금융지주의 대손충당금 확대", "direction": {"kind": "flow_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_d3b3108dbc99b25824db", "canonical_label": "국제유가 급등", "normalized_label": "국제유가 급등", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_6f0a5cd90ab4847fd670", "canonical_label": "미국 기준금리 인상", "normalized_label": "미국 기준금리 인상", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_68efb82e6e585ecd09e3", "canonical_label": "미국 정책금리 상승", "normalized_label": "미국 정책금리 상승", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_499e49296fbb53766abf", "canonical_label": "중복 환율 후보", "normalized_label": "중복 환율 후보", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_fac54a6d7738470fb88e", "canonical_label": "원화 약세", "normalized_label": "원화 약세", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_997ec34dd54b6e55e7a9", "canonical_label": "금 가격 상승", "normalized_label": "금 가격 상승", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_6d49ba9ad920b08307f3", "canonical_label": "승인 누락 환율", "normalized_label": "승인 누락 환율", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_d0ef0a547ef9844eddb5", "canonical_label": "미등록 시계열", "normalized_label": "미등록 시계열", "direction": {"kind": "level_change", "polarity": "up"}},
+        {"canonical_node_id": "cnode_305a988e2442eb396bf5", "canonical_label": "단일 매핑 다중 링크", "normalized_label": "단일 매핑 다중 링크", "direction": {"kind": "level_change", "polarity": "up"}}
+      ],
+      "triples": []
+    },
+    "series_catalog": [
+      {
+        "series_id": "USD_KRW",
+        "raw_symbol": "USD/KRW",
+        "source_id": "finance_data_reader",
+        "adapter_version": "macro-series.1",
+        "native_unit": "KRW_per_USD",
+        "native_frequency": "daily_close",
+        "as_of": "2026-08-06T00:00:00+09:00",
+        "expires_at": "2026-08-07T00:00:00+09:00",
+        "provenance_hash": "sha256:66b90b8003ce65927c603a4450be9f5b91fc81849930a34125c9c0a540389d85"
+      },
+      {
+        "series_id": "US10YT",
+        "raw_symbol": "US10YT",
+        "source_id": "finance_data_reader",
+        "adapter_version": "macro-series.1",
+        "native_unit": "percent",
+        "native_frequency": "daily_close",
+        "as_of": "2026-08-06T00:00:00+09:00",
+        "expires_at": "2026-08-07T00:00:00+09:00",
+        "provenance_hash": "sha256:b3b9a57cce3b7fd6de46bc76abcd90f594b017dd44f6078677611c9650c1939f"
+      },
+      {
+        "series_id": "US13WT",
+        "raw_symbol": "US13WT",
+        "source_id": "finance_data_reader",
+        "adapter_version": "macro-series.1",
+        "native_unit": "percent",
+        "native_frequency": "daily_close",
+        "as_of": "2026-08-06T00:00:00+09:00",
+        "expires_at": "2026-08-07T00:00:00+09:00",
+        "provenance_hash": "sha256:610b49c4bca22cc5fb9b10a1f949703fb2e645d42a60b5eb91437cec01a376b6"
+      },
+      {
+        "series_id": "WTI",
+        "raw_symbol": "CL=F",
+        "source_id": "finance_data_reader",
+        "adapter_version": "macro-series.1",
+        "native_unit": "USD_per_barrel",
+        "native_frequency": "daily_close",
+        "as_of": "2026-07-01T00:00:00+09:00",
+        "expires_at": "2026-07-02T00:00:00+09:00",
+        "provenance_hash": "sha256:5dbccbca919d98d5eae8cfb928d353925bc2e72fe154bb30de414a86f8c368cf"
+      },
+      {
+        "series_id": "GOLD",
+        "raw_symbol": "GC=F",
+        "source_id": "finance_data_reader",
+        "adapter_version": "macro-series.1",
+        "native_unit": "USD_per_ounce",
+        "native_frequency": "daily_close",
+        "as_of": "2026-08-06T00:00:00+09:00",
+        "expires_at": "2026-08-07T00:00:00+09:00",
+        "provenance_hash": "sha256:36c844825117ff1471a4a582ede1a36bbf834808281f48032d10cf242f1b5f14"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_kind": "approve",
+        "canonical_node_id": "cnode_0b6a943c2860b6e61893",
+        "mapping_kind": "single_series",
+        "mapping_expires_at": "2026-08-07T00:00:00+09:00",
+        "series_links": [{
+          "series_id": "USD_KRW",
+          "transform": "pct_change_1d",
+          "unit": "percent_change",
+          "direction": "same",
+          "source_id": "finance_data_reader",
+          "as_of": "2026-08-06T00:00:00+09:00",
+          "provenance_hash": "sha256:66b90b8003ce65927c603a4450be9f5b91fc81849930a34125c9c0a540389d85",
+          "suitability": "direct_market_series",
+          "suitability_evidence": "USD/KRW directly measures KRW per USD.",
+          "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Direct concept and direction match.", "expires_at": "2026-09-05T00:00:00+09:00"}
+        }]
+      },
+      {
+        "proposal_kind": "approve",
+        "canonical_node_id": "cnode_444f9e9f245dcdc58c7e",
+        "mapping_kind": "composite_series",
+        "formula": "US10YT - US13WT",
+        "formula_unit": "percentage_point",
+        "mapping_expires_at": "2026-08-07T00:00:00+09:00",
+        "series_links": [
+          {"series_id": "US10YT", "transform": "level", "unit": "percent", "direction": "component", "source_id": "finance_data_reader", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:b3b9a57cce3b7fd6de46bc76abcd90f594b017dd44f6078677611c9650c1939f", "suitability": "direct_component", "suitability_evidence": "Long-rate component.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Long-rate formula component.", "expires_at": "2026-09-05T00:00:00+09:00"}},
+          {"series_id": "US13WT", "transform": "level", "unit": "percent", "direction": "component", "source_id": "finance_data_reader", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:610b49c4bca22cc5fb9b10a1f949703fb2e645d42a60b5eb91437cec01a376b6", "suitability": "direct_component", "suitability_evidence": "Short-rate component.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Short-rate formula component.", "expires_at": "2026-09-05T00:00:00+09:00"}}
+        ]
+      },
+      {"proposal_kind": "unmappable", "canonical_node_id": "cnode_9ae6e9aa79452980e619", "reason": "No catalog series measures loan loss provisions.", "proxy_candidates_rejected": [{"series_id": "GOLD", "reason": "Gold is not a direct measure."}]},
+      {
+        "proposal_kind": "approve",
+        "canonical_node_id": "cnode_d3b3108dbc99b25824db",
+        "mapping_kind": "single_series",
+        "mapping_expires_at": "2026-07-03T00:00:00+09:00",
+        "series_links": [{"series_id": "WTI", "transform": "pct_change_1d", "unit": "percent_change", "direction": "same", "source_id": "finance_data_reader", "as_of": "2026-07-01T00:00:00+09:00", "provenance_hash": "sha256:5dbccbca919d98d5eae8cfb928d353925bc2e72fe154bb30de414a86f8c368cf", "suitability": "direct_market_series", "suitability_evidence": "WTI measures oil price.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-07-01T01:00:00+09:00", "approval_reason": "Direct oil benchmark.", "expires_at": "2026-07-03T00:00:00+09:00"}}]
+      },
+      {"proposal_kind": "reject", "canonical_node_id": "cnode_6f0a5cd90ab4847fd670", "candidate_series_id": "GOLD", "reason": "rejected_proxy", "evidence": {"candidate_series_id": "GOLD", "proxy_reason": "Gold is related risk evidence, not a direct policy-rate measurement.", "missing_direct_source_explanation": "No catalog series directly measuring policy rates was proposed."}},
+      {"proposal_kind": "reject", "canonical_node_id": "cnode_68efb82e6e585ecd09e3", "candidate_series_id": "GOLD", "reason": "rejected_misleading", "evidence": {"candidate_series_id": "GOLD", "expected_direction": "same", "observed_conflict": "Interest-rate meaning conflicts with an asset-price series."}},
+      {"proposal_kind": "reject", "canonical_node_id": "cnode_499e49296fbb53766abf", "candidate_series_id": "USD_KRW", "reason": "rejected_dirty", "evidence": {"conflict_kind": "conflicting_links", "original_records": [{"series_id": "USD_KRW"}, {"series_id": "GOLD"}], "conflict_reason": "Duplicate and conflicting legacy links cannot be reconciled."}},
+      {"proposal_kind": "approve", "canonical_node_id": "cnode_fac54a6d7738470fb88e", "mapping_kind": "single_series", "mapping_expires_at": "2026-09-05T00:00:00+09:00", "series_links": [{"series_id": "USD_KRW", "transform": "pct_change_1d", "unit": "percent_change", "direction": "inverse", "source_id": "finance_data_reader", "provenance_hash": "sha256:66b90b8003ce65927c603a4450be9f5b91fc81849930a34125c9c0a540389d85", "suitability": "direct_market_series", "suitability_evidence": "Inverse exchange-rate direction.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Direct inverse concept.", "expires_at": "2026-09-05T00:00:00+09:00"}}]},
+      {"proposal_kind": "approve", "canonical_node_id": "cnode_6d49ba9ad920b08307f3", "mapping_kind": "single_series", "mapping_expires_at": "2026-09-05T00:00:00+09:00", "series_links": [{"series_id": "USD_KRW", "transform": "pct_change_1d", "unit": "percent_change", "direction": "same", "source_id": "finance_data_reader", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:66b90b8003ce65927c603a4450be9f5b91fc81849930a34125c9c0a540389d85", "suitability": "direct_market_series", "suitability_evidence": "Approval intentionally omitted."}]},
+      {"proposal_kind": "approve", "canonical_node_id": "cnode_d0ef0a547ef9844eddb5", "mapping_kind": "single_series", "mapping_expires_at": "2026-09-05T00:00:00+09:00", "series_links": [{"series_id": "UNKNOWN", "transform": "level", "unit": "index_points", "direction": "same", "source_id": "unknown", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "suitability": "direct_market_series", "suitability_evidence": "Series intentionally absent from catalog.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Fixture-only unknown series.", "expires_at": "2026-09-05T00:00:00+09:00"}}]},
+      {"proposal_kind": "approve", "canonical_node_id": "cnode_305a988e2442eb396bf5", "mapping_kind": "single_series", "mapping_expires_at": "2026-09-05T00:00:00+09:00", "series_links": [{"series_id": "US10YT", "transform": "level", "unit": "percent", "direction": "component", "source_id": "finance_data_reader", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:b3b9a57cce3b7fd6de46bc76abcd90f594b017dd44f6078677611c9650c1939f", "suitability": "direct_component", "suitability_evidence": "First invalid single-series component.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Fixture cardinality case.", "expires_at": "2026-09-05T00:00:00+09:00"}}, {"series_id": "US13WT", "transform": "level", "unit": "percent", "direction": "component", "source_id": "finance_data_reader", "as_of": "2026-08-06T00:00:00+09:00", "provenance_hash": "sha256:610b49c4bca22cc5fb9b10a1f949703fb2e645d42a60b5eb91437cec01a376b6", "suitability": "direct_component", "suitability_evidence": "Second invalid single-series component.", "manual_approval": {"required": true, "approved_by": "macro-domain-owner", "approved_at": "2026-08-06T01:00:00+09:00", "approval_reason": "Fixture cardinality case.", "expires_at": "2026-09-05T00:00:00+09:00"}}]}
+    ],
+    "legacy_flat_map": {"금 가격 상승": "GOLD"}
+  },
+  "adversarial": {
+    "duplicate_node": {"canonical_node_id": "cnode_0b6a943c2860b6e61893", "canonical_label": "충돌하는 환율 노드", "normalized_label": "충돌하는 환율 노드", "direction": {"kind": "level_change", "polarity": "down"}},
+    "duplicate_catalog": {"series_id": "USD_KRW", "raw_symbol": "CONFLICT", "source_id": "derived_macro_series", "adapter_version": "macro-series.2", "native_unit": "conflict", "native_frequency": "daily_close", "as_of": "2026-08-06T00:00:00+09:00", "expires_at": "2026-08-07T00:00:00+09:00", "provenance_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "duplicate_terminal_proposal": {"proposal_kind": "unmappable", "canonical_node_id": "cnode_0b6a943c2860b6e61893", "reason": "Conflicts with an approval proposal.", "proxy_candidates_rejected": []},
+    "formula_unknown_variable": "US10YT - US13WT + GOLD",
+    "formula_forbidden_syntax": "US10YT ** US13WT",
+    "formula_duplicate_link": true,
+    "future_approved_at": "2026-08-07T00:00:00+09:00",
+    "overlong_mapping_expires_at": "2026-08-08T00:00:00+09:00",
+    "mismatched_evidence_series_id": "USD_KRW",
+    "empty_dirty_original_records": true,
+    "future_as_of": "2026-08-06T18:00:00+09:00"
+  },
+  "expected": {
+    "approved_count": 2,
+    "candidate_count": 1,
+    "malformed_count": 4,
+    "rejection_results": ["rejected_dirty", "rejected_malformed", "rejected_misleading", "rejected_proxy", "rejected_stale"],
+    "composite_formula": "US10YT - US13WT",
+    "legacy_candidate_node_id": "cnode_997ec34dd54b6e55e7a9"
+  }
+}
