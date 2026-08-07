@@ -1,11 +1,25 @@
 # v7 SPEC: Information Source Expansion
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-08, Oracle APPROVE)
 
 ## Scope
 
 v7 defines how Trading Oracle accepts an information source, checks its quality, measures its decision value, and controls its operating lifecycle. It is independent from older SPEC lines. A source is not trusted because it exists, returns many rows, is cheap, or is already mentioned in README. It is trusted only when its source artifact, quality result, value report, and policy event all parse and link cleanly.
 
 This SPEC does not choose a vendor, add a scraper, change source code, edit config, read credentials, rewrite cache files, or alter recommendation scoring. Current sources remain current sources until a later implementation changes them under this contract.
+
+## Implementation Defaults
+
+The product implementation uses the same offline CLI contract as v6: every PRD exposes `verify-fixture` and `build`, writes canonical JSON to stdout, exits `0` on success and `1` on contract or input failure, and never adopts a source into production automatically.
+
+The canonical defaults are:
+
+- PRD 02 freshness SLA is the single source of truth for PRD 01 stale validation.
+- One added fetch per ticker is the maximum default PRD 03 fetch budget.
+- Canary prompt traffic is exactly `0.05`.
+- Every promotion observation window contains at least 100 attempts.
+- Fallback ties are resolved by ascending `source_bundle_id` after all documented ranking keys.
+- Contract expiry takes precedence over voluntary retirement when both apply.
+- A missing outcome adapter produces `INCONCLUSIVE_MISSING_OUTCOME_ADAPTER` and cannot pass the PRD 04 value gate.
 
 ## Local PRD Map
 
@@ -74,7 +88,7 @@ Promotion success requires both quality and cost success plus owner approval, ma
 2. PRD 02 marks the prompt eligible records `fresh` and `high` with independent evidence and no contradiction.
 3. PRD 03 returns `PASS_INCREMENTAL_VALUE_EVALUATION` with source masked control near zero lift, factual correction above threshold, verdict lift above threshold, calibration improvement, coverage inside target, and harm inside limit.
 4. PRD 04 receives owner approval, previous policy hash, source bundle hash, quality result hashes, provenance hashes, contract hash, and expiry review date.
-5. Traffic opens in order: `shadow` at `0.00`, `canary` at `0.05`, `limited` at `0.25`, `limited` at `0.50`, then `primary` at `1.00`.
+5. Traffic opens in order: `shadow` at `0.00`, `canary` at exactly `0.05`, `limited` at `0.25`, `limited` at `0.50`, then `primary` at `1.00`; each promotion step requires at least 100 observed attempts.
 6. Each traffic movement creates a new cache generation and moves older prompt eligible cache entries to audit-only use.
 7. Fallback order can put this bundle first only after state, capability, freshness, quality, value, cost, latency, policy hash, and cache generation all match.
 
@@ -192,3 +206,14 @@ Required parser checks:
 6. Cost and quality success criteria both have explicit thresholds or labels.
 7. Happy promotion and harmful retirement are both covered by prose and parseable fixture data.
 8. Parser and mutation requirements cover links, bidirectional contract gaps, quality misuse, value misuse, policy hash mismatch, stale cache, harmful fallback, and illegal promotion.
+
+## Verification CLI
+
+The standalone verifier reads only this SPEC and its linked files below `docs/specs/v7`.
+
+```bash
+uv run scripts/verify_v7_spec.py verify
+uv run scripts/verify_v7_spec.py verify-fixture
+```
+
+`verify` checks the canonical Markdown contract. `verify-fixture` also generates every required mutation in memory and requires its normative error code. Both commands emit canonical JSON to stdout and exit `0` only when all checks pass; contract, input, or confined-path failures exit `1`.
