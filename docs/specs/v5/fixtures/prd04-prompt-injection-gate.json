@@ -1,0 +1,12 @@
+{
+  "schema_version": "causal-prompt-injection-build.1",
+  "generated_at": "2026-08-06T12:30:00+09:00",
+  "prompt_cutoff": "2026-08-06T12:30:00+09:00",
+  "freshness_window_hours": 24,
+  "package_ttl_hours": 12,
+  "minimum_confidence": "0.500000",
+  "max_tokens": 900,
+  "reserved_tokens": 120,
+  "ordering_policy": "freshness_confidence_holdout_p_lag_pair",
+  "verified_section_label": "데이터 검증됨, 통계적 선행 근거"
+}
