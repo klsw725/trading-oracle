@@ -1,0 +1,252 @@
+{
+  "schema_version": "causal-node-canonicalization-fixture.1",
+  "legacy_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 4,
+      "num_triples": 4,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "원/달러 환율 상승",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "USD/KRW 상승",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "글로벌매크로"
+      },
+      {
+        "subject": "달러 대비 원화 약세",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "원화 강세",
+        "relation": "decreases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "dirty_duplicate_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 2,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "원/달러 환율 상승",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "원/달러 환율 상승",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "malformed_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 2,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": 123,
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "원달러 환율 상승",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "formatting_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 2,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "원/달러 환율",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "원달러 환율",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "domain_collision_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 4,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "마진 개선",
+        "relation": "enables",
+        "object": "반도체 투자 확대",
+        "domain": "반도체"
+      },
+      {
+        "subject": "마진 개선",
+        "relation": "enables",
+        "object": "자동차 투자 확대",
+        "domain": "자동차"
+      }
+    ]
+  },
+  "misleading_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 2,
+      "num_triples": 1,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "원달러 환율 상승",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "strict_metadata_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": true,
+      "num_triples": 1,
+      "llm_model": "fixture"
+    },
+    "triples": []
+  },
+  "ownership_transaction_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 6,
+      "num_triples": 3,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "반도체 생산 증가",
+        "relation": "increases",
+        "object": "마진 개선",
+        "domain": "반도체"
+      },
+      {
+        "subject": "수요 증가",
+        "relation": "increases",
+        "object": "마진 개선",
+        "domain": "자동차"
+      },
+      {
+        "subject": "수요 증가",
+        "relation": "increases",
+        "object": "판매 증가",
+        "domain": "소비재"
+      }
+    ]
+  },
+  "empty_owner_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 4,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "마진 개선",
+        "relation": "enables",
+        "object": "투자 확대",
+        "domain": ""
+      },
+      {
+        "subject": "마진 개선",
+        "relation": "enables",
+        "object": "자동차 판매 증가",
+        "domain": "자동차"
+      }
+    ]
+  },
+  "exchange_direction_graph": {
+    "metadata": {
+      "created_at": null,
+      "updated_at": "2026-08-06",
+      "num_topics": 3,
+      "num_triples": 2,
+      "llm_model": "fixture"
+    },
+    "triples": [
+      {
+        "subject": "원달러 환율 증가",
+        "relation": "increases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      },
+      {
+        "subject": "원달러 환율 감소",
+        "relation": "decreases",
+        "object": "수출기업 마진 개선",
+        "domain": "환율"
+      }
+    ]
+  },
+  "expected": {
+    "schema_version": "causal-node-canonicalization.1",
+    "merged_node_id": "cnode_0b6a943c2860b6e61893",
+    "merged_alias_count": 3,
+    "merged_created_from_minimum": 3,
+    "owner_domain": "환율",
+    "secondary_domain": "글로벌매크로",
+    "opposite_node_id": "cnode_9b5b931129be44d18451",
+    "opposite_rejection_reason": "opposite_direction",
+    "duplicate_alias_count": 1,
+    "duplicate_created_from_count": 2,
+    "malformed_triples_rejected": 2,
+    "misleading_rejection_reason": "misleading_direction",
+    "domain_collision_reason": "domain_collision",
+    "domain_collision_triples": 1,
+    "misleading_triples": 0,
+    "ownership_transaction_triples": 2,
+    "transaction_owner_domain": "소비재",
+    "empty_owner_domain": "자동차",
+    "exchange_polarities": ["down", "up"]
+  }
+}
