@@ -1,5 +1,5 @@
 # PRD 01: Node Canonicalization
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 
 ## 문제
 
@@ -426,3 +426,21 @@ Each implementation starts by writing these failing tests or equivalent fixtures
 6. Legacy fixture shows three aliases merging into one canonical node.
 7. Migration rules require Read, parse JSON, deterministic ID, merge mutations, and reject mutations.
 8. The document does not define statistical verification or prompt injection policy.
+
+## 구현 및 실행
+
+- typed legacy parse boundary: `src/causal/canonical_models.py`
+- normalization, direction, and owner-review rules: `src/causal/canonical_rules.py`
+- deterministic ID and transactional merge/reject migration: `src/causal/canonicalizer.py`
+- executable acceptance checks: `src/causal/canonical_acceptance.py`
+- executable acceptance fixture: `docs/specs/v5/fixtures/prd01-node-canonicalization.json`
+- migration and fixture CLI: `scripts/canonicalize_nodes.py`
+
+```bash
+uv run scripts/canonicalize_nodes.py verify-fixture
+uv run scripts/canonicalize_nodes.py migrate \
+  --input data/causal_graph.json \
+  --output data/causal_graph_canonical.json
+```
+
+Migration은 legacy source와 같은 출력 경로를 거절한다. 동일한 canonical artifact를 재생성하면 `write_status = unchanged`를 반환하며, 다른 내용으로 기존 artifact를 덮어쓰지 않는다.
