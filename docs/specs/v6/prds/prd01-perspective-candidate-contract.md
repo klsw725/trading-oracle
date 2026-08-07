@@ -1,5 +1,5 @@
 # PRD 01: Perspective Candidate Contract
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-07)
 > **SPEC 참조**: [v6 SPEC](../SPEC.md)
 
 ## 문서 범위
@@ -7,6 +7,16 @@
 이 문서는 Trading Oracle에 새 투자 관점 후보를 제안할 때 필요한 계약을 정의한다. 후보는 기존 `kwangsoo`, `ouroboros`, `quant`, `macro`, `value` 관점과 같은 입력 묶음을 받을 수 있지만, 같은 근거를 다른 말로 반복하면 안 된다.
 
 이 문서는 v6의 로컬 PRD 01이다. 다른 버전 문서의 산출 여부와 무관하게 이 계약만으로 후보 제안서, 검증 fixture, parser를 작성할 수 있어야 한다.
+
+## 구현
+
+- 계약 경계: `src/v6/models.py`, `src/v6/candidate_contract.py`
+- fixture 검증: `src/v6/candidate_fixture.py`, `docs/specs/v6/fixtures/prd01-perspective-candidate-contract.json`
+- CLI: `scripts/validate_perspective_candidate.py`
+- 검증: `uv run scripts/validate_perspective_candidate.py verify-fixture`
+- 빌드: `uv run scripts/validate_perspective_candidate.py build --input <candidate.json> [--output <artifact.json>]`
+
+CLI는 canonical JSON 한 줄을 출력하고 성공 시 exit `0`, 실패 시 exit `1`을 반환한다. `--output`을 생략하면 `data/v6/perspective_candidates/<candidate_id>/<candidate_version>.json`에 기록한다. `candidate_version`은 `<candidate_name>.<major>.<minor>` safe token만 허용하며 default output은 이 root 밖으로 나갈 수 없다. 산출물은 `src.v4.models.canonical_hash()`와 `write_immutable_json()`을 사용하고, proposal hash·top-level identity·artifact hash를 load 시 다시 검증한다. Artifact decision도 embedded proposal을 다시 평가한 결과와 정확히 같아야 한다. 동일 내용은 `unchanged`, 다른 내용의 덮어쓰기는 conflict다. 직렬화되는 confidence와 overlap metric은 모두 소수점 여섯 자리 문자열이다.
 
 ## 문제
 
@@ -120,6 +130,8 @@
 
 `source_contract`가 없거나 freshness budget이 없으면 후보는 접수되지 않는다.
 
+Top-level `input_contract.missing_behavior`는 반드시 `N/A`다. 필수 입력 부재가 `BUY`, `SELL`, `HOLD`로 닫히는 후보는 `UNTYPED_INPUT_OR_OUTPUT`으로 거절한다.
+
 ## 출력 schema
 
 후보 출력은 `PerspectiveResult`와 호환되어야 한다.
@@ -128,7 +140,7 @@
 {
   "perspective": "working_capital_quality",
   "verdict": "HOLD",
-  "confidence": 0.71,
+  "confidence": "0.710000",
   "reasoning": [
     "재고 회전일이 4분기 연속 증가했고 매출채권 회수일도 18일 늘었다.",
     "가격 모멘텀은 좋지만 이익 품질 악화가 다음 실적 하향 위험을 높인다."
@@ -142,7 +154,7 @@
     "contract_version": "perspective_candidate_contract.1",
     "candidate_version": "working_capital_quality.0.1",
     "hypothesis_id": "hyp_v6_working_capital_quality_001",
-    "overlap_score": 0.28,
+    "overlap_score": "0.280000",
     "novel_evidence": ["inventory_days_change_4q", "receivables_days_change_4q"]
   }
 }
@@ -152,15 +164,17 @@
 | --- | --- | --- | --- |
 | `perspective` | yes | string | 기존 이름과 충돌하지 않는다. snake case. |
 | `verdict` | yes | enum string | `BUY`, `SELL`, `HOLD`, `N/A` 중 하나. |
-| `confidence` | yes | number | `0.0 <= confidence <= 1.0`. `N/A`이면 `0.0`. |
+| `confidence` | yes | decimal string | 소수점 여섯 자리이며 `0.000000 <= confidence <= 1.000000`. `N/A`이면 `0.000000`. |
 | `reasoning` | yes | array of string | 최소 1개. 입력값과 가설을 연결한다. |
 | `reason` | yes | string | 한 줄 요약. |
 | `action.type` | yes | enum string | `buy`, `sell`, `hold`, `none` 중 하나. `verdict="N/A"`이면 `none`. |
 | `extra.contract_version` | yes | string | 이 문서의 계약 버전. 첫 값은 `perspective_candidate_contract.1`. |
 | `extra.candidate_version` | yes | string | 후보 고유 version. |
 | `extra.hypothesis_id` | yes | string | 제출한 독립 가설과 일치. |
-| `extra.overlap_score` | yes | number | `0.0 <= overlap_score <= 1.0`. 낮을수록 독립적이다. |
+| `extra.overlap_score` | yes | decimal string | 소수점 여섯 자리이며 `0.000000 <= overlap_score <= 1.000000`. 낮을수록 독립적이다. |
 | `extra.novel_evidence` | yes | array of string | 기존 관점과 다른 핵심 관측값. |
+
+`action.type`은 각각 `BUY->buy`, `SELL->sell`, `HOLD->hold`, `N/A->none`으로 verdict와 일치해야 한다. `action.watch`는 선택적인 nonblank string이다. 출력 `perspective`, candidate version, hypothesis id는 제출 candidate identity와 같아야 하며 `N/A`의 `not_applicable_reason`은 공백일 수 없다.
 
 ## N/A schema
 
@@ -170,7 +184,7 @@
 {
   "perspective": "working_capital_quality",
   "verdict": "N/A",
-  "confidence": 0.0,
+  "confidence": "0.000000",
   "reasoning": ["working_capital_series 입력이 없어 독립 가설을 검증할 수 없다."],
   "reason": "필수 운전자본 입력 없음",
   "action": {"type": "none"},
@@ -180,7 +194,7 @@
     "hypothesis_id": "hyp_v6_working_capital_quality_001",
     "not_applicable_reason": "missing_required_extra_input",
     "missing_inputs": ["working_capital_series"],
-    "overlap_score": 0.28,
+    "overlap_score": "0.280000",
     "novel_evidence": []
   }
 }
@@ -190,7 +204,7 @@
 
 ## Overlap and forbidden duplication
 
-후보 제안서는 기존 관점별 overlap matrix를 포함해야 한다.
+후보 제안서는 기존 다섯 관점 각각에 대한 overlap row를 정확히 한 개씩 포함해야 한다. 누락·중복 row와 malformed metric은 duplicate 판정보다 먼저 `UNTYPED_INPUT_OR_OUTPUT`으로 거절한다.
 
 | compared_to | max_overlap_score | forbidden duplication |
 | --- | --- | --- |
@@ -206,6 +220,8 @@ Overlap 계산은 최소 두 축을 쓴다.
 2. `verdict_correlation_proxy`: fixture에서 기존 관점 verdict와 같은 방향으로 움직인 비율.
 
 최종 `overlap_score`는 `max(input_overlap, verdict_correlation_proxy)`로 시작한다. 후보가 왜 다르게 판단했는지 설명하는 `disagreement_cases`가 있으면 평가 문서에서 낮출 수 있지만, 이 PRD 01에서는 조정식을 정하지 않는다.
+
+각 row는 `manual_review`를 포함한다. `reviewer`는 비어 있지 않고, `status`는 `independent` 또는 `duplicates_existing`이며, duplicate일 때 해당 관점의 typed forbidden family를 기록한다. Family는 `trend_following`, `forensic_risk`, `six_signal_vote`, `macro_cycle`, `valuation_threshold`다. 그러나 candidate의 self-report는 deterministic evidence를 override하지 못한다. 정규화된 core observation identifier가 한 incumbent family에서 2개 이상 겹치거나 `novel_signal_family`가 incumbent core family와 같으면 낮은 claimed overlap과 `status="independent"`에도 duplicate로 거절한다. 한 개의 incidental input 공유는 허용하며 prose keyword 추측은 판정 근거로 사용하지 않는다.
 
 ## Cost and latency budgets
 
@@ -241,7 +257,7 @@ Budget 초과는 후보 품질 문제가 아니라 계약 위반이다. 초과 �
 }
 ```
 
-`owner`는 비어 있으면 안 된다. `candidate_version`은 입력, prompt, parser, budget, 독립 가설 중 하나라도 바뀌면 증가한다.
+`owner`는 비어 있으면 안 된다. `candidate_id`는 `pcand_v6_<candidate_name>`, `candidate_version`은 `<candidate_name>.<major>.<minor>`, `hypothesis_id`는 `hyp_v6_<candidate_name>_<3 digits>`에 결속된다. `candidate_version`은 입력, prompt, parser, budget, 독립 가설 중 하나라도 바뀌면 증가한다.
 
 ## Rejection criteria
 
@@ -297,12 +313,16 @@ Budget 초과는 후보 품질 문제가 아니라 계약 위반이다. 초과 �
   },
   "output_contract": {
     "verdict_enum": ["BUY", "SELL", "HOLD", "N/A"],
-    "confidence_range": [0.0, 1.0],
+    "confidence_range": ["0.000000", "1.000000"],
     "na_requires_confidence_zero": true,
     "na_requires_action_none": true
   },
   "overlap_matrix": [
-    {"compared_to": "quant", "input_overlap": 0.10, "verdict_correlation_proxy": 0.20, "overlap_score": 0.20}
+    {"compared_to": "kwangsoo", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "<owner_handle>", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "ouroboros", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "<owner_handle>", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "quant", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "<owner_handle>", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "macro", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "<owner_handle>", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "value", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "<owner_handle>", "status": "independent", "forbidden_families": []}}
   ],
   "budget": {
     "max_wall_ms_per_ticker": 3000,
@@ -361,16 +381,16 @@ Budget 초과는 후보 품질 문제가 아니라 계약 위반이다. 초과 �
   },
   "output_contract": {
     "verdict_enum": ["BUY", "SELL", "HOLD", "N/A"],
-    "confidence_range": [0.0, 1.0],
+    "confidence_range": ["0.000000", "1.000000"],
     "na_requires_confidence_zero": true,
     "na_requires_action_none": true
   },
   "overlap_matrix": [
-    {"compared_to": "kwangsoo", "input_overlap": 0.05, "verdict_correlation_proxy": 0.22, "overlap_score": 0.22},
-    {"compared_to": "ouroboros", "input_overlap": 0.18, "verdict_correlation_proxy": 0.25, "overlap_score": 0.25},
-    {"compared_to": "quant", "input_overlap": 0.10, "verdict_correlation_proxy": 0.20, "overlap_score": 0.20},
-    {"compared_to": "macro", "input_overlap": 0.08, "verdict_correlation_proxy": 0.18, "overlap_score": 0.18},
-    {"compared_to": "value", "input_overlap": 0.25, "verdict_correlation_proxy": 0.30, "overlap_score": 0.30}
+    {"compared_to": "kwangsoo", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.220000", "overlap_score": "0.220000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "ouroboros", "input_overlap": "0.180000", "verdict_correlation_proxy": "0.250000", "overlap_score": "0.250000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "quant", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "macro", "input_overlap": "0.080000", "verdict_correlation_proxy": "0.180000", "overlap_score": "0.180000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "value", "input_overlap": "0.250000", "verdict_correlation_proxy": "0.300000", "overlap_score": "0.300000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}}
   ],
   "budget": {
     "max_wall_ms_per_ticker": 3000,
@@ -424,12 +444,16 @@ Budget 초과는 후보 품질 문제가 아니라 계약 위반이다. 초과 �
   },
   "output_contract": {
     "verdict_enum": ["BUY", "SELL", "HOLD", "N/A"],
-    "confidence_range": [0.0, 1.0],
+    "confidence_range": ["0.000000", "1.000000"],
     "na_requires_confidence_zero": true,
     "na_requires_action_none": true
   },
   "overlap_matrix": [
-    {"compared_to": "quant", "input_overlap": 0.92, "verdict_correlation_proxy": 0.88, "overlap_score": 0.92}
+    {"compared_to": "kwangsoo", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "ouroboros", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "quant", "input_overlap": "0.920000", "verdict_correlation_proxy": "0.880000", "overlap_score": "0.920000", "manual_review": {"reviewer": "research_governance", "status": "duplicates_existing", "forbidden_families": ["six_signal_vote"]}},
+    {"compared_to": "macro", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+    {"compared_to": "value", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}}
   ],
   "budget": {
     "max_wall_ms_per_ticker": 1000,
@@ -451,7 +475,7 @@ Budget 초과는 후보 품질 문제가 아니라 계약 위반이다. 초과 �
 PRD 01 parser는 다음을 확인해야 한다.
 
 1. 문서 제목은 `# PRD 01: Perspective Candidate Contract`이다.
-2. 바로 다음 줄에 초안 metadata가 정확히 한 번 있다.
+2. 바로 다음 줄에 구현 완료 metadata가 정확히 한 번 있다.
 3. 정식 채택을 뜻하는 표식은 없다.
 4. 후보 template JSON이 parse된다.
 5. happy fixture는 `accepted_for_evaluation=true`이고 모든 budget이 ceiling 이하다.
@@ -461,14 +485,18 @@ PRD 01 parser는 다음을 확인해야 한다.
 9. `N/A` fixture는 confidence 0.0과 action `none`을 가진다.
 10. owner, candidate version, contract version이 비어 있지 않다.
 11. malformed probability, malformed budget, dirty duplicate, misleading purpose probe가 실패로 분류된다.
+12. malformed, budget, identity 검증은 direct adoption보다 먼저 적용된다.
+13. fixture expected check 이름은 비어 있지 않고 중복 없이 실제 probe set과 정확히 일치한다.
+14. artifact의 proposal hash, identity, artifact hash 변조는 load 시 거절된다.
+15. rejection decision을 accepted로 바꾸고 artifact hash를 다시 계산해도 embedded proposal 재평가와 다르므로 거절된다.
 
 ## Failure probes
 
 | probe | mutation | expected result |
 | --- | --- | --- |
-| `malformed_probability` | confidence를 `1.4` 또는 문자열로 바꾼다. | `MALFORMED_CONFIDENCE` |
+| `malformed_probability` | confidence를 범위 밖 여섯 자리 문자열 `"1.400000"`으로 바꾼다. | `MALFORMED_CONFIDENCE` |
 | `malformed_budget` | `max_wall_ms_per_ticker`를 `9000`으로 바꾼다. | `BUDGET_EXCEEDED_BY_DESIGN` |
-| `malformed_na` | `verdict="N/A"`인데 confidence를 `0.3`으로 바꾼다. | `MALFORMED_NA` |
+| `malformed_na` | `verdict="N/A"`인데 confidence를 `"0.300000"`으로 바꾼다. | `MALFORMED_NA` |
 | `dirty_duplicate` | candidate name은 다르지만 primary observations가 quant와 같다. | `DUPLICATES_EXISTING_PERSPECTIVE` |
 | `misleading_purpose` | purpose는 운전자본이라 쓰고 입력은 `signals`만 쓴다. | `NO_INDEPENDENT_HYPOTHESIS` |
 | `direct_adoption` | `accepted_for_evaluation` 대신 정식 관점 추가를 요구한다. | `ADOPTS_CANDIDATE_DIRECTLY` |

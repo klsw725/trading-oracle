@@ -1,0 +1,210 @@
+{
+  "schema_version": "perspective-candidate-contract-fixture.1",
+  "base_candidate": {
+    "candidate_identity": {
+      "candidate_id": "pcand_v6_working_capital_quality",
+      "candidate_name": "working_capital_quality",
+      "owner": "research_accounting_quality",
+      "candidate_version": "working_capital_quality.0.1",
+      "contract_version": "perspective_candidate_contract.1",
+      "created_at": "2026-08-06T00:00:00+09:00",
+      "change_summary": "initial candidate proposal"
+    },
+    "purpose": {
+      "one_sentence": "운전자본 악화로 모멘텀 BUY가 실적 하향 위험을 숨기는 경우를 fixture에서 잡는다.",
+      "decision_impact": "quant BUY와 value BUY를 HOLD 또는 SELL로 낮출 수 있다."
+    },
+    "independent_hypothesis": {
+      "hypothesis_id": "hyp_v6_working_capital_quality_001",
+      "summary": "재고 회전일 증가와 매출채권 회수 지연은 가격 모멘텀보다 먼저 이익 품질 악화를 드러낸다.",
+      "error_mode_explained": "가격 모멘텀과 낮은 PER은 좋지만 다음 실적에서 마진이 꺾이는 경우",
+      "novel_signal_family": "working_capital_quality",
+      "primary_observations": ["inventory_days_change_4q", "receivables_days_change_4q", "gross_margin_delta_4q"],
+      "expected_disagreement": {
+        "with_existing": ["quant", "value"],
+        "direction": "downgrade_buy_to_hold_or_sell"
+      },
+      "falsifiable_claim": "inventory_days_change_4q가 20 이상이고 gross_margin_delta_4q가 -3.0 이하인 표본의 20 session benchmark excess return이 baseline보다 낮아야 한다."
+    },
+    "input_contract": {
+      "uses_perspective_input_fields": ["ticker", "name", "fundamentals", "signals"],
+      "required_extra_inputs": [{
+        "name": "working_capital_series",
+        "type": "object",
+        "source_contract": "manual_fixture_or_future_adapter",
+        "required_for_verdict": true,
+        "missing_behavior": "N/A",
+        "freshness_budget_hours": 168
+      }],
+      "missing_behavior": "N/A"
+    },
+    "output_contract": {
+      "verdict_enum": ["BUY", "SELL", "HOLD", "N/A"],
+      "confidence_range": ["0.000000", "1.000000"],
+      "na_requires_confidence_zero": true,
+      "na_requires_action_none": true
+    },
+    "overlap_matrix": [
+      {"compared_to": "kwangsoo", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.220000", "overlap_score": "0.220000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "ouroboros", "input_overlap": "0.180000", "verdict_correlation_proxy": "0.250000", "overlap_score": "0.250000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "quant", "input_overlap": "0.100000", "verdict_correlation_proxy": "0.200000", "overlap_score": "0.200000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "macro", "input_overlap": "0.080000", "verdict_correlation_proxy": "0.180000", "overlap_score": "0.180000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "value", "input_overlap": "0.250000", "verdict_correlation_proxy": "0.300000", "overlap_score": "0.300000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}}
+    ],
+    "budget": {
+      "max_wall_ms_per_ticker": 3000,
+      "max_llm_calls_per_ticker": 0,
+      "max_prompt_tokens_per_ticker": 0,
+      "max_output_tokens_per_ticker": 0,
+      "max_extra_fetches_per_ticker": 0,
+      "cache_ttl_hours": null,
+      "timeout_behavior": "N/A"
+    },
+    "requested_stage": "offline_evaluation"
+  },
+  "valid_output": {
+    "perspective": "working_capital_quality",
+    "verdict": "HOLD",
+    "confidence": "0.710000",
+    "reasoning": ["운전자본 악화가 독립 가설의 임계값을 넘었다."],
+    "reason": "운전자본 악화가 quant BUY를 HOLD로 낮춘다.",
+    "action": {"type": "hold", "watch": "다음 분기 재고 회전일과 gross margin"},
+    "extra": {
+      "contract_version": "perspective_candidate_contract.1",
+      "candidate_version": "working_capital_quality.0.1",
+      "hypothesis_id": "hyp_v6_working_capital_quality_001",
+      "overlap_score": "0.300000",
+      "novel_evidence": ["inventory_days_change_4q", "receivables_days_change_4q"]
+    }
+  },
+  "valid_na_output": {
+    "perspective": "working_capital_quality",
+    "verdict": "N/A",
+    "confidence": "0.000000",
+    "reasoning": ["working_capital_series 입력이 없어 독립 가설을 검증할 수 없다."],
+    "reason": "필수 운전자본 입력 없음",
+    "action": {"type": "none"},
+    "extra": {
+      "contract_version": "perspective_candidate_contract.1",
+      "candidate_version": "working_capital_quality.0.1",
+      "hypothesis_id": "hyp_v6_working_capital_quality_001",
+      "overlap_score": "0.300000",
+      "novel_evidence": [],
+      "not_applicable_reason": "missing_required_extra_input",
+      "missing_inputs": ["working_capital_series"]
+    }
+  },
+  "quant_clone_candidate": {
+    "candidate_identity": {
+      "candidate_id": "pcand_v6_quant_plus",
+      "candidate_name": "quant_plus",
+      "owner": "research_signals",
+      "candidate_version": "quant_plus.0.1",
+      "contract_version": "perspective_candidate_contract.1",
+      "created_at": "2026-08-06T00:00:00+09:00",
+      "change_summary": "initial candidate proposal"
+    },
+    "purpose": {
+      "one_sentence": "기존 6 시그널 투표에 RSI 가중치를 더해 BUY 정확도를 높인다.",
+      "decision_impact": "quant HOLD를 BUY로 높인다."
+    },
+    "independent_hypothesis": {
+      "hypothesis_id": "hyp_v6_quant_plus_001",
+      "summary": "RSI와 MACD를 더 크게 반영하면 quant보다 낫다.",
+      "error_mode_explained": "quant가 약한 모멘텀을 놓치는 경우",
+      "novel_signal_family": "technical_signal_reweighting",
+      "primary_observations": ["signals.rsi.value", "signals.macd.histogram", "signals.bull_votes"],
+      "expected_disagreement": {"with_existing": ["quant"], "direction": "upgrade_hold_to_buy"},
+      "falsifiable_claim": "RSI와 MACD 가중치 상위 표본의 20 session return이 quant baseline보다 높아야 한다."
+    },
+    "input_contract": {
+      "uses_perspective_input_fields": ["signals"],
+      "required_extra_inputs": [],
+      "missing_behavior": "N/A"
+    },
+    "output_contract": {
+      "verdict_enum": ["BUY", "SELL", "HOLD", "N/A"],
+      "confidence_range": ["0.000000", "1.000000"],
+      "na_requires_confidence_zero": true,
+      "na_requires_action_none": true
+    },
+    "overlap_matrix": [
+      {"compared_to": "kwangsoo", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "ouroboros", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "quant", "input_overlap": "0.920000", "verdict_correlation_proxy": "0.880000", "overlap_score": "0.920000", "manual_review": {"reviewer": "research_governance", "status": "duplicates_existing", "forbidden_families": ["six_signal_vote"]}},
+      {"compared_to": "macro", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}},
+      {"compared_to": "value", "input_overlap": "0.050000", "verdict_correlation_proxy": "0.100000", "overlap_score": "0.100000", "manual_review": {"reviewer": "research_governance", "status": "independent", "forbidden_families": []}}
+    ],
+    "budget": {
+      "max_wall_ms_per_ticker": 1000,
+      "max_llm_calls_per_ticker": 0,
+      "max_prompt_tokens_per_ticker": 0,
+      "max_output_tokens_per_ticker": 0,
+      "max_extra_fetches_per_ticker": 0,
+      "cache_ttl_hours": null,
+      "timeout_behavior": "N/A"
+    },
+    "requested_stage": "offline_evaluation"
+  },
+  "adversarial": {
+    "malformed_confidence": "1.400000",
+    "malformed_wall_ms": 9000,
+    "malformed_na_confidence": "0.300000",
+    "dirty_duplicate_observations": ["signals.rsi.value", "signals.macd.histogram", "signals.bull_votes"],
+    "misleading_input_fields": ["signals"],
+    "direct_adoption_stage": "production_adoption",
+    "malformed_verdict": "MAYBE",
+    "untyped_confidence_range": [0, 1],
+    "missing_owner": "",
+    "malformed_overlap_metric": "not-a-decimal",
+    "kwangsoo_clone_family": "trend_following",
+    "ouroboros_clone_family": "forensic_risk",
+    "quant_clone_family": "six_signal_vote",
+    "macro_clone_family": "macro_cycle",
+    "value_clone_family": "valuation_threshold",
+    "mismatched_candidate_id": "pcand_v6_other_candidate",
+    "mismatched_candidate_version": "other_candidate.0.1",
+    "mismatched_hypothesis_id": "hyp_v6_other_candidate_001",
+    "unknown_input_field": "future_unknown_field",
+    "mismatched_output_perspective": "other_candidate",
+    "mismatched_action": "sell",
+    "blank_na_reason": "   ",
+    "blank_hypothesis_metadata": "",
+    "low_overlap_value_clone_observations": ["fundamentals.per", "fundamentals.pbr", "fundamentals.dividend_yield"],
+    "invalid_top_level_missing_behavior": "BUY",
+    "documented_action_watch": "다음 분기 재고 회전일과 gross margin"
+  },
+  "expected": [
+    {"check": "happy_independent_candidate", "accepted_for_evaluation": true, "rejection_code": null},
+    {"check": "valid_na_output", "accepted_for_evaluation": true, "rejection_code": null},
+    {"check": "rejected_quant_clone_candidate", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "malformed_probability", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_CONFIDENCE"},
+    {"check": "malformed_budget", "accepted_for_evaluation": false, "rejection_code": "BUDGET_EXCEEDED_BY_DESIGN"},
+    {"check": "malformed_na", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_NA"},
+    {"check": "dirty_duplicate", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "misleading_purpose", "accepted_for_evaluation": false, "rejection_code": "NO_INDEPENDENT_HYPOTHESIS"},
+    {"check": "direct_adoption", "accepted_for_evaluation": false, "rejection_code": "ADOPTS_CANDIDATE_DIRECTLY"},
+    {"check": "malformed_verdict", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_VERDICT"},
+    {"check": "untyped_input_or_output", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "missing_owner_or_version", "accepted_for_evaluation": false, "rejection_code": "MISSING_OWNER_OR_VERSION"},
+    {"check": "incomplete_overlap_rows", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "duplicate_overlap_rows", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "malformed_overlap_metric", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "kwangsoo_clone", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "ouroboros_clone", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "macro_clone", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "value_clone", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "candidate_id_name_mismatch", "accepted_for_evaluation": false, "rejection_code": "MISSING_OWNER_OR_VERSION"},
+    {"check": "candidate_version_name_mismatch", "accepted_for_evaluation": false, "rejection_code": "MISSING_OWNER_OR_VERSION"},
+    {"check": "hypothesis_id_name_mismatch", "accepted_for_evaluation": false, "rejection_code": "MISSING_OWNER_OR_VERSION"},
+    {"check": "unknown_perspective_input_field", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "output_perspective_mismatch", "accepted_for_evaluation": false, "rejection_code": "MISSING_OWNER_OR_VERSION"},
+    {"check": "verdict_action_mismatch", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_VERDICT"},
+    {"check": "blank_na_reason", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_NA"},
+    {"check": "malformed_precedes_direct_adoption", "accepted_for_evaluation": false, "rejection_code": "MALFORMED_CONFIDENCE"},
+    {"check": "blank_hypothesis_metadata", "accepted_for_evaluation": false, "rejection_code": "NO_INDEPENDENT_HYPOTHESIS"},
+    {"check": "low_overlap_value_core_clone", "accepted_for_evaluation": false, "rejection_code": "DUPLICATES_EXISTING_PERSPECTIVE"},
+    {"check": "top_level_missing_behavior_buy", "accepted_for_evaluation": false, "rejection_code": "UNTYPED_INPUT_OR_OUTPUT"},
+    {"check": "documented_action_watch_output", "accepted_for_evaluation": true, "rejection_code": null}
+  ]
+}
