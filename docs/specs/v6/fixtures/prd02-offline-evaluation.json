@@ -1,0 +1,1951 @@
+{
+  "schema_version": "v6.offline-evaluation-fixture.2",
+  "candidate_artifact": {
+    "schema_version": "perspective-candidate-contract-artifact.1",
+    "generated_at": "2026-08-06T00:00:00+09:00",
+    "candidate_id": "pcand_v6_working_capital_quality",
+    "candidate_version": "working_capital_quality.0.1",
+    "hypothesis_id": "hyp_v6_working_capital_quality_001",
+    "candidate_proposal_hash": "sha256:4045dce14559b67343ed944d6ca3b0d3f257f62ce1ae2a3098e778c952490c40",
+    "candidate_proposal": {
+      "candidate_identity": {
+        "candidate_id": "pcand_v6_working_capital_quality",
+        "candidate_name": "working_capital_quality",
+        "owner": "research_accounting_quality",
+        "candidate_version": "working_capital_quality.0.1",
+        "contract_version": "perspective_candidate_contract.1",
+        "created_at": "2026-08-06T00:00:00+09:00",
+        "change_summary": "initial candidate proposal"
+      },
+      "purpose": {
+        "one_sentence": "운전자본 악화로 모멘텀 BUY가 실적 하향 위험을 숨기는 경우를 fixture에서 잡는다.",
+        "decision_impact": "quant BUY와 value BUY를 HOLD 또는 SELL로 낮출 수 있다."
+      },
+      "independent_hypothesis": {
+        "hypothesis_id": "hyp_v6_working_capital_quality_001",
+        "summary": "재고 회전일 증가와 매출채권 회수 지연은 가격 모멘텀보다 먼저 이익 품질 악화를 드러낸다.",
+        "error_mode_explained": "가격 모멘텀과 낮은 PER은 좋지만 다음 실적에서 마진이 꺾이는 경우",
+        "novel_signal_family": "working_capital_quality",
+        "primary_observations": [
+          "inventory_days_change_4q",
+          "receivables_days_change_4q",
+          "gross_margin_delta_4q"
+        ],
+        "expected_disagreement": {
+          "with_existing": [
+            "quant",
+            "value"
+          ],
+          "direction": "downgrade_buy_to_hold_or_sell"
+        },
+        "falsifiable_claim": "inventory_days_change_4q가 20 이상이고 gross_margin_delta_4q가 -3.0 이하인 표본의 20 session benchmark excess return이 baseline보다 낮아야 한다."
+      },
+      "input_contract": {
+        "uses_perspective_input_fields": [
+          "ticker",
+          "name",
+          "fundamentals",
+          "signals"
+        ],
+        "required_extra_inputs": [
+          {
+            "name": "working_capital_series",
+            "type": "object",
+            "source_contract": "manual_fixture_or_future_adapter",
+            "required_for_verdict": true,
+            "missing_behavior": "N/A",
+            "freshness_budget_hours": 168
+          }
+        ],
+        "missing_behavior": "N/A"
+      },
+      "output_contract": {
+        "verdict_enum": [
+          "BUY",
+          "SELL",
+          "HOLD",
+          "N/A"
+        ],
+        "confidence_range": [
+          "0.000000",
+          "1.000000"
+        ],
+        "na_requires_confidence_zero": true,
+        "na_requires_action_none": true
+      },
+      "overlap_matrix": [
+        {
+          "compared_to": "kwangsoo",
+          "input_overlap": "0.050000",
+          "verdict_correlation_proxy": "0.220000",
+          "overlap_score": "0.220000",
+          "manual_review": {
+            "reviewer": "research_governance",
+            "status": "independent",
+            "forbidden_families": []
+          }
+        },
+        {
+          "compared_to": "ouroboros",
+          "input_overlap": "0.180000",
+          "verdict_correlation_proxy": "0.250000",
+          "overlap_score": "0.250000",
+          "manual_review": {
+            "reviewer": "research_governance",
+            "status": "independent",
+            "forbidden_families": []
+          }
+        },
+        {
+          "compared_to": "quant",
+          "input_overlap": "0.100000",
+          "verdict_correlation_proxy": "0.200000",
+          "overlap_score": "0.200000",
+          "manual_review": {
+            "reviewer": "research_governance",
+            "status": "independent",
+            "forbidden_families": []
+          }
+        },
+        {
+          "compared_to": "macro",
+          "input_overlap": "0.080000",
+          "verdict_correlation_proxy": "0.180000",
+          "overlap_score": "0.180000",
+          "manual_review": {
+            "reviewer": "research_governance",
+            "status": "independent",
+            "forbidden_families": []
+          }
+        },
+        {
+          "compared_to": "value",
+          "input_overlap": "0.250000",
+          "verdict_correlation_proxy": "0.300000",
+          "overlap_score": "0.300000",
+          "manual_review": {
+            "reviewer": "research_governance",
+            "status": "independent",
+            "forbidden_families": []
+          }
+        }
+      ],
+      "budget": {
+        "max_wall_ms_per_ticker": 3000,
+        "max_llm_calls_per_ticker": 0,
+        "max_prompt_tokens_per_ticker": 0,
+        "max_output_tokens_per_ticker": 0,
+        "max_extra_fetches_per_ticker": 0,
+        "cache_ttl_hours": null,
+        "timeout_behavior": "N/A"
+      },
+      "requested_stage": "offline_evaluation"
+    },
+    "decision": {
+      "accepted_for_evaluation": true,
+      "rejection_code": null
+    },
+    "production_isolation": "offline_only_no_production_imports",
+    "artifact_hash": "sha256:ea53633e3789fdfed61424d4b799850df881e5f3965f4f5bf75cb3c835625ff9"
+  },
+  "hand_input": {
+    "schema_version": "v6.offline-evaluation-input.2",
+    "candidate_artifact_hash": "sha256:ea53633e3789fdfed61424d4b799850df881e5f3965f4f5bf75cb3c835625ff9",
+    "config": {
+      "body": {
+        "success_threshold": "0.010000",
+        "holdout_lift_lower_minimum": "0.003000",
+        "target_lift_lower_minimum": "0.007000",
+        "harm_rate_maximum": "0.200000",
+        "non_target_harm_rate_maximum": "0.250000",
+        "recovery_rate_minimum": "0.100000",
+        "bootstrap_iterations": 200,
+        "bootstrap_seed": "hand-calculation-v2",
+        "expected_repeat_runs": 0,
+        "overlap_ceiling": "0.700000"
+      },
+      "config_hash": "sha256:a133d1c9515eff34ab899fbc149863f1157806861f61910aafc5465e07863ed5"
+    },
+    "manifest": {
+      "body": {
+        "dataset_manifest_id": "fds_v6_hand_calculation",
+        "feature_cutoff": "2026-05-01T00:00:00+09:00",
+        "outcome_horizon_sessions": 5,
+        "threshold_version": "edge-0.01-v1",
+        "embargo_sessions": 20,
+        "record_hashes": [
+          "sha256:b3a58840203aa8397fc5f79b39166ebcdacd7b1bd52cea59b1fea349d9963da7",
+          "sha256:4a8b8333a5d1fda0fe5d507f7cb3c28b9d25cb60f0e7973722b3b606309cdc66",
+          "sha256:dbb8c255860eb5776ce5f82a6aa04ace837908287462914bce5bcab40a4d9b75",
+          "sha256:6b7e68732f6fe5d65dd23df5c006d8bf258f43e5b31d5ff9a07d150492cd59c5"
+        ]
+      },
+      "manifest_hash": "sha256:ae735d6bdf0975326f5e4dcbc11c1e5d5f3afc8e367ccd7ae0ea0fecaf903401"
+    },
+    "records": [
+      {
+        "body": {
+          "batch_id": "hand_1",
+          "sample_id_prefix": "eval_s1",
+          "sample_count": 1,
+          "ticker_prefix": "H1",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-01T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-01T00:00:00+09:00",
+          "feature_generated_at": "2026-03-31T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-01T00:00:00+09:00",
+          "source_hash_seed": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": true,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.500000",
+              "verdict_direction": 1
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 1
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "HOLD",
+            "confidence": "0.700000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "-0.020000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "-0.010000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "-0.015000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.020000"
+              }
+            ],
+            "candidate_edge": "0.030000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.018000",
+            "existing_signal_only_edge": "-0.018000",
+            "shuffled_candidate_edge": "-0.019500"
+          }
+        },
+        "record_hash": "sha256:b3a58840203aa8397fc5f79b39166ebcdacd7b1bd52cea59b1fea349d9963da7"
+      },
+      {
+        "body": {
+          "batch_id": "hand_2",
+          "sample_id_prefix": "eval_s2",
+          "sample_count": 1,
+          "ticker_prefix": "H2",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-02T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-02T00:00:00+09:00",
+          "feature_generated_at": "2026-04-01T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-02T00:00:00+09:00",
+          "source_hash_seed": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 1
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 1
+            }
+          ],
+          "candidate": {
+            "verdict": "BUY",
+            "confidence": "0.800000",
+            "verdict_direction": 1,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.010000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.020000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.015000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.040000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.028000",
+            "existing_signal_only_edge": "0.012000",
+            "shuffled_candidate_edge": "0.010500"
+          }
+        },
+        "record_hash": "sha256:4a8b8333a5d1fda0fe5d507f7cb3c28b9d25cb60f0e7973722b3b606309cdc66"
+      },
+      {
+        "body": {
+          "batch_id": "hand_3",
+          "sample_id_prefix": "eval_s3",
+          "sample_count": 1,
+          "ticker_prefix": "H3",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-03T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-03T00:00:00+09:00",
+          "feature_generated_at": "2026-04-02T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-03T00:00:00+09:00",
+          "source_hash_seed": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.500000",
+              "verdict_direction": 1
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 1
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 1
+            }
+          ],
+          "candidate": {
+            "verdict": "HOLD",
+            "confidence": "0.600000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.020000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.010000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.015000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.020000"
+              }
+            ],
+            "candidate_edge": "0.000000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "-0.012000",
+            "existing_signal_only_edge": "0.022000",
+            "shuffled_candidate_edge": "0.020500"
+          }
+        },
+        "record_hash": "sha256:dbb8c255860eb5776ce5f82a6aa04ace837908287462914bce5bcab40a4d9b75"
+      },
+      {
+        "body": {
+          "batch_id": "hand_4",
+          "sample_id_prefix": "eval_s4",
+          "sample_count": 1,
+          "ticker_prefix": "H4",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-04T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-04T00:00:00+09:00",
+          "feature_generated_at": "2026-04-03T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-04T00:00:00+09:00",
+          "source_hash_seed": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": true,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.500000",
+              "verdict_direction": -1
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.500000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 1
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": -1
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 1
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "HOLD",
+            "confidence": "0.700000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "-0.010000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.000000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "-0.005000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.020000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.020000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.008000",
+            "existing_signal_only_edge": "-0.008000",
+            "shuffled_candidate_edge": "-0.009500"
+          }
+        },
+        "record_hash": "sha256:6b7e68732f6fe5d65dd23df5c006d8bf258f43e5b31d5ff9a07d150492cd59c5"
+      }
+    ],
+    "input_hash": "sha256:132db34554c119d3f58c46bd4449b811110fc18b46dcda83edef411f32869bdc",
+    "reported_terminal_code": "INCONCLUSIVE_INSUFFICIENT_SAMPLE",
+    "repeated_runs": []
+  },
+  "hand_expected": {
+    "mean_baseline_edge": "0.000000",
+    "mean_candidate_edge": "0.022500",
+    "incremental_lift": "0.022500",
+    "candidate_hits": 3,
+    "candidate_errors": 1,
+    "brier": "0.145000",
+    "ece": "0.050000"
+  },
+  "threshold_input": {
+    "schema_version": "v6.offline-evaluation-input.2",
+    "candidate_artifact_hash": "sha256:ea53633e3789fdfed61424d4b799850df881e5f3965f4f5bf75cb3c835625ff9",
+    "config": {
+      "body": {
+        "success_threshold": "0.010000",
+        "holdout_lift_lower_minimum": "0.003000",
+        "target_lift_lower_minimum": "0.007000",
+        "harm_rate_maximum": "0.200000",
+        "non_target_harm_rate_maximum": "0.250000",
+        "recovery_rate_minimum": "0.100000",
+        "bootstrap_iterations": 200,
+        "bootstrap_seed": "threshold-pass-v2",
+        "expected_repeat_runs": 20,
+        "overlap_ceiling": "0.700000"
+      },
+      "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169"
+    },
+    "manifest": {
+      "body": {
+        "dataset_manifest_id": "fds_v6_perspective_eval_20260806",
+        "feature_cutoff": "2026-05-01T00:00:00+09:00",
+        "outcome_horizon_sessions": 5,
+        "threshold_version": "edge-0.01-v1",
+        "embargo_sessions": 20,
+        "record_hashes": [
+          "sha256:7d27ec3447c09b1071186b75138ab0a9b1da29ad15479ff338c1378b15d9c0d9",
+          "sha256:1e3ce61466d193b91d2788e839fd9c3a6a511312eeafb9b692581c74ecf3eed3",
+          "sha256:b653c40daf38601fa2c1efceb0178b9a95b9ace26ffd09fcfb0434f687052553",
+          "sha256:9276a0560d88930623f50aff1f509314378c1cc1c1634bcbd70a786540417ac7",
+          "sha256:ede911ca167f17d80082956d5fed703431775122eb4b8b845354aa5848f2d1e7",
+          "sha256:e1d2dd11e745dff65f16bc6702f1de55193b7f1355d482e6bb40220558667eaa",
+          "sha256:5a40e5c1f6909eb4b7c9e2d8fc1c0ca8da5caed804e90c78ee8de95aecc193b4",
+          "sha256:dcaf86dc8d10680f8ec765cc9ce50efc2966196fd3218cdec8baaf77091caafb",
+          "sha256:7165a9a6cb5e4f906c3bc491623899bd9d744f7c4ddef3daeaff004b1f08d5be"
+        ]
+      },
+      "manifest_hash": "sha256:5667d9845360a8784ac105c7083928b17aaad8ce9a10e70b996e92cf222a8a4b"
+    },
+    "records": [
+      {
+        "body": {
+          "batch_id": "target_kr_buy",
+          "sample_id_prefix": "thr_kr_target_buy",
+          "sample_count": 70,
+          "ticker_prefix": "KRTA",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-01T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-01T00:00:00+09:00",
+          "feature_generated_at": "2026-03-31T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-01T00:00:00+09:00",
+          "source_hash_seed": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "feature_fields": [
+            "inventory_days_change_4q",
+            "receivables_days_change_4q",
+            "gross_margin_delta_4q"
+          ],
+          "target_error": true,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "BUY",
+            "confidence": "0.950000",
+            "verdict_direction": 1,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "-0.010000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "-0.008000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "-0.009000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.020000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.008000",
+            "existing_signal_only_edge": "-0.008000",
+            "shuffled_candidate_edge": "-0.009500"
+          }
+        },
+        "record_hash": "sha256:7d27ec3447c09b1071186b75138ab0a9b1da29ad15479ff338c1378b15d9c0d9"
+      },
+      {
+        "body": {
+          "batch_id": "target_us_sell",
+          "sample_id_prefix": "thr_us_target_sell",
+          "sample_count": 70,
+          "ticker_prefix": "USTA",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-02T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-02T00:00:00+09:00",
+          "feature_generated_at": "2026-04-01T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-02T00:00:00+09:00",
+          "source_hash_seed": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "feature_fields": [
+            "inventory_days_change_4q",
+            "receivables_days_change_4q",
+            "gross_margin_delta_4q"
+          ],
+          "target_error": true,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "SELL",
+            "confidence": "0.050000",
+            "verdict_direction": -1,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1500,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "-0.010000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "-0.008000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "-0.009000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.002000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "-0.010000",
+            "existing_signal_only_edge": "-0.008000",
+            "shuffled_candidate_edge": "-0.009500"
+          }
+        },
+        "record_hash": "sha256:1e3ce61466d193b91d2788e839fd9c3a6a511312eeafb9b692581c74ecf3eed3"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_kr_buy",
+          "sample_id_prefix": "thr_kr_buy",
+          "sample_count": 50,
+          "ticker_prefix": "KRBU",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-03T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-03T00:00:00+09:00",
+          "feature_generated_at": "2026-04-02T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-03T00:00:00+09:00",
+          "source_hash_seed": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "BUY",
+            "confidence": "0.950000",
+            "verdict_direction": 1,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1200,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.015000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.003000",
+            "existing_signal_only_edge": "0.007000",
+            "shuffled_candidate_edge": "0.005500"
+          }
+        },
+        "record_hash": "sha256:b653c40daf38601fa2c1efceb0178b9a95b9ace26ffd09fcfb0434f687052553"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_us_sell",
+          "sample_id_prefix": "thr_us_sell",
+          "sample_count": 50,
+          "ticker_prefix": "USSE",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-04T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-04T00:00:00+09:00",
+          "feature_generated_at": "2026-04-03T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-04T00:00:00+09:00",
+          "source_hash_seed": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "SELL",
+            "confidence": "0.950000",
+            "verdict_direction": -1,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1300,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.013000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "0.001000",
+            "existing_signal_only_edge": "0.007000",
+            "shuffled_candidate_edge": "0.005500"
+          }
+        },
+        "record_hash": "sha256:9276a0560d88930623f50aff1f509314378c1cc1c1634bcbd70a786540417ac7"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_kr_hold",
+          "sample_id_prefix": "thr_kr_hold",
+          "sample_count": 44,
+          "ticker_prefix": "KRHO",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-05T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-05T00:00:00+09:00",
+          "feature_generated_at": "2026-04-04T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-05T00:00:00+09:00",
+          "source_hash_seed": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "HOLD",
+            "confidence": "0.950000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 900,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.011000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "-0.001000",
+            "existing_signal_only_edge": "0.007000",
+            "shuffled_candidate_edge": "0.005500"
+          }
+        },
+        "record_hash": "sha256:ede911ca167f17d80082956d5fed703431775122eb4b8b845354aa5848f2d1e7"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_us_hold",
+          "sample_id_prefix": "thr_us_hold",
+          "sample_count": 44,
+          "ticker_prefix": "USHO",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-06T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-06T00:00:00+09:00",
+          "feature_generated_at": "2026-04-05T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-06T00:00:00+09:00",
+          "source_hash_seed": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "HOLD",
+            "confidence": "0.050000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": false,
+            "wall_ms": 1100,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": "0.009000"
+          },
+          "ablation": {
+            "remove_novel_observations_edge": "-0.003000",
+            "existing_signal_only_edge": "0.007000",
+            "shuffled_candidate_edge": "0.005500"
+          }
+        },
+        "record_hash": "sha256:e1d2dd11e745dff65f16bc6702f1de55193b7f1355d482e6bb40220558667eaa"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_kr_na",
+          "sample_id_prefix": "thr_kr_na",
+          "sample_count": 16,
+          "ticker_prefix": "KRNA",
+          "market": "KR",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-07T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-07T00:00:00+09:00",
+          "feature_generated_at": "2026-04-06T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-07T00:00:00+09:00",
+          "source_hash_seed": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "N/A",
+            "confidence": "0.000000",
+            "verdict_direction": 0,
+            "missing_required_input": true,
+            "timed_out": false,
+            "wall_ms": 100,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": null
+          },
+          "ablation": {
+            "remove_novel_observations_edge": null,
+            "existing_signal_only_edge": null,
+            "shuffled_candidate_edge": null
+          }
+        },
+        "record_hash": "sha256:5a40e5c1f6909eb4b7c9e2d8fc1c0ca8da5caed804e90c78ee8de95aecc193b4"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_us_na",
+          "sample_id_prefix": "thr_us_na",
+          "sample_count": 9,
+          "ticker_prefix": "USNA",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-08T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-08T00:00:00+09:00",
+          "feature_generated_at": "2026-04-07T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-08T00:00:00+09:00",
+          "source_hash_seed": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "N/A",
+            "confidence": "0.000000",
+            "verdict_direction": 0,
+            "missing_required_input": true,
+            "timed_out": false,
+            "wall_ms": 100,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": null
+          },
+          "ablation": {
+            "remove_novel_observations_edge": null,
+            "existing_signal_only_edge": null,
+            "shuffled_candidate_edge": null
+          }
+        },
+        "record_hash": "sha256:dcaf86dc8d10680f8ec765cc9ce50efc2966196fd3218cdec8baaf77091caafb"
+      },
+      {
+        "body": {
+          "batch_id": "nontarget_us_timeout",
+          "sample_id_prefix": "thr_us_timeout",
+          "sample_count": 7,
+          "ticker_prefix": "USTO",
+          "market": "US",
+          "split": "holdout_window",
+          "emitted_at": "2026-04-09T00:00:00+09:00",
+          "decision_input_cutoff": "2026-04-09T00:00:00+09:00",
+          "feature_generated_at": "2026-04-08T00:00:00+09:00",
+          "outcome_cutoff": "2026-05-09T00:00:00+09:00",
+          "source_hash_seed": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "feature_fields": [
+            "inventory_days_change_4q"
+          ],
+          "target_error": false,
+          "baselines": [
+            {
+              "kind": "existing_consensus",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "closest_existing_perspective",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            },
+            {
+              "kind": "equal_weight_existing_five",
+              "confidence": "0.050000",
+              "verdict_direction": 0
+            }
+          ],
+          "perspectives": [
+            {
+              "perspective": "kwangsoo",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "ouroboros",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "quant",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "macro",
+              "verdict_direction": 0
+            },
+            {
+              "perspective": "value",
+              "verdict_direction": 0
+            }
+          ],
+          "candidate": {
+            "verdict": "N/A",
+            "confidence": "0.000000",
+            "verdict_direction": 0,
+            "missing_required_input": false,
+            "timed_out": true,
+            "wall_ms": 3000,
+            "llm_calls": 0,
+            "prompt_tokens": 0,
+            "extra_fetches": 0
+          },
+          "outcome": {
+            "adapter_available": true,
+            "baseline_edges": [
+              {
+                "kind": "existing_consensus",
+                "edge": "0.005000"
+              },
+              {
+                "kind": "closest_existing_perspective",
+                "edge": "0.007000"
+              },
+              {
+                "kind": "equal_weight_existing_five",
+                "edge": "0.006000"
+              }
+            ],
+            "perspective_edges": [
+              {
+                "perspective": "kwangsoo",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "ouroboros",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "quant",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "macro",
+                "edge": "0.000000"
+              },
+              {
+                "perspective": "value",
+                "edge": "0.000000"
+              }
+            ],
+            "candidate_edge": null
+          },
+          "ablation": {
+            "remove_novel_observations_edge": null,
+            "existing_signal_only_edge": null,
+            "shuffled_candidate_edge": null
+          }
+        },
+        "record_hash": "sha256:7165a9a6cb5e4f906c3bc491623899bd9d744f7c4ddef3daeaff004b1f08d5be"
+      }
+    ],
+    "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+    "reported_terminal_code": "PASS_OFFLINE_EVALUATION",
+    "repeated_runs": [
+      {
+        "run_index": 1,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 2,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 3,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 4,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 5,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 6,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 7,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 8,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 9,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 10,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 11,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 12,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 13,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 14,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 15,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 16,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 17,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 18,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 19,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      },
+      {
+        "run_index": 20,
+        "input_hash": "sha256:0da2f79f29bd75f477b3ee5bf2d82353c4ca59ecf939a78cb233b9f41bb0b6c0",
+        "config_hash": "sha256:0823384cdb2993f6e7e422f3a84658b10ccc5de48dfdc8dafcc710f92a2a0169",
+        "terminal_code": "PASS_OFFLINE_EVALUATION"
+      }
+    ]
+  },
+  "expected_mutations": [
+    {
+      "name": "stale_dataset",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "dirty_manifest",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "leakage_feature",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "misleading_report",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "na_timeout_disguised",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "high_correlation_clone",
+      "code": "REJECT_HIGH_CORRELATION_CLONE"
+    },
+    {
+      "name": "harmful_candidate",
+      "code": "REJECT_HARMFUL_CANDIDATE"
+    },
+    {
+      "name": "no_incremental_lift",
+      "code": "REJECT_NO_INCREMENTAL_LIFT"
+    },
+    {
+      "name": "insufficient_sample",
+      "code": "INCONCLUSIVE_INSUFFICIENT_SAMPLE"
+    },
+    {
+      "name": "missing_outcome_adapter",
+      "code": "INCONCLUSIVE_MISSING_OUTCOME_ADAPTER"
+    },
+    {
+      "name": "flaky_threshold",
+      "code": "INCONCLUSIVE_FLAKY_RESULT"
+    },
+    {
+      "name": "ablation_no_drop",
+      "code": "REJECT_NO_INCREMENTAL_LIFT"
+    },
+    {
+      "name": "malformed_precedes_clone",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "clone_precedes_harm",
+      "code": "REJECT_HIGH_CORRELATION_CLONE"
+    },
+    {
+      "name": "harm_precedes_no_lift",
+      "code": "REJECT_HARMFUL_CANDIDATE"
+    },
+    {
+      "name": "no_lift_precedes_insufficient",
+      "code": "REJECT_NO_INCREMENTAL_LIFT"
+    },
+    {
+      "name": "all_train_window",
+      "code": "INCONCLUSIVE_INSUFFICIENT_SAMPLE"
+    },
+    {
+      "name": "over_budget_resource",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "zero_threshold_repeats",
+      "code": "REJECT_MALFORMED_EVALUATION_INPUT"
+    },
+    {
+      "name": "missing_all_outcomes",
+      "code": "INCONCLUSIVE_MISSING_OUTCOME_ADAPTER"
+    },
+    {
+      "name": "missing_target_error_cohort",
+      "code": "INCONCLUSIVE_INSUFFICIENT_SAMPLE"
+    }
+  ]
+}

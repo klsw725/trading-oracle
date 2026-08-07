@@ -1,5 +1,5 @@
 # PRD 02: Offline Evaluation
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-07)
 > **SPEC 참조**: [v6 SPEC](../SPEC.md)
 
 ## 문서 범위
@@ -261,13 +261,13 @@ Ablation이 후보 lift를 설명하지 못하면 결과는 inconclusive다. 기
     {"sample_id": "eval_s4", "split": "holdout_window", "baseline_edge": "-0.01", "candidate_edge": "0.02", "candidate_confidence": "0.70", "candidate_verdict": "HOLD", "nearest_existing_verdict": "SELL"}
   ],
   "expected_metrics": {
-    "mean_baseline_edge": "0.0000",
-    "mean_candidate_edge": "0.0225",
-    "incremental_lift": "0.0225",
+    "mean_baseline_edge": "0.000000",
+    "mean_candidate_edge": "0.022500",
+    "incremental_lift": "0.022500",
     "candidate_hits": 3,
     "candidate_errors": 1,
-    "brier": "0.1450",
-    "ece": "0.0500",
+    "brier": "0.145000",
+    "ece": "0.050000",
     "sample_policy": "arithmetic_only"
   }
 }
@@ -292,21 +292,21 @@ ECE = 0.0500
   "candidate_id": "pcand_v6_working_capital_quality",
   "holdout_eligible_samples": 360,
   "target_error_samples": 140,
-  "holdout_incremental_lift_5": "0.014",
-  "holdout_lift_bootstrap_lower_90": "0.005",
-  "target_error_lift_5": "0.021",
-  "target_error_lift_bootstrap_lower_90": "0.010",
-  "harm_rate": "0.14",
-  "non_target_harm_rate": "0.18",
-  "baseline_miss_recovery_rate": "0.23",
-  "max_error_correlation": "0.42",
-  "max_verdict_correlation": "0.48",
-  "candidate_brier_delta_vs_baseline": "-0.025",
-  "candidate_ece": "0.08",
-  "overall_na_rate": "0.09",
+  "holdout_incremental_lift_5": "0.014000",
+  "holdout_lift_bootstrap_lower_90": "0.005000",
+  "target_error_lift_5": "0.021000",
+  "target_error_lift_bootstrap_lower_90": "0.010000",
+  "harm_rate": "0.140000",
+  "non_target_harm_rate": "0.180000",
+  "baseline_miss_recovery_rate": "0.230000",
+  "max_error_correlation": "0.420000",
+  "max_verdict_correlation": "0.480000",
+  "candidate_brier_delta_vs_baseline": "-0.025000",
+  "candidate_ece": "0.080000",
+  "overall_na_rate": "0.090000",
   "p95_wall_ms_per_ticker": 2400,
-  "timeout_rate": "0.004",
-  "ablation_remove_novel_observations_lift_drop": "0.012",
+  "timeout_rate": "0.004000",
+  "ablation_remove_novel_observations_lift_drop": "0.012000",
   "expected_code": "PASS_OFFLINE_EVALUATION"
 }
 ```
@@ -321,10 +321,10 @@ ECE = 0.0500
   "nearest_existing_perspective": "quant",
   "holdout_eligible_samples": 420,
   "target_error_samples": 160,
-  "holdout_incremental_lift_5": "0.018",
-  "holdout_lift_bootstrap_lower_90": "0.006",
-  "max_error_correlation": "0.86",
-  "max_verdict_correlation": "0.93",
+  "holdout_incremental_lift_5": "0.018000",
+  "holdout_lift_bootstrap_lower_90": "0.006000",
+  "max_error_correlation": "0.860000",
+  "max_verdict_correlation": "0.930000",
   "primary_observations": ["signals.rsi.value", "signals.macd.histogram", "signals.bull_votes"],
   "expected_code": "REJECT_HIGH_CORRELATION_CLONE",
   "must_not_override_with_lift": true
@@ -364,7 +364,7 @@ ECE = 0.0500
 PRD 02 parser는 다음을 확인해야 한다.
 
 1. 문서 제목은 `# PRD 02: Offline Evaluation`이다.
-2. 초안 metadata가 정확히 한 번 있다.
+2. 구현 완료 metadata가 정확히 한 번 있다.
 3. Production 채택을 뜻하는 표식은 없다.
 4. Fixture A부터 D까지 JSON이 parse된다.
 5. Fixture A의 incremental lift, Brier, ECE가 hand calculation과 일치한다.
@@ -374,6 +374,37 @@ PRD 02 parser는 다음을 확인해야 한다.
 9. Split rule에 no leakage, embargo, duplicate isolation이 있다.
 10. Baseline comparison, error correlation, calibration, N/A, cost, latency, ablation, minimum sample, inconclusive policy가 모두 있다.
 11. Stale, dirty, misleading, flaky probe가 모두 있다.
+
+## 구현 계약
+
+- 경계 모델: `src/v6/offline_models.py`
+- Frozen input/manifest/sample record: `src/v6/offline_evidence.py`
+- Hash, duplicate, cutoff, leakage, N/A/resource 검증: `src/v6/offline_validation.py`
+- Hand calculation: `src/v6/offline_metrics.py`
+- Record-to-summary derivation과 deterministic bootstrap: `src/v6/offline_derive.py`
+- 판정과 precedence: `src/v6/offline_evaluator.py`
+- PRD 01 lineage 및 canonical hash self-verification: `src/v6/offline_artifact.py`
+- Acceptance와 Oracle bypass probe: `src/v6/offline_acceptance.py`
+- Evidence-level mutation corpus: `src/v6/offline_mutations.py`
+- Fixture: `docs/specs/v6/fixtures/prd02-offline-evaluation.json`
+- CLI: `uv run scripts/evaluate_perspective_candidate.py verify-fixture`
+- Immutable build: `uv run scripts/evaluate_perspective_candidate.py build --input docs/specs/v6/fixtures/prd02-offline-evaluation.json`
+
+모든 decimal metric은 소수점 여섯 자리 문자열로 직렬화한다. 판정 precedence는 malformed, clone, harm, no-lift, insufficient sample, missing adapter, flaky, pass 순서다. Novel observation 제거 시 lift drop이 `0.007000` 미만인 결과는 incremental evidence를 세우지 못했으므로 `REJECT_NO_INCREMENTAL_LIFT`로 닫는다. Offline pass는 PRD 03 입력 자격일 뿐 production 채택이 아니다.
+
+### Evidence-derived schema v2
+
+`v6.offline-evaluation-input.2`는 호출자가 summary나 metric을 제출하는 것을 허용하지 않는다. 입력은 PRD 01 artifact hash, hash-bound config, frozen manifest, content-addressed sample batch record, reported terminal code, 같은 input/config hash에 결속된 repeat run뿐이다. 각 sample batch body에는 deterministic sample ID 범위, split/window/cutoff timestamp, 세 baseline output, 기존 다섯 관점 output, candidate verdict/confidence/N/A/timeout, outcome edge, per-sample cost/latency, 세 ablation edge가 함께 고정된다.
+
+Evaluator는 record body에서 세 baseline lift, holdout/target bootstrap lower bound, harm/recovery, error/verdict correlation, Brier/ECE, N/A coverage, p95/mean latency, cost ceiling, ablation, market/action/sample minimum을 다시 계산한다. Config, record, manifest, input hash 중 하나라도 canonical body와 다르거나 sample ID/source identity가 중복되거나 cutoff/leakage/N/A/resource 불변식을 어기면 malformed다. Repeat run 20개는 현재 재계산 결과와 동일한 input/config hash 및 terminal code를 가져야 한다.
+
+Metric eligibility는 `split == holdout_window`, outcome adapter available, candidate edge present를 모두 만족한 sample만 포함한다. 따라서 N/A 또는 outcome-less sample은 N/A coverage의 분모에는 남지만 lift, correlation, calibration, market/action minimum과 `holdout_eligible_samples`에서는 제외한다. 현재 threshold fixture는 raw holdout 360개 중 eligible 328개, KR/US eligible 각 164개다.
+
+Threshold evaluation은 config의 선언과 무관하게 repeat run을 정확히 20개 요구한다. Hand arithmetic input만 별도 역할로 repeat 0개를 허용한다. p95 wall time은 `min(PRD 01 max_wall_ms_per_ticker, 6000)` 이하여야 하고, LLM call, prompt token, extra fetch는 PRD 01 budget을 넘을 수 없으며 timeout rate는 `0.020000` 이하여야 한다. 이 resource gate는 clone/harm/lift보다 앞선 malformed 단계다. Holdout이 없으면 insufficient, 모든 holdout outcome adapter가 없으면 arithmetic 전에 missing adapter로 닫는다.
+
+Eligible holdout은 있지만 eligible target-error cohort가 비어 있으면 target mean/bootstrap을 계산하지 않고 `INCONCLUSIVE_INSUFFICIENT_SAMPLE`로 닫는다. `missing_target_error_cohort` canonical-rehash mutation이 이 경계를 고정한다.
+
+`v6.offline-evaluation-artifact.2`는 frozen hand input과 threshold input을 모두 포함한다. Artifact loader는 두 input의 모든 hash를 다시 검증하고 `OfflineSummary`와 `HandMetrics`를 재산출하므로, metric을 변조한 뒤 artifact를 재해시해도 유효해지지 않는다. `build` API는 candidate와 두 frozen input만 받고 caller-supplied summary/hand metrics 인자를 받지 않는다.
 
 ## DoneClaim 규칙
 
