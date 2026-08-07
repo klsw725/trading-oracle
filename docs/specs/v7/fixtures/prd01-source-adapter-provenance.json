@@ -1,0 +1,82 @@
+{
+  "schema_version": "v7.source_adapter_provenance.prd01.1",
+  "contract_id": "source_adapter_provenance_prd01",
+  "evaluated_at": "2026-08-06T18:00:00+09:00",
+  "freshness_sla_hours": {
+    "market_price": 0.5,
+    "fundamental_equity": 168.0,
+    "news_search": 168.0,
+    "web_context": 168.0,
+    "macro_timeseries_daily": 24.0,
+    "macro_timeseries_monthly": 720.0
+  },
+  "raw_payload": {
+    "html": "Samsung Electronics PER 18.42 PBR 1.31 dividend yield 2.12",
+    "source_label": "equity_fundamental_main_page"
+  },
+  "happy_trace_fixture": {
+    "schema_version": "v7.source_adapter_provenance.artifact.1",
+    "adapter_id": "fundamental_equity",
+    "adapter_version": "source-adapter-provenance.1+sha256:297ea879bfff791ec466404afc029329aa27dc3acb5e2339356d687d5db302fd",
+    "source_identity": {
+      "source_id": "public_fundamental_snapshot_source",
+      "source_kind": "web_page",
+      "endpoint_label": "equity_fundamental_main_page",
+      "vendor_default": false,
+      "fallback_from_source_id": null,
+      "fallback_provenance_hash": null
+    },
+    "auth_boundary": {
+      "mode": "none",
+      "scope_label": "read_public_web",
+      "secret_material_present": false,
+      "credential_ref_hash": null,
+      "loaded_from": "none",
+      "redaction_policy": "adapter-redaction.1"
+    },
+    "market_coverage": {
+      "declared_markets": ["KR"],
+      "declared_exchanges": ["KOSPI", "KOSDAQ"],
+      "actual_market": "KR",
+      "actual_exchange": "KOSPI",
+      "symbol_namespace": "KRX_CODE",
+      "currency": "KRW",
+      "timezone": "Asia/Seoul"
+    },
+    "fetch_started_at": "2026-08-06T09:00:01+09:00",
+    "fetched_at": "2026-08-06T09:00:02+09:00",
+    "as_of": {"kind": "session", "value": "2026-08-06", "timezone": "Asia/Seoul"},
+    "freshness_status": "fresh",
+    "license": {
+      "name": "unknown",
+      "redistribution": "hash_only",
+      "attribution_required": "unknown"
+    },
+    "retention": {
+      "raw_mode": "discard_after_hash",
+      "ttl_hours": 168,
+      "ttl_reason": null,
+      "user_visible_allowed": false
+    },
+    "normalized_record": {
+      "record_type": "fundamental_snapshot",
+      "symbol": "005930",
+      "market": "KR",
+      "exchange": "KOSPI",
+      "as_of": {"kind": "session", "value": "2026-08-06", "timezone": "Asia/Seoul"},
+      "fields": {"per": 18.42, "pbr": 1.31, "div_yield": 2.12},
+      "field_units": {"per": "ratio", "pbr": "ratio", "div_yield": "percent"}
+    },
+    "raw_payload_hash": "sha256:bd6385c8ad828e67f12c9a343b16a6738e821738bb85c3f6d7ba0ec3a51c2cc1",
+    "normalized_record_hash": "sha256:64c34a639e499d1d7b5b88b056f63770c3a64a5bd61bc30408a8635d9dbdef91",
+    "provenance_hash": "sha256:ce47028d096ce6bba82a6a87432b286ea20e0b40c3915815259c29649280699d",
+    "capabilities": ["fundamentals"],
+    "redaction_report": {
+      "policy": "adapter-redaction.1",
+      "patterns_checked": ["secret", "token", "cookie", "signed_url", "user_data"],
+      "replacement_count": 0
+    },
+    "error_envelope": null,
+    "result_status": "pass"
+  }
+}

@@ -1,5 +1,5 @@
 # PRD 01: Source Adapter Provenance
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-07)
 
 Parent SPEC: [v7 Information Source Expansion SPEC](../SPEC.md)
 
@@ -96,6 +96,8 @@ Coverage mismatch는 silent fallback이 아니다. 예를 들어 US ticker가 KR
 | `as_of` | 데이터 값의 기준 시각, 기준 거래 session, 발표 시각, 또는 검색 결과 publish 시각. |
 
 `fetched_at`은 `as_of`를 대신할 수 없다. 웹 검색 결과처럼 publish date가 불확실한 자료는 `as_of.kind="unknown"`과 `freshness_status="degraded"`로 남기며, 사실 근거로 승격하지 않는다.
+
+Freshness 판정의 숫자 기준은 [PRD 02 Freshness SLA and TTL](prd02-quality-freshness-dedup.md#freshness-sla-and-ttl)을 단일 원천으로 사용한다. PRD 01은 adapter가 선언한 임의 window를 신뢰하지 않는다.
 
 ## License and Retention
 
