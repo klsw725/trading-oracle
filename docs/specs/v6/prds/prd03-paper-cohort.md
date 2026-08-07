@@ -1,5 +1,5 @@
 # PRD 03: Paper Cohort
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-07)
 > **SPEC 참조**: [v6 SPEC](../SPEC.md)
 
 ## 문서 범위
@@ -245,7 +245,7 @@ Resume 규칙은 다음과 같다.
     "policy_id": "paper_policy_v6_20260806",
     "policy_salt": "salt_v6_paper_20260806",
     "sample_rate_bps": 10000,
-    "assignment_bucket": 2412,
+    "assignment_bucket": 1213,
     "assigned_to_paper": true,
     "horizons": [5, 20]
   },
@@ -265,15 +265,36 @@ Resume 규칙은 다음과 같다.
     "vote_effect": "none",
     "shadow_visible_to_user": false
   },
-  "paper_metrics": {
-    "assigned_samples": 360,
-    "target_disagreement_samples": 130,
-    "running_duration_market_sessions": 72,
-    "candidate_na_rate": "0.08",
-    "latency_p95_ms": 2300,
-    "input_schema_drift_rate": "0.000",
-    "shadow_vote_distribution_psi": "0.08"
-  },
+  "observation_batches": [{
+    "decision_cutoff": "2026-08-06T09:35:00+09:00",
+    "market_sessions": [{"market": "KR", "session_id": "KRX_2026_session_000"}],
+    "records": [{
+      "sample_id": "paper_sample_v6_005930_20260806",
+      "target_disagreement": true,
+      "input_schema_valid": true,
+      "assignment_input": {
+        "production_decision_id": "prod_decision_20260806_005930",
+        "emitted_at": "2026-08-06T09:35:00+09:00",
+        "ticker": "005930",
+        "market": "KR",
+        "production_action": "BUY"
+      },
+      "assignment": {"assigned_to_paper": true, "assignment_bucket": 1213},
+      "production_verdict": "BUY",
+      "perspective": "working_capital_quality",
+      "shadow_verdict": "HOLD",
+      "shadow_confidence": "0.720000",
+      "shadow_reason": "working capital quality weakened before price momentum",
+      "shadow_action": "hold",
+      "vote_effect": "none",
+      "shadow_visible_to_user": false,
+      "cost_units": 0,
+      "shadow_recorded": true,
+      "latency_ms": 2100,
+      "record_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    }],
+    "batch_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  }],
   "expected_stop_code": "STOP_READY_FOR_LIFECYCLE_REVIEW",
   "production_must_remain_unchanged": true
 }
@@ -340,9 +361,8 @@ Resume 규칙은 다음과 같다.
   "schema_version": "v6.paper_cohort.adapter_fixture.1",
   "run_id": "paper_run_v6_working_capital_quality_20260806",
   "outcome_adapter": null,
-  "assigned_samples": 340,
-  "running_duration_market_sessions": 68,
-  "shadow_verdicts_recorded": 340,
+  "sample_observation_records": 340,
+  "market_sessions": 68,
   "outcome_metrics_available": false,
   "expected_stop_code": "STOP_INCONCLUSIVE_PENDING_ADAPTER",
   "must_not_mark_success": true,
@@ -366,13 +386,25 @@ Resume 규칙은 다음과 같다.
 | `stale_adapter` | Mark stale outcome adapter as fresh. | parser failure. |
 | `misleading_report` | Say paper affected vote and still passed. | parser failure. |
 | `malformed_ledger` | Break event index sequence or hash chain. | parser failure. |
+| `record_cardinality_inflation` | Repeat existing records to 999, rehash batch, and rebuild the ledger. | artifact rejection. |
+| `duplicate_assignment_identity` | Reuse one production decision and assignment hash under distinct sample IDs, then rebuild every hash and ledger event. | artifact rejection. |
+| `shadow_ledger_mismatch` | Change and rehash the input shadow while retaining the ledger. | artifact rejection. |
+| `rehashed_dirty_policy` | Rehash a changed policy while retaining the started event. | artifact rejection. |
+| `fabricated_checkpoint` | Supply a self-consistent checkpoint not derived from a cancelled ledger head. | resume rejected. |
+| `missing_adapter_with_harm` | Remove the adapter while retaining harmful outcome claims. | `STOP_INCONCLUSIVE_PENDING_ADAPTER`. |
+| `cutoff_or_horizon_missing` | Change the shadow cutoff or remove the 20-session observation. | contamination rejection. |
+| `ineligible_300_rebuilt` | Keep 300 records but recompute 15 assignments with production `N/A`, which policy excludes; rehash and rebuild the ledger. | artifact rejection. |
+| `mixed_market_60_rebuilt` | Combine 30 typed KR and 30 typed US sessions; rehash and rebuild the ledger. | artifact rejection. |
+| `unbound_cancelled_checkpoint` | Insert hash-valid ASSIGNED/SHADOW payloads not bound to the input before CANCELLED. | checkpoint rejection. |
+| `resumed_terminal_history` | Validate CANCELLED→RESUMED followed by the remaining semantic events and STOPPED. | READY artifact accepted. |
+| `duplicate_resume_contamination` | Resume by writing an inventory sample already recorded before cancel. | typed `STOP_CONTAMINATION_DETECTED`. |
 
 ## 검증 기준
 
 PRD 03 parser는 다음을 확인해야 한다.
 
 1. 문서 제목은 `# PRD 03: Paper Cohort`이다.
-2. 바로 다음 줄에 초안 metadata가 정확히 한 번 있다.
+2. 바로 다음 줄에 구현 완료 metadata가 정확히 한 번 있다.
 3. 생산 채택을 뜻하는 표식은 없다.
 4. Fixture A부터 D까지 JSON이 parse된다.
 5. Fixture A는 shadow verdict를 기록하지만 생산 perspectives, vote summary, consensus verdict가 바뀌지 않는다.
@@ -382,3 +414,36 @@ PRD 03 parser는 다음을 확인해야 한다.
 9. Deterministic assignment formula와 ledger hash chain 규칙이 있다.
 10. Sample horizon, minimum duration, drift monitoring, stop condition, contamination prevention이 모두 있다.
 11. Required probes는 JSON mutation, status mutation, stale, dirty, misleading, malformed, cancel, resume을 포함한다.
+
+## 구현 계약
+
+- 경계 모델과 stop code: `src/v6/paper_models.py`
+- Hash-bound observation batch, adapter, 5/20-session report: `src/v6/paper_observations.py`
+- Raw assignment seed SHA-256와 policy hash: `src/v6/paper_assignment.py`
+- Append-only event/payload hash chain과 resume checkpoint: `src/v6/paper_ledger.py`
+- Duration, sample, mature coverage, drift, N/A, latency, harm, adapter 판정: `src/v6/paper_evaluator.py`
+- Offline artifact v2 재검증과 PRD04 handoff artifact: `src/v6/paper_artifact.py`
+- Canonical fixture와 ledger 조립: `src/v6/paper_fixture.py`
+- Mutation, forgery, isolation acceptance: `src/v6/paper_acceptance.py`
+- Fixture: `docs/specs/v6/fixtures/prd03-paper-cohort.json`
+- CLI: `uv run scripts/run_perspective_paper_cohort.py verify-fixture`
+- Immutable build: `uv run scripts/run_perspective_paper_cohort.py build --input docs/specs/v6/fixtures/prd03-paper-cohort.json`
+
+`v6.paper-cohort-artifact.1`은 `v6.offline-evaluation-artifact.2` 전체를 입력에 포함하고 loader에서 lineage, evidence, derived summary, terminal code와 canonical hash를 다시 검증한다. `PASS_OFFLINE_EVALUATION`만 run을 시작할 수 있다. Production before/after의 perspectives, vote summary, consensus verdict, portfolio sizing, user output은 각각 같은 snapshot hash에 결속되며 paper 모듈은 production 경로를 import하지 않는다.
+
+Assignment는 문서의 pipe-delimited raw seed bytes에 SHA-256을 적용하며 acceptance는 독립 golden bucket `(1213, 6380, 126)`을 사용한다. 각 sample은 sample ID뿐 아니라 production decision ID와 assignment hash가 전역에서 고유해야 하며, 이름만 바꾼 동일 assignment 복제본은 cohort 표본으로 계산하지 않는다. Ledger payload와 event body는 별도 canonical hash를 가지며 공통 run identity, ordered FSM, input/policy/assignment/production snapshot/shadow/outcome/drift payload, event cardinality를 재검증한다. Observation input에는 aggregate count 필드가 없다. 각 sample record와 각 5/20-session outcome record가 개별 canonical hash를 가지며 batch/ledger hash가 그 manifest 전체를 결속한다.
+
+| derived metric | sole derivation source |
+| --- | --- |
+| assigned/shadow samples | Frozen policy로 assignment를 재계산해 `assigned_to_paper=true`가 증명되고 sample ID, production decision ID, assignment hash가 각각 전역적으로 고유하며 `shadow_recorded=true`인 sample observation record 수 |
+| target disagreement | `target_disagreement=true` record 수 |
+| candidate/target N/A | `shadow_verdict=N/A` 전체/target record 수 |
+| schema drift | `input_schema_valid=false` record 수 |
+| production-shadow disagreement | record의 `production_verdict != shadow_verdict` 수 |
+| latency p95 | 모든 sample record의 `latency_ms` nearest-rank p95 |
+| running duration | 모든 sample assignment와 같은 단일 typed market에 속하는 고유 `MarketSession.session_id` 수 |
+| 5/20 eligible/mature/harm | observation manifest와 정확히 같은 sample ID 집합을 가진 horizon record의 수와 `mature`/`harmed` 값 |
+
+각 sample record는 자체 `AssignmentInput`과 `AssignmentResult`를 포함한다. Evaluator는 frozen candidate identity와 policy로 `assign()`을 다시 실행하고 production verdict/action/market/cutoff가 일치하며 실제 assigned인 record만 허용한다. 모든 record와 market session은 정확히 하나의 market에 속해야 하므로 KR 30일과 US 30일을 60일로 합산할 수 없다. 각 horizon은 observation manifest의 sample ID를 누락·추가·중복·재정렬할 수 없다. `harmed=true`는 같은 record의 `mature=true`를 요구한다. 대표 `PaperCohortInput.shadow`와 top-level assignment는 정확히 하나의 sample observation record와 전체 필드가 일치해야 한다. Aggregate count를 추가하거나 기존 record를 반복해 999개로 재해시하고 ledger를 전부 재구축하는 공격은 각각 boundary의 extra-field 규칙과 전역 unique/alignment 검증으로 거부된다.
+
+Outcome observation은 hash-bound adapter와 같은 run에 결속된다. Adapter 부재 또는 stale 판정은 harm 판정보다 먼저 수행한다. Semantic ledger validator는 normal terminal, cancelled terminal, cancelled/resumed terminal 세 이력 형태를 검증한다. Cancel 전 모든 event는 normal semantic payload prefix와 일치해야 하며 checkpoint는 이 전체 cancelled history에서만 파생된다. Resume event는 cancelled head hash를 payload로 결속하고 남은 semantic events를 이어 STOPPED에 도달한다. 이미 inventory에 존재하는 sample을 다시 쓰는 resume 요청은 boolean false가 아니라 typed `STOP_CONTAMINATION_DETECTED` decision을 반환한다. 최종 artifact는 derived stop decision, ledger head, production snapshot hashes, `evidence_only_not_production_adoption` handoff를 다시 계산하므로 입력이나 정책만 다시 해시한 forgery도 통과하지 못한다.

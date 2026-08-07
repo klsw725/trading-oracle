@@ -1,5 +1,5 @@
 # Trading Oracle v6: Perspective Expansion
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (PRD 01~04, 4/4 완료)
 
 v6는 새 투자 관점 후보를 기존 다섯 관점과 같은 힘으로 바로 넣지 않고, 독립 가설, 오프라인 검증, paper 관찰, 제한된 lifecycle 정책으로 나누어 다룬다. 핵심 흐름은 `candidate->evaluation->paper->lifecycle`이다.
 
@@ -9,10 +9,10 @@ v6는 새 투자 관점 후보를 기존 다섯 관점과 같은 힘으로 바�
 
 | PRD | 문서 | 상태 | SPEC에서 맡는 역할 |
 | --- | --- | --- | --- |
-| PRD 01 | [prd01-perspective-candidate-contract.md](prds/prd01-perspective-candidate-contract.md) | 📝 초안 | 후보 목적, 독립 가설, 입출력 schema, 중복 금지, 비용과 latency 예산, owner와 version 계약 |
-| PRD 02 | [prd02-offline-evaluation.md](prds/prd02-offline-evaluation.md) | 📝 초안 | 고정 데이터셋, baseline 비교, incremental lift, error correlation, calibration, N/A, cost, ablation 판정 |
-| PRD 03 | [prd03-paper-cohort.md](prds/prd03-paper-cohort.md) | 📝 초안 | shadow verdict, production isolation, deterministic assignment, ledger, drift, stop condition, contamination 차단 |
-| PRD 04 | [prd04-consensus-lifecycle.md](prds/prd04-consensus-lifecycle.md) | 📝 초안 | 제한 승격, capped weight, deliberation 권한, rollback, retirement, version coexistence, audit policy |
+| PRD 01 | [prd01-perspective-candidate-contract.md](prds/prd01-perspective-candidate-contract.md) | ✅ 구현 완료 | 후보 목적, 독립 가설, 입출력 schema, 중복 금지, 비용과 latency 예산, owner와 version 계약 |
+| PRD 02 | [prd02-offline-evaluation.md](prds/prd02-offline-evaluation.md) | ✅ 구현 완료 | 고정 데이터셋, baseline 비교, incremental lift, error correlation, calibration, N/A, cost, ablation 판정 |
+| PRD 03 | [prd03-paper-cohort.md](prds/prd03-paper-cohort.md) | ✅ 구현 완료 | shadow verdict, production isolation, deterministic assignment, ledger, drift, stop condition, contamination 차단 |
+| PRD 04 | [prd04-consensus-lifecycle.md](prds/prd04-consensus-lifecycle.md) | ✅ 구현 완료 | 제한 승격, capped weight, deliberation 권한, rollback, retirement, version coexistence, audit policy |
 
 ## 문제
 
@@ -101,7 +101,9 @@ Shadow verdict가 production vote, scorer, deliberation, portfolio output, adapt
 
 ### Consensus lifecycle
 
-Limited production은 영구 편입이 아니다. 후보 version마다 lifecycle record가 있고, 같은 candidate id의 active scorer version은 하나만 허용된다. Policy artifact는 기존 policy를 덮어쓰지 않고 새 version으로 emit되며 rollback policy를 반드시 가진다.
+Limited production은 영구 편입이 아니다. 후보 version마다 lifecycle record가 있고, 같은 candidate id의 active scorer version은 하나만 허용된다. PRD 04 compiler는 promotion, expiry/review, incident, renewal, rollback, retirement assessment, retirement, reopen operation을 검증된 prior `LifecycleHistory` head에서만 append한다. 각 operation/key는 정확히 한 번만 commit되며 promotion creation/transition pair 외 payload replay는 금지된다. 불충분한 incident evidence는 immutable renewal-review policy로 닫고, rollback 뒤 reopen은 rollback이 보존한 source paper와 다른 최신 READY paper를 요구한다.
+
+History identity는 hypothesis까지 포함하고 policy projection은 compiler에서 재도출한다. Caller-authored operation registry와 별도로 trusted `CompilerContext` persistence head를 compiler/build 경계에 주입하며 mismatch를 거절한다. Policy emission만 registry revision을 하나 증가시키고 prior head hash를 연결하며, non-emission은 head를 보존한다. Partial persistence는 hash-bound checkpoint action matrix로 복구하며 rollback을 promotion보다 우선하고, genesis initial promotion은 명시적 zero-head checkpoint로 재개한다. 다섯 retirement trigger와 만료된 renewal-review version의 atomic replacement를 지원한다. Source TTL은 promotion policy에 compiler-fixed 값으로 보존하고, source/falsification은 trusted context의 full typed self-validating artifacts와 exact candidate, hypothesis, source paper에 결합한다.
 
 Rollback은 audit record를 지우지 않는다. Retirement 뒤 후보 version은 replay와 attribution을 위해 읽을 수 있지만 새 scorer weight, deliberation prompt, adaptive weight, prompt tuning, portfolio sizing, user output의 active guidance로 쓰지 않는다.
 
