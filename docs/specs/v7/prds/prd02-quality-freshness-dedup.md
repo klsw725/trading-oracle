@@ -1,5 +1,5 @@
 # PRD 02: Quality Freshness Dedup
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료 (2026-08-08)
 
 Parent SPEC: [v7 Information Source Expansion SPEC](../SPEC.md)
 
@@ -29,20 +29,21 @@ Parent SPEC: [v7 Information Source Expansion SPEC](../SPEC.md)
 
 ## Input Contract
 
-품질 판정 입력은 PRD 01 envelope 또는 같은 의미를 가진 adapter artifact다. 필수 입력은 다음과 같다.
+구현 계약 `v7.quality_freshness_dedup.prd02.2`는 caller가 평가 fixture 안에 함께 넣은 expected root를 증거로 인정하지 않는다. 각 source는 완전한 PRD 01 `PersistedProvenanceBundle`을 내장하고, compiler 호출자는 평가 fixture와 별도 경로에서 읽은 `v7.quality_freshness_dedup.trust.1` 문서로 registry root와 bundle root를 제공해야 한다.
 
 | field | rule |
 | --- | --- |
-| `source_ref.provenance_hash` | PRD 01 artifact를 가리키는 hash. 없으면 품질 판정을 만들 수 없다. |
-| `source_ref.adapter_id` | `web_context`, `news_search`, `fundamental_equity`, `market_price` 같은 논리 ID. |
+| `source.bundle` | PRD 01 artifact와 trusted payload manifest를 함께 가진 persisted verification bundle. hash-only ref는 금지한다. |
+| `source.upstream_bundle` | local cache일 때 필수인 별도 upstream PRD 01 persisted bundle. cache와 upstream 모두 각자의 root와 raw preimage로 검증한다. |
+| `QualityTrustDocument` | 평가 fixture와 독립적으로 persisted된 primary/fallback registry root 및 bundle root inventory다. body와 claimed root를 함께 바꿔도 이 문서를 바꾸지 않으면 발급이 실패한다. |
+| `QualityTrustContext` | 독립 trust document의 root와 평가 fixture의 raw preimage 및 source metadata registry를 함께 검증한 뒤 내부 issuer가 발급한다. artifact에 raw preimage를 저장하지 않는다. |
+| `SourceMetadataRegistry` | trusted root가 source ID, provenance/quality kind, reliability, family, capabilities, coverage, canonical host, cache upstream source ID를 고정한다. |
 | `subject` | ticker, market, company name, query label을 포함한다. |
-| `as_of` | 값 또는 기사 publish 기준. 모르면 `kind="unknown"`으로 둔다. |
-| `fetched_at` | cache read 또는 source fetch timestamp. |
-| `retention` | raw text 사용 가능 여부와 hash-only boundary. |
-| `normalized_record` | PRD 01에서 만든 값. raw HTML, secret, cookie, user prompt 원문은 금지한다. |
-| `untrusted_text[]` | title, snippet, search body처럼 프롬프트에 들어갈 수 있는 외부 텍스트. 항상 untrusted다. |
+| `normalized_record` | typed `quality_claim`에서 subject, event date, canonical URL/title, predicate, object, polarity, numeric consistency, claim text, untrusted text를 결정적으로 파생한다. caller override는 없다. |
 
 `fetched_at`은 freshness의 보조 값일 뿐이다. 웹 검색처럼 publish date가 없으면 `as_of.kind="unknown"`, `freshness_label="degraded"`, `quality_label="degraded"`를 써야 한다.
+
+동일 `provenance_hash`는 alias나 record ID가 달라도 한 번만 입력할 수 있다. source family, reliability class, source kind를 바꿔 독립 cluster를 늘리는 입력은 각각 `PROVENANCE_REUSED`, `SOURCE_REGISTRY_INVALID`, `SOURCE_METADATA_MISMATCH`로 fail closed한다. Session `as_of`는 PRD 01의 IANA timezone을 `ZoneInfo`로 해석한다.
 
 ## Freshness SLA and TTL
 
@@ -173,6 +174,8 @@ Contradiction이 있으면 fallback source를 읽을 수 있다. Fallback은 기
 Fallback은 안전한 대체가 아니라 새 입력이다. 원본보다 품질이 높아도 원본의 stale, dirty, contradiction 흔적은 audit trail에 남아야 한다.
 
 ## Machine-readable Fixture
+
+아래 JSON은 원문 authoring 예시다. 실행 가능한 canonical v2 평가 fixture는 [`prd02-quality-freshness-dedup.json`](../fixtures/prd02-quality-freshness-dedup.json), 독립 root 경계는 [`prd02-quality-freshness-dedup-trust.json`](../fixtures/prd02-quality-freshness-dedup-trust.json)이다. `verify-fixture`, `build`, persisted `verify`는 두 파일을 별도 경로에서 읽는다.
 
 ```json
 {
