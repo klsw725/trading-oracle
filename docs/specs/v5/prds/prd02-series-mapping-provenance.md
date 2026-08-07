@@ -1,5 +1,5 @@
 # PRD 02: Series Mapping Provenance
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 > **SPEC 참조**: [../SPEC.md](../SPEC.md)
 
 ## Problem
@@ -54,6 +54,7 @@ Required input fields:
 | `schema_version` | Must equal `causal-node-canonicalization.1`. |
 | `nodes[].canonical_node_id` | Required stable key. |
 | `nodes[].canonical_label` | Human readable label for approval review. |
+| `nodes[].normalized_label` | Required canonical ID seed; must match the PRD 01 artifact. |
 | `nodes[].direction.kind` | Used to pick level, flow, event, or entity mapping. |
 | `nodes[].direction.polarity` | Used to check series direction compatibility. |
 | `triples[]` | Optional for mapping a single node, required when generating pair test candidates. |
@@ -105,6 +106,7 @@ The mapping artifact is append friendly and auditable.
 {
   "schema_version": "causal-series-mapping.1",
   "source_node_schema_version": "causal-node-canonicalization.1",
+  "source_node_artifact_hash": "sha256:...",
   "mapping_policy_version": "series-mapper.1",
   "generated_at": "2026-08-06T00:00:00+09:00",
   "series_catalog": [],
@@ -281,7 +283,7 @@ A node is unmappable when no catalog series measures the same concept with accep
 
 ```json
 {
-  "canonical_node_id": "cnode_918374f6c129728a51be",
+  "canonical_node_id": "cnode_9ae6e9aa79452980e619",
   "canonical_label": "한국 금융지주의 대손충당금 확대",
   "mapping_result": "unmappable",
   "mapping_kind": "unmappable",
@@ -429,7 +431,7 @@ Input node:
 
 ```json
 {
-  "canonical_node_id": "cnode_918374f6c129728a51be",
+  "canonical_node_id": "cnode_9ae6e9aa79452980e619",
   "canonical_label": "한국 금융지주의 대손충당금 확대",
   "direction": {
     "kind": "flow_change",
@@ -511,6 +513,7 @@ Expected mapping:
 | QA area | Fixture | Required result |
 | --- | --- | --- |
 | Read QA | PRD 01 artifact exists and has `schema_version = causal-node-canonicalization.1`. | Mapper reads nodes by `canonical_node_id`. |
+| Read QA | Canonical ID seed or triple endpoint is inconsistent. | Mapping input is rejected before approval. |
 | Read QA | `data/node_series_map.json` exists as flat legacy evidence. | Mapper may import candidates, but every candidate requires review. |
 | Read QA | Series catalog `as_of` is older than `expires_at`. | Candidate is rejected as stale. |
 | JSON QA | Approved mapping misses `manual_approval`. | Rejected as malformed. |
@@ -531,3 +534,25 @@ Expected mapping:
 6. Stale, proxy, dirty, misleading, and malformed inputs are rejected with evidence.
 7. Keyword matching can create candidates only and is never enough for approval.
 8. Fixtures cover read, JSON, and mutation QA.
+9. The artifact records `source_node_artifact_hash`, and canonical IDs are recomputed from label, normalized label, and direction.
+
+## 구현 및 실행
+
+- typed mapping boundary and evidence models: `src/causal/series_mapping_models.py`
+- approval, formula, provenance, and expiry gates: `src/causal/series_mapping_approval.py`
+- duplicate and dirty conflict handling: `src/causal/series_mapping_conflicts.py`
+- typed rejection evidence: `src/causal/series_mapping_rejections.py`
+- artifact assembly: `src/causal/series_mapping.py`
+- executable acceptance checks: `src/causal/series_mapping_acceptance.py`
+- CLI: `scripts/map_causal_series.py`
+
+```bash
+uv run scripts/map_causal_series.py verify-fixture
+uv run scripts/map_causal_series.py build \
+  --input docs/specs/v5/fixtures/prd02-series-mapping-provenance.json \
+  --output data/causal_series_mapping.json
+```
+
+Legacy flat mapping은 candidate evidence만 만들며 자동 승인되지 않는다. 동일 입력의 immutable artifact 재생성은 `write_status = unchanged`를 반환한다.
+
+PRD 01 node artifact는 `canonical_label`, `normalized_label`, `direction`으로 ID를 재계산하며 triple endpoint 존재 여부를 확인한다. PRD 02 출력의 `source_node_artifact_hash`는 PRD 03이 동일한 canonical root를 소비했는지 검증하는 lineage lock이다.
