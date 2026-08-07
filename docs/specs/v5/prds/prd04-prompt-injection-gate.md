@@ -1,5 +1,5 @@
 # PRD 04: Prompt Injection Gate
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 > **SPEC 참조**: [../SPEC.md](../SPEC.md)
 
 ## Problem
@@ -167,11 +167,12 @@ Freshness is checked before confidence and budget. A stale record cannot reserve
 Rules:
 
 1. `prompt_cutoff` must be at or before package `expires_at`.
-2. PRD 03 verification `generated_at` must be within the configured freshness window.
-3. Every referenced mapping approval and source catalog expiry from PRD 02 must be after `prompt_cutoff`.
-4. A record with missing expiry becomes `excluded_malformed`, not verified.
-5. A record with an expired verification or mapping becomes `excluded_stale`.
-6. A package generated from a stale source artifact must not replace the last accepted package.
+2. PRD 03 `generated_at` and `verification_cutoff` must not be after `prompt_cutoff`.
+3. PRD 03 verification `generated_at` must be within the configured freshness window.
+4. Every referenced mapping approval and source catalog expiry from PRD 02 must be after `prompt_cutoff`.
+5. A record with missing expiry becomes `excluded_malformed`, not verified.
+6. A record with an expired verification or mapping becomes `excluded_stale`.
+7. A package generated from a stale source artifact must not replace the last accepted package.
 
 ## Confidence Rules
 
@@ -216,9 +217,11 @@ Rules:
 1. `source_artifact_hash` is a hash of the complete PRD 03 artifact consumed by the gate.
 2. `package_hash` is a hash of the canonical prompt package after exclusions and ordering.
 3. Each rendered record stores `pair_id`, `run_config_hash`, `correction_scope_hash`, subject mapping hash, and object mapping hash.
-4. `rollback_to_package_hash` is required when a prior accepted package exists.
-5. If assembly fails after any record is accepted, the caller must keep the prior package and append `rollback_package` mutation.
-6. Rollback cannot resurrect expired records. It can only restore the last package that was valid at its own cutoff.
+4. Every pair `input_fingerprint`, run config, correction scope, split policy, window policy, and verification cutoff must equal the PRD 03 root values.
+5. `rollback_to_package_hash` is required when a prior accepted package exists.
+6. If assembly fails after any record is accepted, the caller must keep the prior package and append `rollback_package` mutation.
+7. Rollback rechecks package expiry, evidence expiry, and verification freshness at the rollback `generated_at`; it never extends the prior expiry.
+8. Rollback cannot resurrect expired records. It can only restore the last package that was valid at its own cutoff.
 
 ## Decision Table
 
@@ -409,3 +412,23 @@ Expected exclusion:
 7. Audit fixtures cover stable inject and expired exclude.
 8. Mutation QA covers prompt injection, stale exclusion, malformed exclusion, and budget exclusion.
 9. The prompt label describes statistical lead evidence, never true causality.
+
+## 구현 및 실행
+
+- strict source, package, record, budget, and rollback models: `src/causal/prompt_injection_models.py`
+- eligibility, ordering, budget, provenance, and rollback gate: `src/causal/prompt_injection_gate.py`
+- deterministic record construction: `src/causal/prompt_injection_records.py`
+- package/source hash verified runtime reader: `src/causal/prompt_injection_runtime.py`
+- executable acceptance checks: `src/causal/prompt_injection_acceptance.py`
+- macro prompt integration: `src/perspectives/macro.py`, `src/perspectives/macro_prompt.py`
+- immutable package CLI: `scripts/build_causal_prompt.py`
+
+```bash
+uv run scripts/build_causal_prompt.py verify-fixture
+uv run scripts/build_causal_prompt.py build \
+  --source data/causal_statistical_verification.json \
+  --config data/causal_prompt_config.json \
+  --output data/causal_prompt_injection.json
+```
+
+Runtime은 package와 원본 PRD 03 artifact hash를 함께 검증한다. 누락·변조·만료 시 verified record를 반환하지 않으며 legacy `verified_triples`로 fallback하지 않는다.

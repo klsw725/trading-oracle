@@ -1,5 +1,5 @@
 # Trading Oracle v5 - Causal Graph Quality
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 
 v5는 인과 그래프가 LLM 상식 문자열에서 macro prompt의 검증된 근거로 이동하기 전에 필요한 품질 계약이다. 이 SPEC은 v5 로컬 PRD 01부터 04까지만 종합한다. v2 SPEC과 누적 분석은 문제 근거이며, 다른 SPEC 완료 여부는 v5의 성공 또는 실패를 바꾸지 않는다.
 
@@ -7,10 +7,10 @@ v5는 인과 그래프가 LLM 상식 문자열에서 macro prompt의 검증된 �
 
 | PRD | PRD 문서 | 상태 | 계약 |
 | --- | --- | --- | --- |
-| PRD 01 | [Node Canonicalization](prds/prd01-node-canonicalization.md) | 📝 초안 | legacy `subject`와 `object` 문자열을 versioned canonical node로 바꾸고, 방향 의미가 다른 노드 병합을 거절한다. |
-| PRD 02 | [Series Mapping Provenance](prds/prd02-series-mapping-provenance.md) | 📝 초안 | canonical node를 정량 series에 연결할 때 transform, unit, direction, source, as_of, provenance, approval, expiry를 보존한다. |
-| PRD 03 | [Statistical Verification](prds/prd03-statistical-verification.md) | 📝 초안 | approved mapping pair를 stationarity, lag search, corrected alpha, holdout, structural break, stability gate로 판정한다. |
-| PRD 04 | [Prompt Injection Gate](prds/prd04-prompt-injection-gate.md) | 📝 초안 | fresh `verified_stable` statistical lead evidence만 macro prompt의 verified section에 넣는다. |
+| PRD 01 | [Node Canonicalization](prds/prd01-node-canonicalization.md) | ✅ 완료 | legacy `subject`와 `object` 문자열을 versioned canonical node로 바꾸고, 방향 의미가 다른 노드 병합을 거절한다. |
+| PRD 02 | [Series Mapping Provenance](prds/prd02-series-mapping-provenance.md) | ✅ 완료 | canonical node를 정량 series에 연결할 때 transform, unit, direction, source, as_of, provenance, approval, expiry를 보존한다. |
+| PRD 03 | [Statistical Verification](prds/prd03-statistical-verification.md) | ✅ 완료 | approved mapping pair를 stationarity, lag search, corrected alpha, holdout, structural break, stability gate로 판정한다. |
+| PRD 04 | [Prompt Injection Gate](prds/prd04-prompt-injection-gate.md) | ✅ 완료 | fresh `verified_stable` statistical lead evidence만 macro prompt의 verified section에 넣는다. |
 
 ## Exact Evidence
 
@@ -141,5 +141,5 @@ Authoring QA for this SPEC must include these checks.
 3. Anchor validation for any Markdown link that includes a fragment.
 4. Sequence check that the local PRD table has exactly first cells `PRD 01`, `PRD 02`, `PRD 03`, and `PRD 04` in order.
 5. Link count check that each relative local PRD link appears exactly once in this SPEC.
-6. Term check that this file has exactly one draft status line, no done marker, no numbered global work label, `statistical_lead_evidence`, `verified_stable`, `inconclusive`, and `rejected_*` separation.
+6. Term check that this file has exactly one completed status line, no draft marker, no numbered global work label, `statistical_lead_evidence`, `verified_stable`, `inconclusive`, and `rejected_*` separation.
 7. Mutation probes for malformed PRD link, bad anchor, duplicate PRD row, missing PRD row, misleading true causality wording, rejected evidence rendered as verified, and dependency wording that makes another SPEC completion a gate.
