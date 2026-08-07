@@ -6,7 +6,6 @@ SPEC §4-0 공통 필드 규격 준수.
 
 from __future__ import annotations
 
-import json
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
@@ -15,31 +14,37 @@ from contextvars import ContextVar
 from copy import deepcopy
 from dataclasses import dataclass, field
 from threading import Lock
-from typing import Final
+from typing import Final, Protocol
 
-import pandas as pd
+from pydantic import TypeAdapter, ValidationError
 
 from src.v4.models import JsonValue
+from src.perspectives.provider_runtime import ProviderRequest, generate_provider_text
 
 
-@dataclass
+class OhlcvFrame(Protocol):
+    @property
+    def empty(self) -> bool: ...
+
+
+@dataclass(frozen=True, slots=True)
 class PerspectiveInput:
     """관점 분석에 필요한 입력 데이터 묶음"""
 
     ticker: str
     name: str
-    ohlcv: pd.DataFrame
-    signals: dict  # compute_signals() 결과
-    fundamentals: dict  # fetch_naver_fundamentals() 결과
-    position: dict | None  # 포트폴리오 포지션 (미보유 시 None)
-    market_context: dict  # {"kospi": {...}, "kosdaq": {...}}
-    config: dict
-    web_context: dict = field(default_factory=dict)  # 웹 검색 결과 (Phase 10)
-    fx_signal: dict = field(default_factory=dict)  # 환율 팩터 (Phase 17)
+    ohlcv: OhlcvFrame
+    signals: dict[str, JsonValue]  # compute_signals() 결과
+    fundamentals: dict[str, JsonValue]  # fetch_naver_fundamentals() 결과
+    position: dict[str, JsonValue] | None  # 포트폴리오 포지션 (미보유 시 None)
+    market_context: dict[str, JsonValue]  # {"kospi": {...}, "kosdaq": {...}}
+    config: dict[str, JsonValue]
+    web_context: dict[str, JsonValue] = field(default_factory=dict)  # 웹 검색 결과 (Phase 10)
+    fx_signal: dict[str, JsonValue] = field(default_factory=dict)  # 환율 팩터 (Phase 17)
     provenance_collector: LlmProvenanceCollector | None = None
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class PerspectiveResult:
     """관점 분석 결과 — SPEC §4-0 공통 필드
 
@@ -57,15 +62,16 @@ class PerspectiveResult:
     confidence: float
     reasoning: list[str]
     reason: str
-    action: dict
-    extra: dict = field(default_factory=dict)
+    action: dict[str, JsonValue]
+    extra: dict[str, JsonValue] = field(default_factory=dict)
 
-    def to_dict(self) -> dict:
-        base = {
+    def to_dict(self) -> dict[str, JsonValue]:
+        reasoning: list[JsonValue] = [item for item in self.reasoning]
+        base: dict[str, JsonValue] = {
             "perspective": self.perspective,
             "verdict": self.verdict,
             "confidence": self.confidence,
-            "reasoning": self.reasoning,
+            "reasoning": reasoning,
             "reason": self.reason,
             "action": self.action,
         }
@@ -75,7 +81,7 @@ class PerspectiveResult:
 
 class LlmProvenanceCollector:
     def __init__(self, config: Mapping[str, JsonValue]) -> None:
-        self._config = deepcopy(dict(config))
+        self._config: dict[str, JsonValue] = deepcopy(dict(config))
         v4_config = self._config.get("v4")
         if isinstance(v4_config, dict):
             capture_config = v4_config.get("native_capture")
@@ -86,7 +92,7 @@ class LlmProvenanceCollector:
                         "enabled": capture_config.get("enabled") is True
                     },
                 }
-        self._lock = Lock()
+        self._lock: Lock = Lock()
         self._prompts: list[JsonValue] = []
         self._raw_results: list[JsonValue] = []
         self._parsed_results: list[JsonValue] = []
@@ -204,30 +210,41 @@ def make_na_result(perspective: str, reason: str = "판정 불가") -> Perspecti
     )
 
 
-def extract_json(text: str) -> dict | None:
+_JSON_RECORD: Final = TypeAdapter(dict[str, JsonValue])
+
+
+def extract_json(text: str) -> dict[str, JsonValue] | None:
     """LLM 응답에서 JSON 추출. 코드블록 내부 또는 raw JSON 모두 처리."""
-    match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
-    if match:
+    code_block = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
+    candidates = [code_block.group(1).strip()] if code_block is not None else []
+    raw_object = re.search(r"\{.*\}", text, re.DOTALL)
+    if raw_object is not None:
+        candidates.append(raw_object.group(0))
+    for candidate in candidates:
         try:
-            return json.loads(match.group(1).strip())
-        except json.JSONDecodeError:
-            pass
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError:
-            pass
+            return _JSON_RECORD.validate_json(candidate)
+        except ValidationError:
+            continue
     return None
 
 
-def call_llm(system_prompt: str, user_prompt: str, config: dict, max_tokens: int = 2048) -> str:
+def call_llm(
+    system_prompt: str,
+    user_prompt: str,
+    config: dict[str, JsonValue],
+    max_tokens: int = 2048,
+) -> str:
     """LLM 호출 → 텍스트 반환. config.llm.provider에 따라 Anthropic/Codex 분기."""
-    llm_config = config.get("llm", {})
-    provider = llm_config.get("provider", "anthropic")
-    model = llm_config.get(
+    llm_value = config.get("llm")
+    llm_config = llm_value if isinstance(llm_value, dict) else {}
+    provider_value = llm_config.get("provider", "anthropic")
+    provider = provider_value if isinstance(provider_value, str) else "anthropic"
+    model_value = llm_config.get(
         "model",
         "gpt-5.1-codex" if provider == "codex" else "claude-sonnet-4-20250514",
+    )
+    model = model_value if isinstance(model_value, str) else (
+        "gpt-5.1-codex" if provider == "codex" else "claude-sonnet-4-20250514"
     )
     binding = _LLM_CAPTURE.get()
     attempt = (
@@ -242,39 +259,14 @@ def call_llm(system_prompt: str, user_prompt: str, config: dict, max_tokens: int
         else 0
     )
 
-    if provider == "codex":
-        from src.agent.codex import generate
-
-        text = generate(system_prompt, user_prompt, model=model)
-        if binding is not None:
-            binding[0].record_response(
-                binding[1], attempt, provider, model, text, None
-            )
-        return text
-
-    from src.agent.oracle import get_client, _parse_sse_response
-    client = get_client()
-
-    response = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
+    response = generate_provider_text(
+        ProviderRequest(provider, model, system_prompt, user_prompt, max_tokens)
     )
-
-    if isinstance(response, str):
-        text = _parse_sse_response(response)
-        provider_raw_text = response
-        request_id = None
-    else:
-        text = response.content[0].text
-        provider_raw_text = text
-        request_id = getattr(response, "id", None)
     if binding is not None:
         binding[0].record_response(
-            binding[1], attempt, provider, model, provider_raw_text, request_id
+            binding[1], attempt, provider, model, response.raw_text, response.request_id
         )
-    return text
+    return response.text
 
 
 class Perspective(ABC):
