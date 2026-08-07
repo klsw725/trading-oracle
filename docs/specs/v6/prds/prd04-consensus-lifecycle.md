@@ -1,10 +1,10 @@
 # PRD 04: Consensus Lifecycle
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > **SPEC 참조**: [v6 SPEC](../SPEC.md)
 
 ## 문서 범위
 
-이 문서는 PRD 03에서 `STOP_READY_FOR_LIFECYCLE_REVIEW`를 받은 새 투자 관점 후보가 제한된 생산 합의에 들어가고, 관찰되고, 되돌려지고, 은퇴되는 계약을 정의한다. 입력은 후보 제안서, 오프라인 평가 summary, paper cohort summary, 현재 생산 합의 설정, 운영 승인 기록이다. 출력은 특정 후보 version이 어떤 lifecycle state에 있고 어떤 weight와 deliberation 권한을 갖는지에 대한 감사 가능한 정책 artifact다.
+이 문서는 PRD 03에서 `STOP_READY_FOR_LIFECYCLE_REVIEW`를 받은 새 투자 관점 후보가 제한된 생산 합의 정책으로 컴파일되고, 관찰되고, 되돌려지고, 은퇴되는 계약을 정의한다. 입력은 전체 self-validating `PaperCohortArtifact`, hash-bound 현재 정책 snapshot, 운영 승인, hash-bound 오류·incident 증거다. 출력은 특정 후보 version이 어떤 lifecycle state에 있고 어떤 weight와 deliberation 권한을 갖는지에 대한 감사 가능한 정책 artifact다.
 
 이 문서는 v6 내부 PRD 04다. 후보가 좋은 paper 결과를 냈더라도 자동으로 영구 관점이 되지 않는다. 모든 생산 영향은 version, weight cap, 기간, rollback pointer, incident threshold, audit record를 가져야 한다.
 
@@ -180,6 +180,15 @@ Retired versions remain readable for replay and attribution. They cannot appear 
 
 Lifecycle records are append-only. Correction is a new event, not an edit.
 
+각 artifact는 operation-local event 조각이 아니라 `LifecycleHistory` 전체를 포함한다. History envelope는 genesis policy version/hash, candidate identity, 전체 prior events, 현재 lifecycle state, 현재 policy version/hash, head event hash, 다음 event index와 자체 hash를 가진다. 최초 promotion 또는 rejection만 genesis에서 시작할 수 있고, 이후 operation은 승인 또는 typed authorization이 가리키는 exact prior history hash를 검증한 뒤 그 head에서 append한다. 다른 branch의 history, stale head, index 0 재시작, 기존 operation id 또는 idempotency key 재사용은 모두 parser failure다.
+
+Canonical fixture는 다음 독립 branch를 완전한 history로 보존한다.
+
+1. `promotion_rejection`: genesis에서 rejection.
+2. `expiry_renewal`: promotion -> expiry/renewal review -> renewal.
+3. `rollback_reopen`: promotion -> incident -> rollback -> reopen.
+4. `retirement_after_two_rollbacks`: promotion -> incident -> rollback -> reopen -> promotion -> incident -> rollback -> retirement-required assessment -> retirement.
+
 | event_type | purpose |
 | --- | --- |
 | `lifecycle_created` | Creates version state from PRD 01, PRD 02, PRD 03 refs. |
@@ -195,7 +204,7 @@ Event fields:
 ```json
 {
   "event_id": "lifecycle_v6_0003",
-  "schema_version": "v6.consensus_lifecycle.event.1",
+  "schema_version": "v6.consensus_lifecycle.event.3",
   "candidate_id": "pcand_v6_working_capital_quality",
   "candidate_version": "working_capital_quality.0.1",
   "policy_version": "consensus_policy_v6_20260806_limited_1",
@@ -208,8 +217,8 @@ Event fields:
   "payload_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
   "event_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
   "payload": {
-    "initial_weight": "0.25",
-    "total_weight_share": "0.0476",
+    "initial_weight": "0.250000",
+    "total_weight_share": "0.047619",
     "approval_duration_market_sessions": 60,
     "candidate_reasoning_as_prompt_input": false,
     "rollback_policy_version": "consensus_policy_v6_20260806_previous"
@@ -217,7 +226,7 @@ Event fields:
 }
 ```
 
-`event_hash` is computed from canonical JSON over `schema_version`, `candidate_id`, `candidate_version`, `policy_version`, `event_index`, `event_type`, `lifecycle_state_before`, `lifecycle_state_after`, `prev_event_hash`, and `payload_hash`.
+`event_hash` is computed from canonical JSON over `schema_version`, `candidate_id`, `candidate_version`, `policy_version`, `event_index`, `event_type`, `lifecycle_state_before`, `lifecycle_state_after`, `occurred_at`, `prev_event_hash`, and `payload_hash`.
 
 ## Policy artifact
 
@@ -225,7 +234,7 @@ The emitted policy is separate from the lifecycle event.
 
 ```json
 {
-  "schema_version": "v6.consensus_policy.1",
+  "schema_version": "v6.consensus_policy.2",
   "policy_version": "consensus_policy_v6_20260806_limited_1",
   "scorer_version": "consensus-scorer-current",
   "deliberator_version": "deliberator-current",
@@ -235,8 +244,8 @@ The emitted policy is separate from the lifecycle event.
       "candidate_id": "pcand_v6_working_capital_quality",
       "candidate_version": "working_capital_quality.0.1",
       "lifecycle_state": "limited_production",
-      "initial_weight": "0.25",
-      "total_weight_share": "0.0476",
+      "initial_weight": "0.250000",
+      "total_weight_share": "0.047619",
       "approval_expires_after_market_sessions": 60,
       "deliberation": {
         "candidate_can_reconsider": true,
@@ -254,7 +263,7 @@ If `automatic_permanent_perspective` is absent or true, parser fails.
 
 ## Interruption and resume
 
-Promotion, rollback, and retirement writes can be interrupted. Resume is allowed only when the last persisted event hash and idempotency key match the pending operation.
+Promotion, rollback, and retirement writes can be interrupted. Resume is allowed only when the checkpoint's observed history hash, head event hash, next event index, and idempotency key match the supplied validated history and pending operation.
 
 Rules:
 
@@ -286,15 +295,15 @@ Rules:
   "approval": {
     "operator_approval_id": "approval_v6_limited_promotion_20260806",
     "approved_lifecycle_state": "limited_production",
-    "initial_weight": "0.25",
+    "initial_weight": "0.250000",
     "approval_duration_market_sessions": 60,
     "rollback_policy_version": "consensus_policy_v6_20260806_previous"
   },
   "policy": {
     "policy_version": "consensus_policy_v6_20260806_limited_1",
     "base_perspectives": ["kwangsoo", "ouroboros", "quant", "macro", "value"],
-    "candidate_weight": "0.25",
-    "total_weight_share": "0.0476",
+    "candidate_weight": "0.250000",
+    "total_weight_share": "0.047619",
     "candidate_reasoning_as_prompt_input": false,
     "automatic_permanent_perspective": false
   },
@@ -389,6 +398,10 @@ Rules:
 | `state_skip_paper_ready` | Move from `offline_passed` directly to `limited_production`. | parser failure. |
 | `threshold_error_spike_not_rolled_back` | Error delta above `0.08` but state remains `limited_production`. | parser failure. |
 | `threshold_insufficient_incident_sample` | Error delta above `0.08` with only 20 mature samples. | `renewal_review`, not rollback by error spike alone. |
+| `single_latency_failure` | One latency window exceeds the effective budget. | append `renewal_review_started` and emit a review policy. |
+| `completed_operation_replay` | Rehash and append an already committed promotion transition and policy event. | parser failure. |
+| `old_paper_reopen` | Reopen with the same READY paper artifact used by the rolled-back promotion. | parser failure. |
+| `rollback_delta_boundary` | Set two rollback ordinals to delta `0`, `120`, and `121`. | reject `0`/`121`, accept `120`. |
 | `deliberation_prompt_injection` | Candidate reasoning enters incumbent prompt while flag is false. | `rolled_back`. |
 | `version_double_active` | Two versions of same candidate affect one scorer decision. | parser failure. |
 | `interruption_hash_mismatch` | Resume with different policy payload hash. | resume rejected. |
@@ -409,3 +422,31 @@ PRD 04 parser는 다음을 확인해야 한다.
 8. Fixture D는 같은 hash와 idempotency key에서만 resume을 허용한다.
 9. Lifecycle states, promotion gate, initial weight cap, deliberation participation, rollback, retirement, version coexistence, incidents, audit trail이 모두 있다.
 10. Required probes는 JSON, state, threshold, deliberation, interruption, dirty policy mutation을 포함한다.
+
+## 구현 계약
+
+PRD 04 구현은 `src/v6/lifecycle_*.py`와 `scripts/run_consensus_lifecycle.py`로 한정된 offline policy compiler다. 생산 voter, scorer, deliberator, perspectives, performance, portfolio, `src/common.py`, `main.py`, `scripts/daily.py`를 import, 호출, 수정하지 않는다.
+
+1. `PaperCohortArtifact` 전체를 입력에 내장하고 nested candidate, offline, paper ledger와 모든 hash를 다시 검증한다.
+2. Current policy snapshot v2는 정확한 다섯 base perspective 순서, incumbent weight, 보존 가능한 전체 active candidate policy, production snapshot hash를 포함한다.
+3. Promotion error record는 5-session horizon의 모든 mature outcome과 순서·sample id·record hash가 정확히 일치해야 한다.
+4. Candidate share는 `w / (sum(five incumbent non-N/A weights) + w)`로 계산하고 raw 값으로 cap을 판정한 뒤 `ROUND_HALF_EVEN` 6자리로 직렬화한다. Canonical fixture는 `0.250000 / 5.250000 = 0.047619`다.
+5. Lifecycle event의 payload는 typed union이며 `payload_hash`는 canonical payload hash다. Event hash는 `occurred_at`, `event_id`, raw payload를 제외한 명시 필드로 계산한다.
+6. `promotion`, `expiry`, `incident`, `renewal`, `rollback`, `retirement_assessment`, `retirement`, `reopen` discriminated operation을 단일 compiler가 판정하고, operation별 exact typed event sequence와 payload cardinality를 재구성한다. Artifact의 ledger가 재구성 결과와 완전히 같지 않거나 완료된 operation/key가 다시 나타나면 모든 hash를 다시 만든 경우에도 거절한다.
+7. Incident threshold 발화는 `ROLLBACK_REQUIRED`, 두 번째 rollback ordinal delta가 `1..120`이면 rollback 완료 뒤 `RETIREMENT_REQUIRED`를 반환한다. 실제 rollback과 retirement는 각각 별도 명시 승인 없이는 commit하지 않는다.
+8. Renewal은 기존 weight와 rollback pointer를 유지하고 duration만 연장한다. 자동 clamp, 자동 renewal, 자동 permanent adoption은 없다.
+9. 모든 emitted policy는 `automatic_permanent_perspective=false`, `runtime_adoption="not_automatically_wired"`를 필수로 가진다.
+10. Canonical fixture와 adversarial acceptance corpus는 `uv run scripts/run_consensus_lifecycle.py verify-fixture`로 검증하며, `build`는 별도 immutable artifact만 쓴다.
+11. Promotion rollback pointer는 반드시 superseded current policy의 version/hash와 같고, rollback은 candidate에 저장된 pointer와 일치하는 full immutable snapshot만 복원한다.
+12. Promotion과 renewal은 unrelated active candidate policy를 그대로 보존한다. Retirement는 대상 version 하나만 제거한다.
+13. Monitoring evidence는 candidate/version/policy/market에 결속되고 window index와 previous hash가 연속이어야 하며, 모든 window에서 `attempt_id`와 `production_decision_id`가 전역 고유해야 한다.
+14. Deliberation contamination, observed cap breach, dirty same-version policy는 각각 typed manifest, typed observed policy evidence, 두 self-validating policy snapshot pair로만 제출할 수 있다.
+15. Rollback event는 대상 candidate의 `source_paper_artifact_hash`를 보존한다. Reopen은 이 hash와 다른 full READY paper artifact를 요구하며, 새 artifact의 `generated_at`은 latest rollback event보다 늦어야 한다.
+16. Lifecycle identity는 `candidate_id`, `candidate_version`, `hypothesis_id`로 결속하고 genesis/current policy projection과 timestamp를 compiler가 재도출한다. Emitted policy version 재사용은 금지한다.
+17. Partial persistence checkpoint는 operation type, prior head/index/history, transition/policy/commit/approval hash를 포함한다. Resume은 다섯 write/noop action을 가지며 mismatch는 `ROLLBACK_REQUIRED`, rollback intent가 promotion보다 우선한다.
+18. Retirement는 owner request, superseded version, source TTL unavailable, falsified hypothesis, retirement-required assessment의 hash-bound trigger union이며 active policy에서도 실행 가능하다.
+19. Error incident는 active source paper, market, PRD01 latency budget에 결속하고 empty window를 거부하며 raw Decimal threshold를 직렬화 전에 비교한다.
+20. 만료된 `renewal_review` old version 하나는 newer approved version으로 atomic replacement할 수 있다.
+21. 모든 operation은 untrusted `PolicyVersionRegistry` snapshot을 포함하지만 compiler/build API는 별도의 trusted `CompilerContext`를 필수로 받는다. Request registry hash가 trusted persistence head와 다르면 prior history 유무와 무관하게 거절한다. Policy emission은 `revision=current+1`, `previous_registry_hash=current.registry_hash`인 CAS chain head를 반환하고, non-emission은 trusted head를 그대로 보존한다. 이미 등록된 version은 같은 hash와 다른 hash 모두 재사용할 수 없다.
+22. Genesis interruption checkpoint는 zero history/head/index와 명시적 `head_state="genesis"`를 사용한다. Initial promotion의 resume transition은 `lifecycle_created`가 아니라 그 다음 실제 promotion transition에 결합한다.
+23. Superseded retirement는 숫자 major/minor 순서, 동일 candidate id, promotion approval, newer policy version, active candidate approval hash를 모두 교차 검증한다. Promotion policy는 candidate contract의 source declaration마다 compiler-fixed 20 market-session TTL을 보존한다. Source retirement는 trusted context에 등록된 full self-hashed availability artifact, exact candidate/version/hypothesis/source contract, persisted TTL에서 계산한 expiry를 요구한다. Falsification은 bare hash/detail을 금지하고 trusted context에 등록된 full self-validating artifact의 embedded negative observations, exact source paper, candidate lineage에서 `falsified`를 결정한다.
