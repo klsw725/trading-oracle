@@ -1,0 +1,109 @@
+{
+  "schema_version": "v8.operator_approval_dry_run.prd02.fixture.1",
+  "fixture_name": "happy_operator_approval_dry_run",
+  "strict_no_real_order": true,
+  "forbidden_fields": [
+    "access_token",
+    "account_number",
+    "broker_order_id",
+    "client_secret",
+    "live_order_id"
+  ],
+  "proposed_order": {
+    "schema_version": "v8.operator_approval_dry_run.proposed_order.1",
+    "proposed_order_id": "aprop_v8_f5e78bd2e22f115b7e08",
+    "paper_order_id": "pord_v8_401fb2527af3008c3980",
+    "paper_recommendation_id": "prec_v8_1df70a8e23b72f301477",
+    "ticker": "005930",
+    "side": "BUY",
+    "order_type": "limit",
+    "quantity": "10",
+    "limit_price": "10000.00",
+    "currency": "KRW",
+    "estimated_notional": "100000.00",
+    "destination": "broker_dry_run",
+    "quote_ref": {
+      "quote_id": "quote_v8_fixture_005930_20260806_090700",
+      "quote_as_of": "2026-08-06T09:07:00+09:00",
+      "quote_expires_at": "2026-08-06T09:07:30+09:00",
+      "max_quote_age_seconds": 30,
+      "source_hash": "sha256:2f0bf376dcfd0e69f391a01cbbe6a9f4d393c96a58e626e1f29de6290904588b"
+    },
+    "checklist_id": "achk_v8_8baf645186b964804411",
+    "idempotency_key": "idem_approval_v8_fixture_1",
+    "approval_expires_at": "2026-08-06T09:12:00+09:00",
+    "permission_context": {
+      "proposed_by": "operator_recommender",
+      "eligible_approver_role": "execution_reviewer",
+      "max_notional": "500000.00"
+    },
+    "forbidden_fields_absent": true
+  },
+  "checklist": {
+    "checklist_id": "achk_v8_8baf645186b964804411",
+    "checked_at": "2026-08-06T09:07:10+09:00",
+    "items": [
+      {
+        "item": "intent_matches_recommendation",
+        "result": "checked"
+      },
+      {
+        "item": "quote_is_fresh",
+        "result": "checked"
+      },
+      {
+        "item": "notional_under_operator_limit",
+        "result": "checked"
+      },
+      {
+        "item": "no_live_destination_visible",
+        "result": "checked"
+      }
+    ]
+  },
+  "approval_decision": {
+    "approval_decision_id": "adec_v8_d71af0d8867d3f86aa2e",
+    "approval_status": "approved",
+    "approved_by": "operator_approver_01",
+    "approved_role": "execution_reviewer",
+    "approved_at": "2026-08-06T09:07:15+09:00",
+    "approver_is_proposer": false,
+    "idempotency_key": "idem_approval_v8_fixture_1"
+  },
+  "dry_run_request": {
+    "dry_run_request_id": "adreq_v8_ba523e62b7dfcc309c8b",
+    "requested_at": "2026-08-06T09:07:20+09:00",
+    "destination": "broker_dry_run",
+    "live_submission": false,
+    "idempotency_key": "idem_approval_v8_fixture_1"
+  },
+  "broker_dry_run_response": {
+    "schema_version": "v8.operator_approval_dry_run.broker_response.1",
+    "dry_run_response_id": "adry_v8_7e7c2b4d21c7a6e5e38f",
+    "dry_run_request_id": "adreq_v8_ba523e62b7dfcc309c8b",
+    "broker_adapter": {
+      "name": "fixture_broker",
+      "version": "dry_run_only_1",
+      "validation_mode": "dry_run"
+    },
+    "live_submission": false,
+    "would_accept": true,
+    "estimated_fee": "100.00",
+    "estimated_tax": "0.00",
+    "estimated_cash_effect": "-100100.00",
+    "forbidden_fields_absent": true
+  },
+  "expected_after_replay": {
+    "approval_status": "dry_run_passed",
+    "real_order_created": false,
+    "portfolio_mutated": false,
+    "idempotency_index_entry": {
+      "idempotency_key": "idem_approval_v8_fixture_1",
+      "proposed_order_id": "aprop_v8_f5e78bd2e22f115b7e08",
+      "approval_decision_id": "adec_v8_d71af0d8867d3f86aa2e",
+      "dry_run_request_id": "adreq_v8_ba523e62b7dfcc309c8b",
+      "dry_run_response_id": "adry_v8_7e7c2b4d21c7a6e5e38f",
+      "approval_status": "dry_run_passed"
+    }
+  }
+}
