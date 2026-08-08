@@ -1,6 +1,19 @@
 # PRD: v8 PRD 04 risk controls kill switch
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v8 SPEC](../SPEC.md)
+
+## 사용법
+
+```bash
+uv run python -m src.v8.cli prd04-acceptance
+uv run python -m src.v8.cli prd04-build
+uv run python -m src.v8.cli prd04-build --input docs/specs/v8/fixtures/prd04-risk-controls-happy.json --output data/paper/v8/risk/prd04-artifact.json
+uv run python -m src.v8.cli prd04-verify
+uv run python -m src.v8.cli prd04-verify --fixture docs/specs/v8/fixtures/prd04-risk-controls-happy.json
+uv run python -m src.v8.cli prd04-verify --artifact data/paper/v8/risk/prd04-artifact.json
+```
+
+`prd04-build`는 `--output`이 없으면 canonical artifact를 stdout에만 출력한다. `--output`을 지정해도 `data/paper/v8/**` 아래의 immutable artifact만 생성하며, broker submit, live/data read, `data/portfolio.json` mutation은 수행하지 않는다. `prd04-acceptance`는 16개 acceptance와 12개 normative mutation probe를 실행한다.
 
 ## 문제
 
@@ -601,7 +614,7 @@ The fixture proves a safe BUY can pass the risk gate and proceed only to dry-run
 
 ## Acceptance criteria
 
-1. Line 1 title and line 2 draft marker are exact, and no green check marker exists.
+1. Line 1 title and line 2 implementation status marker are exact.
 2. Pre-trade cash, position, concentration, correlation, market-hours, stale quote, daily loss, risk acknowledgement, and kill switch contracts are present.
 3. Risk matrix names allow conditions, block codes, and whether acknowledgement can override each control.
 4. Kill switch authority, automatic activation, reset procedure, and fail-closed unreadable behavior are defined.

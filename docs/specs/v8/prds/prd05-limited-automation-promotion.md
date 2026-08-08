@@ -1,10 +1,23 @@
 # PRD: v8 PRD 05 limited automation promotion
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v8 SPEC](../SPEC.md)
 
 ## 문제
 
 v8 PRD 01은 paper ledger를 정의하고, PRD 02는 operator approval dry-run을 고정한다. PRD 03은 주문 관찰과 대사를 fail closed로 처리하고, PRD 04는 risk gate와 kill switch를 정의한다. 아직 없는 계약은 이 흐름을 어느 조건에서 제한 자동화로 승격하고, 사고가 나면 어느 속도로 되돌리는지다.
+
+## 사용법
+
+```bash
+uv run python -m src.v8.cli prd05-build
+uv run python -m src.v8.cli prd05-verify
+uv run python -m src.v8.cli prd05-verify --fixture docs/specs/v8/fixtures/prd05-limited-automation-promotion-incident.json
+uv run python -m src.v8.cli prd05-acceptance
+```
+
+Canonical fixture는 `docs/specs/v8/fixtures/prd05-limited-automation-promotion-happy.json`과 `docs/specs/v8/fixtures/prd05-limited-automation-promotion-incident.json`이다. Fixture의 결과는 `expected_result`를 읽지 않고 typed evidence에서 계산한다.
+
+Traffic sampling의 canonical seed는 `{"promotion_decision_id": string, "proposal_id": string, "trading_session": string}`이다. Canonical JSON SHA-256의 첫 8 hex를 unsigned integer로 읽어 `mod 10000` bucket을 만들고, `5.00%`는 bucket `< 500`만 선택한다. 동일 proposal replay는 항상 같은 결과를 내며 artifact에 없는 proposal은 먼저 deny-by-default scope gate에서 차단한다.
 
 이 PRD의 limited automation은 실제 주문 자동화가 아니다. 시스템이 할 수 있는 일은 적격한 paper order를 자동으로 risk gate와 dry-run 후보로 올리고, 승인 필요 구간을 줄이며, 제한된 dry-run 요청을 자동으로 실행하는 것뿐이다. Live broker submit, live order 생성, live portfolio mutation, unlimited automation은 언제나 금지된다.
 
@@ -317,7 +330,7 @@ This fixture proves a stale quote false allow incident rolls back limited automa
 
 ## Acceptance criteria
 
-1. Line 1 title and line 2 draft marker are exact, and no completion marker exists.
+1. Line 1 title, line 2 `✅ 구현 완료` marker, and the parent SPEC `✅ 구현 완료` marker are exact.
 2. The promotion ladder defines `paper`, `dry_run`, `approval_required`, `limited_automation`, and rollback behavior without an unlimited status.
 3. Eligible symbols, order types, markets, sides, notional, traffic share, concurrent requests, duration, and symbol caps are defined.
 4. Observation windows and thresholds cover paper, dry-run, approval_required, and limited automation renewal.

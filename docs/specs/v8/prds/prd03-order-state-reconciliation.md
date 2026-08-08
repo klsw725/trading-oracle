@@ -1,6 +1,19 @@
 # PRD: v8 PRD 03 order state reconciliation
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v8 SPEC](../SPEC.md)
+
+## 사용법
+
+```bash
+uv run python -m src.v8.cli prd03-acceptance
+uv run python -m src.v8.cli prd03-build
+uv run python -m src.v8.cli prd03-build --input docs/specs/v8/fixtures/prd03-order-state-reconciliation-happy.json --output data/paper/v8/reconciliation/prd03-artifact.json
+uv run python -m src.v8.cli prd03-verify
+uv run python -m src.v8.cli prd03-verify --fixture docs/specs/v8/fixtures/prd03-order-state-reconciliation-unknown.json
+uv run python -m src.v8.cli prd03-verify --artifact data/paper/v8/reconciliation/prd03-artifact.json
+```
+
+`prd03-build`는 `--output`이 없으면 canonical artifact를 stdout에만 출력한다. `--output`을 지정한 경우에도 `data/paper/v8/**` 아래의 immutable artifact만 생성하며, broker submit API와 `data/portfolio.json`은 읽거나 쓰지 않는다.
 
 ## 문제
 
@@ -378,7 +391,7 @@ This fixture proves fail closed behavior after broker truth cannot be trusted. I
 
 ## Acceptance criteria
 
-1. Line 1 title and line 2 draft marker are exact, and no done marker exists.
+1. Line 1 title and line 2 implementation status marker are exact.
 2. The document defines `submitted`, `accepted`, `partial`, `filled`, `cancelled`, `rejected`, and `unknown` with broker truth requirements.
 3. Retry semantics and idempotent recovery block duplicate orders and duplicate fill fragments.
 4. Partial fill accounting defines decimal arithmetic for fill, fee, tax, cash delta, remaining quantity, and position delta.
