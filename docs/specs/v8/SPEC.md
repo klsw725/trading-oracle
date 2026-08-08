@@ -1,5 +1,5 @@
 # Trading Oracle v8: Paper To Limited Automation Safety
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 
 v8은 추천이 실제 주문으로 흐르지 않도록 paper ledger, operator approval dry-run, order reconciliation, risk controls, limited automation promotion을 하나의 안전 계약으로 묶는다. 이 SPEC은 v8 로컬 PRD 01부터 PRD 05까지만 종합한다. 다른 SPEC의 작성 상태, gate 결과, 구현 여부는 v8 판단 입력이 아니다.
 
@@ -7,11 +7,11 @@ v8은 추천이 실제 주문으로 흐르지 않도록 paper ledger, operator a
 
 | PRD | PRD 문서 | 상태 | 계약 |
 | --- | --- | --- | --- |
-| PRD 01 | [Paper Portfolio Ledger](prds/prd01-paper-portfolio-ledger.md) | 📝 초안 | Paper 전용 recommendation, order, fill, cash, position, fee, corporate action, reconciliation을 append-only hash chain으로 남기고 live boundary를 차단한다. |
-| PRD 02 | [Operator Approval Dry-run](prds/prd02-operator-approval-dry-run.md) | 📝 초안 | Proposed order, operator checklist, approval lifecycle, idempotency, quote freshness, broker dry-run response, permission을 정의하고 live submit을 금지한다. |
-| PRD 03 | [Order State Reconciliation](prds/prd03-order-state-reconciliation.md) | 📝 초안 | Redacted broker truth와 내부 artifact를 비교해 order_status, partial fill, cash delta, position delta, retry recovery를 fail closed로 대사한다. |
-| PRD 04 | [Risk Controls Kill Switch](prds/prd04-risk-controls-kill-switch.md) | 📝 초안 | Cash, position, concentration, correlation, market hours, stale quote, daily loss, acknowledgement, kill switch를 dry-run 전 안전 gate로 고정한다. |
-| PRD 05 | [Limited Automation Promotion](prds/prd05-limited-automation-promotion.md) | 📝 초안 | Paper, dry-run, approval_required, limited_automation 승격과 cap, observation window, incident rollback, re-promotion 조건을 제한 자동화 계약으로 묶는다. |
+| PRD 01 | [Paper Portfolio Ledger](prds/prd01-paper-portfolio-ledger.md) | ✅ 구현 완료 | Paper 전용 recommendation, order, fill, cash, position, fee, corporate action, reconciliation을 append-only hash chain으로 남기고 live boundary를 차단한다. |
+| PRD 02 | [Operator Approval Dry-run](prds/prd02-operator-approval-dry-run.md) | ✅ 구현 완료 | Proposed order, operator checklist, approval lifecycle, idempotency, quote freshness, broker dry-run response, permission을 정의하고 live submit을 금지한다. |
+| PRD 03 | [Order State Reconciliation](prds/prd03-order-state-reconciliation.md) | ✅ 구현 완료 | Redacted broker truth와 내부 artifact를 비교해 order_status, partial fill, cash delta, position delta, retry recovery를 fail closed로 대사한다. |
+| PRD 04 | [Risk Controls Kill Switch](prds/prd04-risk-controls-kill-switch.md) | ✅ 구현 완료 | Cash, position, concentration, correlation, market hours, stale quote, daily loss, acknowledgement, kill switch를 dry-run 전 안전 gate로 고정한다. |
+| PRD 05 | [Limited Automation Promotion](prds/prd05-limited-automation-promotion.md) | ✅ 구현 완료 | Paper, dry-run, approval_required, limited_automation 승격과 cap, observation window, incident rollback, re-promotion 조건을 제한 자동화 계약으로 묶는다. |
 
 The first cells of this table are exactly `PRD 01`, `PRD 02`, `PRD 03`, `PRD 04`, and `PRD 05`. Each local PRD file is linked exactly once in this SPEC.
 
@@ -72,6 +72,14 @@ Kill switch termination means terminating unsafe automation flow, not deleting h
 
 Reset appends reset request, review, and inactive records. It requires root cause, fresh quote evidence, market calendar evidence, daily loss evidence when applicable, recomputed hash chain, forbidden field absence, cooldown, and independent reviewers. Missing, stale, self-approved, or hash-mismatched reset input keeps the prior active switch in force.
 
+## Executable Acceptance
+
+```bash
+uv run python -m src.v8.cli spec-acceptance
+```
+
+이 명령은 SPEC과 로컬 PRD 5개만 읽어 canonical JSON 보고서를 출력한다. 문서 변이는 메모리에서만 수행하며 broker, credential, live portfolio, paper artifact를 읽거나 쓰지 않는다.
+
 ## Link, JSON, And Mutation QA
 
 Authoring QA for this SPEC must include these checks.
@@ -81,7 +89,7 @@ Authoring QA for this SPEC must include these checks.
 | PRD table sequence | First cells are exactly `PRD 01`, `PRD 02`, `PRD 03`, `PRD 04`, and `PRD 05` in order. |
 | Forward link count | Each relative v8 PRD link appears exactly once in this SPEC. |
 | Backlink count | Each v8 PRD contains exactly one Markdown link target `../SPEC.md`. |
-| Draft marker | This SPEC and PRD 01 to PRD 05 are draft documents and contain no final-status marker. |
+| Implementation marker | This SPEC and PRD 01 to PRD 05 use the exact `✅ 구현 완료` status marker, and every Local PRD row has the same status. |
 | JSON parse | Every fenced `json` block in this SPEC and PRD 01 to PRD 05 parses as JSON. |
 | Lifecycle field names | PRD 02 to PRD 05 use their explicit lifecycle fields and reject forbidden generic lifecycle field names in artifacts. |
 | Mutation coverage | PRD 01 to PRD 05 cover malformed JSON, stale or dirty input, misleading success, forbidden credential or live ID fields, duplicate or conflicting idempotency, hash mismatch, interruption replay, and live order mutation attempts. |
@@ -89,7 +97,7 @@ Authoring QA for this SPEC must include these checks.
 
 ## Acceptance Criteria
 
-- The document is marked draft near the title and has no final-status marker.
+- The SPEC and PRD 01 to PRD 05 use the exact `✅ 구현 완료` status marker, and the local PRD table status column matches it.
 - The local PRD table has rows whose first cells are exactly `PRD 01`, `PRD 02`, `PRD 03`, `PRD 04`, and `PRD 05`.
 - Each local PRD file is linked exactly once with the `prds/<filename>` form.
 - The paper -> approval -> order -> risk -> promotion synthesis is independent from other SPEC status or gate results.
