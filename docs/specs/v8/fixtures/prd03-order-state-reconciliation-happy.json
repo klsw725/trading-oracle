@@ -1,0 +1,73 @@
+{
+  "schema_version": "v8.order_reconciliation.prd03.fixture.1",
+  "fixture_name": "happy_partial_fill_reconciliation",
+  "strict_no_real_order": true,
+  "forbidden_fields": ["access_token", "account_number", "broker_order_id", "client_secret", "live_order_id"],
+  "execution_order": {
+    "schema_version": "v8.order_reconciliation.execution_order.1",
+    "execution_order_id": "eord_v8_6e48b5a50d7fc2ed4b1c",
+    "proposed_order_id": "aprop_v8_f5e78bd2e22f115b7e08",
+    "dry_run_response_id": "adry_v8_7e7c2b4d21c7a6e5e38f",
+    "ticker": "005930",
+    "side": "BUY",
+    "order_type": "limit",
+    "quantity": "10",
+    "limit_price": "10000.00",
+    "currency": "KRW",
+    "idempotency_key": "idem_order_recon_v8_fixture_1",
+    "order_status": "submitted",
+    "broker_order_ref_hash": "sha256:8e5c7d81227df03b1fe21bb604a8b64c24d9f0ab1f428809218cc09388ce9f11",
+    "record_hash": "sha256:2c1ebc1a7e7a5c7f1690a761b7f0c143e845785c3c25f1d34f7a76c7bd7c2a10"
+  },
+  "broker_truth": {
+    "schema_version": "v8.order_reconciliation.broker_truth.1",
+    "broker_truth_id": "btru_v8_99a715ce8a1d998f22de",
+    "broker_adapter": {"name": "fixture_broker_reader", "version": "read_only_1", "mode": "redacted_truth_snapshot"},
+    "observed_at": "2026-08-06T09:08:10+09:00",
+    "truth_fresh_until": "2026-08-06T09:08:40+09:00",
+    "broker_order_ref_hash": "sha256:8e5c7d81227df03b1fe21bb604a8b64c24d9f0ab1f428809218cc09388ce9f11",
+    "order_status": "partial",
+    "ticker": "005930",
+    "side": "BUY",
+    "currency": "KRW",
+    "original_quantity": "10",
+    "cumulative_filled_quantity": "4",
+    "remaining_quantity": "6",
+    "fill_fragments": [{
+      "fill_fragment_id": "ffill_v8_9c55b18a93af0cba542e",
+      "sequence": 1,
+      "filled_at": "2026-08-06T09:08:05+09:00",
+      "quantity": "4",
+      "price": "10000.00",
+      "gross_notional": "40000.00",
+      "fee": "40.00",
+      "tax": "0.00"
+    }],
+    "fee_total": "40.00",
+    "tax_total": "0.00",
+    "forbidden_fields_absent": true,
+    "record_hash": "sha256:5f6c71f8298a9b584f81e3c90d52266a00d63ef18c3c8fb9e2c0ac31c59cf582"
+  },
+  "portfolio_delta": {
+    "portfolio_delta_id": "pdelta_v8_89e813b7e25bde95582c",
+    "order_status": "partial",
+    "cash_before": {"KRW": "1000000.00"},
+    "cash_delta": {"KRW": "-40040.00"},
+    "cash_after": {"KRW": "959960.00"},
+    "position_delta": {"ticker": "005930", "quantity_delta": "4", "cost_basis_delta": "40000.00", "avg_price_after": "10000.00"},
+    "portfolio_state_before_hash": "sha256:39765e5de752d6c15f6e7928500f268c958ec52a385305bac559e15e4126d905",
+    "portfolio_state_after_hash": "sha256:ac898d028799010be491145ff428b7c90315226584550ecce5b42f4e6af02f88",
+    "record_hash": "sha256:66cfd83ed3e1c7d5835cf6b82d776419dd1827c2296b5dd2e0dff276db9fa38d"
+  },
+  "reconciliation": {
+    "order_reconciliation_id": "orecon_v8_1a010db279330d8f9682",
+    "as_of": "2026-08-06T09:08:12+09:00",
+    "order_status": "partial",
+    "matched_checks": ["broker_truth_fresh", "fill_cumulative", "cash_delta", "position_delta", "forbidden_fields_absent"],
+    "mismatch_count": 0,
+    "reorder_allowed": false,
+    "expected_arithmetic": {"gross_notional": "40000.00", "fee": "40.00", "tax": "0.00", "cash_delta": "-40040.00", "cash_after": "959960.00", "remaining_quantity": "6"},
+    "prev_record_hash": "sha256:66cfd83ed3e1c7d5835cf6b82d776419dd1827c2296b5dd2e0dff276db9fa38d",
+    "record_hash": "sha256:b14961ddcc2f7a54e13c34f32e9a35bd8ac3c258a908030a61a570d22b77c0af"
+  }
+}

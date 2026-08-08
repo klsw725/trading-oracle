@@ -1,0 +1,42 @@
+{
+  "schema_version": "v8.order_reconciliation.prd03.failure_fixture.1",
+  "fixture_name": "unknown_broker_truth_blocks_reorder",
+  "strict_no_real_order": true,
+  "forbidden_fields": ["access_token", "account_number", "broker_order_id", "client_secret", "live_order_id"],
+  "execution_order": {
+    "schema_version": "v8.order_reconciliation.execution_order.1",
+    "execution_order_id": "eord_v8_6e48b5a50d7fc2ed4b1c",
+    "proposed_order_id": "aprop_v8_f5e78bd2e22f115b7e08",
+    "dry_run_response_id": "adry_v8_7e7c2b4d21c7a6e5e38f",
+    "ticker": "005930",
+    "side": "BUY",
+    "order_type": "limit",
+    "quantity": "10",
+    "limit_price": "10000.00",
+    "currency": "KRW",
+    "idempotency_key": "idem_order_recon_v8_fixture_1",
+    "order_status": "submitted",
+    "broker_order_ref_hash": "sha256:8e5c7d81227df03b1fe21bb604a8b64c24d9f0ab1f428809218cc09388ce9f11",
+    "record_hash": "sha256:2c1ebc1a7e7a5c7f1690a761b7f0c143e845785c3c25f1d34f7a76c7bd7c2a10"
+  },
+  "submitted_at": "2026-08-06T09:08:00+09:00",
+  "truth_failure": {
+    "observed_at": "2026-08-06T09:10:20+09:00",
+    "truth_fresh_until": "2026-08-06T09:08:40+09:00",
+    "broker_order_ref_hash": "sha256:8e5c7d81227df03b1fe21bb604a8b64c24d9f0ab1f428809218cc09388ce9f11",
+    "order_status": "accepted",
+    "cumulative_filled_quantity": "4",
+    "remaining_quantity": "10",
+    "contradiction": "filled_plus_remaining_exceeds_original"
+  },
+  "expected_result": {
+    "order_status": "unknown",
+    "mismatch": "broker_truth_contradiction",
+    "cash_delta_appended": false,
+    "position_delta_appended": false,
+    "reorder_allowed": false,
+    "operator_review_required": true,
+    "allowed_next_action": "refresh_broker_truth_for_same_ref_hash"
+  },
+  "record_hash": "sha256:bd955057c91a1ff0c3d8ff38dca371b287e80a2bca9d7b17bb3e0b140668259d"
+}
