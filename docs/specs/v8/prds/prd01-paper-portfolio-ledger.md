@@ -1,5 +1,5 @@
 # PRD: v8 PRD 01 paper portfolio ledger
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v8 SPEC](../SPEC.md)
 
 ## 문제
@@ -359,9 +359,21 @@ The fixture below is a contract sample. It does not send an order. It models one
 }
 ```
 
+## 오프라인 사용법
+
+문서 상태는 상위 v8 계약과 동일하게 구현 완료다. 아래 명령은 broker, credential, `data/portfolio.json`을 읽거나 쓰지 않고 fixture를 메모리에서 컴파일하고 검증한다.
+
+```bash
+uv run python -m src.v8.cli verify
+uv run python -m src.v8.cli acceptance
+uv run python -m src.v8.cli compile --input docs/specs/v8/fixtures/prd01-paper-portfolio-ledger.json
+```
+
+`compile`은 기본적으로 canonical artifact를 표준 출력에만 기록한다. 선택 저장은 `--output data/paper/v8/<artifact>.json`처럼 paper 전용 경로에만 가능하며, 같은 canonical content의 재실행만 허용하는 immutable write다.
+
 ## Acceptance criteria
 
-1. The PRD line 1 title and line 2 draft marker are exact and no completion marker exists.
+1. The PRD line 1 title and line 2 `✅ 구현 완료` status marker are exact.
 2. The schema includes paper recommendation, virtual cash, virtual position, virtual fill, fee, corporate action, reconciliation, and hash-chain ledger contracts.
 3. The fixture validates happy paper fill arithmetic: `1000000.00 - 100000.00 - 100.00 = 899900.00`.
 4. The fixture validates hash chain recomputation and full `sha256:<64 hex>` event hashes.

@@ -1,6 +1,18 @@
 # PRD: v8 PRD 02 operator approval dry-run
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v8 SPEC](../SPEC.md)
+
+## 사용법
+
+```bash
+uv run python -m src.v8.cli prd02-acceptance
+uv run python -m src.v8.cli prd02-build
+uv run python -m src.v8.cli prd02-build --input docs/specs/v8/fixtures/prd02-operator-approval-dry-run.json --output data/paper/v8/approvals/prd02-artifact.json
+uv run python -m src.v8.cli prd02-verify
+uv run python -m src.v8.cli prd02-verify --artifact data/paper/v8/approvals/prd02-artifact.json
+```
+
+`prd02-build`는 `--output`이 없으면 stdout에만 canonical artifact를 출력한다. `--output`을 지정한 경우에만 `data/paper/v8/**` 아래에 immutable artifact를 생성하며, live 주문 API와 `data/portfolio.json`은 읽거나 쓰지 않는다.
 
 ## 문제
 
@@ -324,7 +336,7 @@ The fixture is a contract sample. It validates one operator approved dry-run. It
 
 ## Acceptance criteria
 
-1. Line 1 title and line 2 draft marker are exact, and no green check marker exists.
+1. Line 1 title and line 2 implementation status marker are exact.
 2. Proposed order, checklist, approve, reject, expire, idempotency, quote freshness, broker dry-run response, and permission contracts are all present.
 3. The document states strict no real order and forbids live broker submission, live order IDs, credentials, live account fields, and `data/portfolio.json` mutation.
 4. The approval state machine uses `approval_status` and explicitly forbids `state` and `stage` field names.
