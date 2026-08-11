@@ -61,12 +61,39 @@ uv run scripts/backtest.py --period 6m --optimize
 uv run scripts/daily.py -t AAPL MSFT --json
 ```
 
+## Toss Open API 설정
+
+프로젝트 루트의 `config.yaml`에 WTS에서 발급한 값을 입력합니다. 이 파일은 `.gitignore`에 포함되어 Git으로 추적되지 않습니다.
+
+```yaml
+toss:
+  client_id: "..."
+  client_secret: "..."
+```
+
+Toss Open API 호출 IP는 토스증권 WTS의 `설정 > Open API > 허용 IP 관리`에 먼저 등록해야 합니다. 인증정보가 없거나 Toss 호출이 실패하면 아래 표의 기존 보조 소스로 자동 전환됩니다.
+
+## 데이터 소스
+
+| 데이터 | 우선 소스 | 보조 소스 |
+|--------|-----------|-----------|
+| 국내·미국 종목 OHLCV/현재가 | Toss Open API | pykrx / FinanceDataReader |
+| 국내 지수 OHLCV | Toss Open API | FinanceDataReader |
+| 종목명·발행주식수·시가총액 계산 | Toss Open API | FinanceDataReader / yfinance |
+| 추천 후보 | Toss 시장 거래대금 랭킹 | FinanceDataReader 전체 종목목록 |
+| USD/KRW 최신 기준율 | Toss Open API | FinanceDataReader 과거 시계열 |
+| PER/PBR/배당 | 네이버 금융 / yfinance | 로컬 TTL 캐시 |
+| 미국 지수·기타 환율·금리·원자재 | FinanceDataReader | - |
+| 뉴스·웹 컨텍스트 | DuckDuckGo | 로컬 TTL 캐시 |
+
+Toss Open API가 제공하지 않는 전체 종목목록, 펀더멘털, 미국 지수, 다통화·원자재 과거 시계열, 뉴스는 기능 보존을 위해 기존 소스를 유지합니다.
+
 ## 프로젝트 구조
 
 ```
 trading-oracle/
 ├── main.py                          # CLI (다관점 분석, 포트폴리오, 초기화)
-├── config.yaml                      # 설정 (LLM provider, 시그널 파라미터)
+├── config.yaml                      # 로컬 설정 (Toss 인증, LLM, 시그널)
 ├── SKILL.md                         # shacs-bot 스킬 정의
 │
 ├── scripts/                         # 기능별 진입점
@@ -83,7 +110,8 @@ trading-oracle/
 ├── src/
 │   ├── common.py                    # 공유 유틸리티
 │   ├── data/
-│   │   ├── market.py                # OHLCV, 지수, 시총 (pykrx + FDR)
+│   │   ├── toss.py                  # Toss OAuth + 읽기 전용 시장 데이터
+│   │   ├── market.py                # OHLCV, 지수, 시총 (Toss 우선)
 │   │   ├── fundamentals.py          # PER/PBR (네이버 + yfinance)
 │   │   ├── web_search.py            # DuckDuckGo 웹 검색 + OUROBOROS 검증
 │   │   └── macro.py                 # 매크로 시계열 (금리, 환율, 원자재)
@@ -221,7 +249,7 @@ uv run scripts/verify_causal.py --detail
 uv run scripts/verify_causal.py --info
 ```
 
-검증 통과 트리플은 매크로 관점 프롬프트에 `lag`와 `p-value`와 함께 "데이터 검증됨" 라벨로 우선 주입됩니다.
+검증 통과 트리플은 `causal-prompt-injection.1` 패키지의 freshness, confidence, provenance, token budget gate를 통과한 `verified_prompt_records`만 매크로 관점의 별도 검증 섹션에 주입됩니다. 패키지가 없거나 유효하지 않으면 레거시 `verified_triples`로 대체하지 않습니다.
 
 ## 웹 검색
 
