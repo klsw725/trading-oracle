@@ -173,3 +173,18 @@ Required mutations:
 | Independence | The flow is input, replay IA, risk surfaces, accessibility and recovery, rollout observation, with other SPEC payloads as adapter examples only. |
 | Coverage | Roles, screens, states, SLOs, usage success, happy replay, missing outcome, happy risk, stale false normal, degraded input, parser checks, and mutations are defined. |
 | Boundaries | No UI implementation, backend implementation, source refetch, broker call, portfolio mutation, calibration execution, or commit artifact is required. |
+
+## Successor Research Roadmap
+
+v9은 dashboard read contract로 독립 유지된다. 아래 문서는 v9의 구현 gate가 아니며, v9 이후 paper intraday research의 목표를 별도 계약으로 나눈 successor roadmap이다.
+
+| Version | Contract | Purpose |
+| --- | --- | --- |
+| v10 | [Intraday Data Foundation](../v10/SPEC.md) | KR·US 정규장 1분봉, 5분 집계, calendar, universe, provenance |
+| v11 | [Paper Execution And Ledger](../v11/SPEC.md) | Virtual account, sizing, fill, 비용, short, append-only ledger, replay |
+| v12 | [Intraday Strategy Cohort](../v12/SPEC.md) | 10 Long·5 Short deterministic 전략과 15분 ORB 기준선 |
+| v13 | [Deterministic And LLM Strategy Router](../v13/SPEC.md) | 종목별 80:20 router, Codex snapshot, fallback, replay |
+| v14 | [Research Validation And Statistical Gates](../v14/SPEC.md) | 12/6/6 split, walk-forward, 다중검정, holdout, manifest |
+| v15 | [Paper Operations, Promotion And Rollback](../v15/SPEC.md) | 승격, mirror 비교, kill switch, rollback, 운영 승인 |
+
+Successor 계약의 paper artifact를 dashboard에 표시하려면 이후 adapter PRD가 v9 typed envelope로 변환해야 한다. 이 표만으로 v9 adapter, 화면, API 또는 rollout 구현이 요구되지는 않는다.
