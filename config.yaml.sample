@@ -1,9 +1,15 @@
-# Trading Oracle 설정
-# ANTHROPIC_API_KEY는 환경변수로 설정하세요
+# Trading Oracle 설정 예시
+# cp config.yaml.sample config.yaml 후 로컬 값을 입력하세요.
+# ANTHROPIC_API_KEY는 환경변수로 설정하세요.
 
 # 관심 종목 (종목코드)
 # 비어있으면 자동으로 주도주 스크리닝
 watchlist: []
+
+# Toss Open API (WTS > 설정 > Open API에서 발급)
+toss:
+  client_id: "YOUR_TOSS_CLIENT_ID"
+  client_secret: "YOUR_TOSS_CLIENT_SECRET"
 
 # 투자 성향
 risk_tolerance: moderate  # conservative, moderate, aggressive
@@ -39,7 +45,7 @@ signals:
 # codex 사용 시: uv run main.py codex-login 으로 먼저 로그인
 llm:
   provider: codex
-  model: gpt-5.5
+  model: gpt-5.6-sol
   max_tokens: 8192
 
 # 포지션 사이징 설정
@@ -86,8 +92,8 @@ forex:
 
 # 상관 리스크 관리 (Phase 19)
 correlation:
-  max_pair_correlation: 0.7     # 이 이상이면 동시 보유 차단
-  window_days: 60               # 상관계수 롤링 윈도우 (거래일)
+  max_pair_correlation: 0.7       # 이 이상이면 동시 보유 차단
+  window_days: 60                 # 상관계수 롤링 윈도우 (거래일)
   sector_concentration_limit: 50  # 단일 섹터 최대 비중 %
 
 # 웹 검색 설정 (DuckDuckGo 기반, API 키 불필요)
