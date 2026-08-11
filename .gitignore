@@ -30,6 +30,7 @@ docs/*.md
 # Agent work dirs
 .sisyphus/
 .omc/
+.omo/
 data/macro_series.parquet
 data/causal_graph_verified.json
 data/node_series_map.json
