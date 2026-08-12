@@ -1,0 +1,28 @@
+{
+  "schema_version": "v11.prd01.fixture.2",
+  "daily_loss_inputs":{"observed_at":"2026-01-05T00:05:45Z","realized_pnl":"-1000000","unrealized_pnl":"-900000","commission":"30000","tax":"20000","spread":"20000","slippage":"20000","borrow":"10000"},
+  "v10_fixtures":["docs/specs/v10/fixtures/prd01-calendar-minute.json","docs/specs/v10/fixtures/prd02-aggregation-revision.json","docs/specs/v10/fixtures/prd03-universe-actions.json"],
+  "cases": [
+    {"decision":{"decision_id":"close-long","candidate_id":"us-c2","router_decision_id":"us-r2","strategy_id":"paper-alpha","strategy_version":"1","market":"US","symbol":"GOOG","sector":"communication","side":"long","action":"open","cutoff":"2026-01-05T14:35:00Z","watermark_at":"2026-01-05T14:35:10Z","decision_ready_at":"2026-01-05T14:35:20Z","deterministic_score":"9.5"},"reference_price":"25","historical_turnovers":["40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000"],"expected_cost":"3","gates":{"eligible":true,"session_open":true,"data_fresh":true,"borrow_allowed":true,"liquidity_allowed":true,"daily_loss_halted":false,"execution_halted":false}},
+    {
+      "decision": {"decision_id":"immediate-long","candidate_id":"us-c0","router_decision_id":"us-r0","strategy_id":"paper-alpha","strategy_version":"1","market":"US","symbol":"MSFT","sector":"technology","side":"long","action":"open","cutoff":"2026-01-05T14:35:00Z","watermark_at":"2026-01-05T14:35:10Z","decision_ready_at":"2026-01-05T14:35:12Z","deterministic_score":"10"},
+      "reference_price":"50","historical_turnovers":["40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000"],"expected_cost":"3",
+      "gates":{"eligible":true,"session_open":true,"data_fresh":true,"borrow_allowed":true,"liquidity_allowed":true,"daily_loss_halted":false,"execution_halted":false}
+    },
+    {
+      "decision": {"decision_id":"kr-long","candidate_id":"kr-c1","router_decision_id":"kr-r1","strategy_id":"paper-alpha","strategy_version":"1","market":"KR","symbol":"KR:000001","sector":"technology","side":"long","action":"open","cutoff":"2026-01-05T00:05:00Z","watermark_at":"2026-01-05T00:05:10Z","decision_ready_at":"2026-01-05T00:05:12Z","deterministic_score":"9"},
+      "reference_price":"102.00","historical_turnovers":["40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000"],"expected_cost":"2400",
+      "gates":{"eligible":true,"session_open":true,"data_fresh":true,"borrow_allowed":true,"liquidity_allowed":true,"daily_loss_halted":false,"execution_halted":false}
+    },
+    {
+      "decision": {"decision_id":"delayed-short","candidate_id":"us-c1","router_decision_id":"us-r1","strategy_id":"paper-beta","strategy_version":"1","market":"US","symbol":"AAPL","sector":"technology","side":"short","action":"open","cutoff":"2026-01-05T14:35:00Z","watermark_at":"2026-01-05T14:35:10Z","decision_ready_at":"2026-01-05T14:35:30Z","deterministic_score":"8"},
+      "reference_price":"100","historical_turnovers":["40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000","40000"],"expected_cost":"3",
+      "gates":{"eligible":true,"session_open":true,"data_fresh":true,"borrow_allowed":true,"liquidity_allowed":true,"daily_loss_halted":false,"execution_halted":false}
+    },
+    {
+      "decision": {"decision_id":"kr-blocked","candidate_id":"kr-c2","router_decision_id":"kr-r2","strategy_id":"paper-alpha","strategy_version":"1","market":"KR","symbol":"000660","sector":"technology","side":"long","action":"open","cutoff":"2026-01-05T00:05:00Z","watermark_at":"2026-01-05T00:05:10Z","decision_ready_at":"2026-01-05T00:05:15Z","deterministic_score":"7"},
+      "reference_price":"100000","historical_turnovers":["40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000","40000000"],"expected_cost":"2400",
+      "gates":{"eligible":false,"session_open":true,"data_fresh":true,"borrow_allowed":true,"liquidity_allowed":true,"daily_loss_halted":false,"execution_halted":false}
+    }
+  ]
+}
