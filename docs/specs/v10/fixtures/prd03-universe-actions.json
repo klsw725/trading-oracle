@@ -1,0 +1,8 @@
+{
+  "schema_version":"v10.prd03.fixture.1","market":"KR","secondary_market":"US","secondary_symbol_prefix":"US:","ranking_date":"2026-01-05","effective_date":"2026-01-06",
+  "candidate_seed":{"count":103,"symbol_prefix":"KR:","first_turnover":"1000.00","turnover_step":"1.00","sessions":20,
+    "overrides":[{"index":101,"instrument_type":"ETF"},{"index":102,"listed_sessions":19}]},
+  "eligibility":{"blocked_index":0,"effective_at":"2026-01-06T00:30:00+00:00","reason":"halted"},
+  "corporate_action":{"symbol":"KR:000001","action_type":"split","effective_at":"2026-01-05T00:00:00+00:00","observed_at":"2026-01-05T00:00:00+00:00","adjustment_factor":"0.50"},
+  "price":{"cutoff":"2026-01-06T00:00:00+00:00","raw_price":"100.00"}
+}
