@@ -179,3 +179,16 @@ Gross, net, sector, correlation, slot, cash, collateral 한도는 intent 예약 
 - 2% `daily_loss_halt`가 비용 포함 mark-to-market, 주문 취소, 다음 1분 전량청산, 다음 장 초기화를 수행한다.
 - 로컬 즉시·지연 `execution_decision` fixture만으로 후속 전략·router 없이 전체 실행 경로를 검증한다.
 - 실계좌 주문, credential, raw account ID, `data/portfolio.json` 변경은 발생하지 않는다.
+
+## 13. 구현 명령
+
+```bash
+uv run python -m src.v11.cli acceptance
+uv run python -m src.v11.cli prd01-build --input docs/specs/v11/fixtures/prd01.json
+uv run python -m src.v11.cli prd01-verify --artifact <artifact>
+uv run python -m src.v11.cli prd03-replay --artifact <artifact>
+```
+
+Build 출력은 source fixture, artifacts, probes, fixture hash와 bundle hash를 포함하는
+`v11.paper_execution.bundle.1` canonical JSON이다. Verify와 replay는 해당 bundle을
+다시 파싱하고 source fixture에서 재구축해 derived field와 hash를 검증한다.
