@@ -1,0 +1,12 @@
+{
+  "schema_version":"v10.prd02.fixture.1","market":"KR","symbol":"KR:000001","session_date":"2026-01-05",
+  "evaluated_at":"2026-01-05T00:05:10+00:00","max_observation_lag_seconds":10,
+  "minutes":[
+    {"start":"2026-01-05T00:00:00+00:00","open":"100.00","high":"102.00","low":"99.00","close":"101.00","volume":10,"observed_at":"2026-01-05T00:01:05+00:00"},
+    {"start":"2026-01-05T00:01:00+00:00","open":"101.00","high":"103.00","low":"100.00","close":"102.00","volume":11,"observed_at":"2026-01-05T00:02:05+00:00"},
+    {"start":"2026-01-05T00:02:00+00:00","open":"102.00","high":"104.00","low":"101.00","close":"103.00","volume":12,"observed_at":"2026-01-05T00:03:05+00:00"},
+    {"start":"2026-01-05T00:03:00+00:00","open":"103.00","high":"105.00","low":"102.00","close":"104.00","volume":13,"observed_at":"2026-01-05T00:04:05+00:00"},
+    {"start":"2026-01-05T00:04:00+00:00","open":"104.00","high":"106.00","low":"103.00","close":"105.00","volume":14,"observed_at":"2026-01-05T00:05:05+00:00"}
+  ],
+  "revision":{"minute_index":0,"revision":1,"close":"101.50","observed_at":"2026-01-05T00:05:20+00:00"}
+}
