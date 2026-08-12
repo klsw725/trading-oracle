@@ -1,0 +1,325 @@
+{
+  "schema_name": "v9.dashboard_read_contract.fixture",
+  "schema_version": "1.0.0",
+  "query_result": {
+    "schema_name": "dashboard.query_result",
+    "schema_version": "1.0.0",
+    "query_id": "qry_recommendation_happy_001",
+    "requested_payload_type": "recommendation.summary.v1",
+    "accepted_versions": ["1.0.0"],
+    "returned_version": "1.0.0",
+    "generated_at": "2026-08-06T09:10:12+09:00",
+    "pagination": {
+      "cursor": null,
+      "next_cursor": null,
+      "limit": 10,
+      "has_more": false,
+      "sort": [
+        {"field": "timestamps.data_cutoff_at", "direction": "desc"},
+        {"field": "identity.subject_id", "direction": "asc"}
+      ]
+    },
+    "items": [
+      {
+        "schema_name": "dashboard.event_envelope",
+        "schema_version": "1.0.0",
+        "min_reader_version": "1.0.0",
+        "event_id": "evt_recommend_20260806_005930_001",
+        "correlation_id": "corr_operator_dashboard_20260806_001",
+        "request_id": "req_recommend_kr_20260806_001",
+        "producer": {
+          "name": "recommendation_json_adapter",
+          "version": "1.0.0",
+          "source_command": "scripts/recommend.py --json"
+        },
+        "identity": {
+          "subject_type": "recommendation",
+          "subject_id": "rec_20260806_005930_buy",
+          "market": "KR",
+          "ticker": "005930",
+          "portfolio_scope": "default"
+        },
+        "timestamps": {
+          "produced_at": "2026-08-06T09:10:11+09:00",
+          "observed_at": "2026-08-06T09:10:10+09:00",
+          "data_cutoff_at": "2026-08-06T09:05:00+09:00",
+          "valid_after_at": "2026-08-06T09:10:11+09:00",
+          "expires_at": "2026-08-06T09:40:11+09:00"
+        },
+        "freshness": {
+          "status": "fresh",
+          "age_seconds": 311,
+          "max_age_seconds": 1800,
+          "stale_after_seconds": 1800,
+          "source_lag_seconds": 300
+        },
+        "quality": {
+          "status": "ok",
+          "score": 0.98,
+          "checks": [{"name": "schema", "status": "pass", "reason": null}]
+        },
+        "risk_state": {
+          "level": "watch",
+          "reasons": ["sector_concentration_near_limit"],
+          "blocking": false,
+          "risk_version": "risk-input-v1"
+        },
+        "payload_type": "recommendation.summary.v1",
+        "payload": {
+          "date": "2026-08-06",
+          "market": "KR",
+          "universe_size": 2741,
+          "portfolio_sizing": {
+            "cash": 5000000,
+            "cash_ratio": 20.0,
+            "cash_floor": 10,
+            "available_cash": 2500000,
+            "can_buy": true
+          },
+          "selection_constraints": {"sector_cap": 2, "relaxed": false},
+          "recommendations": [
+            {
+              "ticker": "005930",
+              "name": "삼성전자",
+              "market": "KR",
+              "sector": "반도체",
+              "price": 79000,
+              "selected_by": ["score", "diversification"],
+              "signals": {"verdict": "BULLISH", "bull_votes": 5, "bear_votes": 1},
+              "consensus": {
+                "consensus_verdict": "BUY",
+                "consensus_label": "강한 합의",
+                "confidence": "high"
+              },
+              "action_plan": {"type": "buy", "target_shares": 20}
+            }
+          ],
+          "no_recommendation_reason": null
+        },
+        "links": [
+          {
+            "rel": "source_evidence",
+            "target_id": "src_market_kr_005930_20260806",
+            "payload_type": "source.reference.v1",
+            "health": "ok",
+            "reason": null
+          },
+          {
+            "rel": "outcome_evidence",
+            "target_id": "outcome_20260806_005930_20",
+            "payload_type": "performance.detail.v1",
+            "health": "ok",
+            "reason": null
+          }
+        ],
+        "meta": {
+          "redaction": "none_required",
+          "raw_hash": "sha256:8a4c0e2d0b2df4b6f5a15c4f7b3a9f1d3b2c1a0e9f8d7c6b5a4e3d2c1b0a9988"
+        }
+      }
+    ],
+    "summary": {"returned_count": 1, "fresh_count": 1, "degraded_count": 0, "blocked_count": 0},
+    "warnings": []
+  },
+  "replay_view_model": {
+    "schema_name": "dashboard.replay_view_model",
+    "schema_version": "1.0.0",
+    "source_contract": "dashboard.query_result.1.0.0",
+    "view_id": "replay_recommendation_detail_005930_20260806",
+    "navigation": {
+      "current_node": "/dashboard/replay/recommendations/{subject_id}",
+      "return_context": {"query_id": "qry_recommendation_happy_001", "cursor": null, "filters": {"market": "KR"}}
+    },
+    "selected_recommendation": {
+      "subject_id": "rec_20260806_005930_buy",
+      "ticker": "005930",
+      "market": "KR",
+      "action": "BUY",
+      "consensus_label": "강한 합의",
+      "confidence": "high",
+      "freshness_status": "fresh",
+      "quality_status": "ok",
+      "risk_level": "watch"
+    },
+    "timeline": [
+      {"kind": "source_observed", "timestamp": "2026-08-06T09:05:00+09:00", "refs": ["src_market_kr_005930_20260806"]},
+      {"kind": "decision_input_cutoff", "timestamp": "2026-08-06T09:05:00+09:00", "refs": ["evt_recommend_20260806_005930_001"]},
+      {"kind": "decision_emitted", "timestamp": "2026-08-06T09:10:11+09:00", "refs": ["rec_20260806_005930_buy"]},
+      {"kind": "outcome_matured", "timestamp": "2026-09-03T15:30:00+09:00", "refs": ["outcome_20260806_005930_20"]}
+    ],
+    "known_reference_ids": [
+      "src_market_kr_005930_20260806",
+      "evt_recommend_20260806_005930_001",
+      "outcome_20260806_005930_20"
+    ],
+    "outcome_summary": {
+      "condition": "ready",
+      "metrics": {"horizon_sessions": 20, "gross_absolute_return_pct": "7.10"},
+      "missing_reason": null,
+      "counted_as_win": true,
+      "counted_as_loss": false
+    },
+    "drilldown_links": [
+      {"rel": "source_evidence", "target_node": "/dashboard/replay/sources", "target_id": "src_market_kr_005930_20260806", "health": "ok", "reason": null},
+      {"rel": "outcome_evidence", "target_node": "/dashboard/replay/outcomes", "target_id": "outcome_20260806_005930_20", "health": "ok", "reason": null}
+    ],
+    "conditions": {"loading": false, "empty": false, "partial": false, "error": false}
+  },
+  "risk_view_model": {
+    "schema_name": "dashboard.risk_health_view_model",
+    "schema_version": "1.0.0",
+    "source_contract": "dashboard.query_result.1.0.0",
+    "view_id": "risk_health_20260806_default",
+    "summary": {
+      "open_risk_count": 2,
+      "blocking_count": 2,
+      "critical_count": 0,
+      "stale_source_count": 1,
+      "healthy_source_count": 0,
+      "acknowledged_count": 0,
+      "paper_live_divergence_count": 1,
+      "confidence_watch_count": 1
+    },
+    "selected_risk_item_id": "risk_20260806_cash_floor_005930",
+    "selection_missing_reason": null,
+    "risk_inbox": [
+      {
+        "risk_item_id": "risk_20260806_cash_floor_005930",
+        "subject_id": "rec_20260806_005930_buy",
+        "category": "portfolio_constraint",
+        "severity": "blocking",
+        "status": "open",
+        "opened_at": "2026-08-06T09:10:12+09:00",
+        "updated_at": "2026-08-06T09:10:12+09:00",
+        "reason_codes": ["cash_floor_breach"],
+        "affected_fields": ["recommendation.actionability", "action_plan"],
+        "actionability": "blocks_current_use",
+        "available_actions": ["open_detail", "acknowledge", "open_replay"]
+      },
+      {
+        "risk_item_id": "risk_20260806_market_price_stale",
+        "subject_id": "src_market_kr_005930_20260806",
+        "category": "source_health",
+        "severity": "action_required",
+        "status": "stale",
+        "opened_at": "2026-08-06T09:45:12+09:00",
+        "updated_at": "2026-08-06T09:45:12+09:00",
+        "reason_codes": ["source_stale"],
+        "affected_fields": ["price", "actionability"],
+        "actionability": "blocks_current_use",
+        "available_actions": ["open_detail", "acknowledge", "open_source"]
+      }
+    ],
+    "source_health": [
+      {
+        "source_health_id": "srchealth_20260806_market_price",
+        "freshness_status": "stale",
+        "quality_status": "degraded",
+        "health_label": "stale",
+        "age_seconds": 4200,
+        "max_age_seconds": 1800,
+        "affected_fields": ["price", "actionability"],
+        "stale_action": "block_current_use"
+      }
+    ],
+    "confidence_condition": "partial",
+    "paper_live_divergence": [
+      {
+        "divergence_id": "div_20260806_paper_live_005930",
+        "subject_id": "rec_20260806_005930_buy",
+        "paper_namespace": "paper:v8:fixture",
+        "live_reference_status": "missing_live_reference",
+        "severity": "watch",
+        "open": true
+      }
+    ],
+    "conditions": {"loading": false, "empty": false, "partial": true, "error": false}
+  },
+  "accessibility_view_model": {
+    "schema_name": "dashboard.accessibility_responsive_view_model",
+    "schema_version": "1.0.0",
+    "source_contracts": [
+      "dashboard.query_result.1.0.0",
+      "dashboard.replay_view_model.1.0.0",
+      "dashboard.risk_health_view_model.1.0.0"
+    ],
+    "view_id": "accessibility_replay_risk_20260806",
+    "locale": "ko-KR",
+    "breakpoint": "compact",
+    "wcag_target": "WCAG_2_2_AA",
+    "information_priority": [
+      "blocking_error",
+      "selected_identity",
+      "freshness_quality_risk_caveat",
+      "decision_summary",
+      "source_outcome_recovery",
+      "secondary_metrics"
+    ],
+    "keyboard": {
+      "skip_links": ["skip_to_risk"],
+      "tab_order": ["skip_to_risk", "global_status", "risk_row", "recommendation_detail_heading", "return_to_list"],
+      "escape_returns_to": "risk_row"
+    },
+    "focus": {"current_focus_id": "risk_row", "visible_indicator_required": true, "opener_id": "risk_row"},
+    "semantics": {
+      "active_landmarks": ["banner", "navigation", "main"],
+      "live_region_politeness": ["polite", "assertive"],
+      "row_accessible_names": ["삼성전자 005930, BUY, risk blocked, fresh source, cash floor breach"],
+      "partial_caveat_announced": true
+    },
+    "responsive_visibility": {
+      "visible_priorities": [1, 2, 3],
+      "summarized_priorities": [4],
+      "collapsed_priorities": [5, 6],
+      "horizontal_scroll_allowed_for": ["secondary_metrics_table"]
+    },
+    "conditions": {"loading": false, "empty": false, "partial": true, "error": false, "reduced_motion": true},
+    "localization": {
+      "numbering_system": "latn",
+      "currency_displays": [
+        {"field": "price", "numeric_value": 79000, "currency": "KRW", "display": "79,000원", "approximate_krw": null, "exchange_rate": null},
+        {"field": "us_price", "numeric_value": 120.5, "currency": "USD", "display": "$120.50 (약 166,892원)", "approximate_krw": 166892, "exchange_rate": 1385.0}
+      ],
+      "missing_values": [
+        {"field": "outcome_metrics", "display": "자료 없음", "reason": "outcome_not_available", "must_not_display_as_zero": true}
+      ]
+    },
+    "recovery_actions": [
+      {"id": "open_risk_detail", "label": "현금 하한 위험 상세 열기", "safe_effect": "read_detail", "enabled": true},
+      {"id": "return_to_list", "label": "추천 목록으로 돌아가기", "safe_effect": "navigate_back", "enabled": true}
+    ],
+    "motion_required_for_meaning": false,
+    "color_only_states": []
+  },
+  "rollout_view_model": {
+    "schema_name": "dashboard.rollout_observability_view_model",
+    "schema_version": "1.0.0",
+    "view_id": "rollout_obs_canary_20260806",
+    "stage": "canary_5",
+    "source_contracts": [
+      "dashboard.query_result.1.0.0",
+      "dashboard.replay_view_model.1.0.0",
+      "dashboard.risk_health_view_model.1.0.0",
+      "dashboard.accessibility_responsive_view_model.1.0.0"
+    ],
+    "audience": {"eligible_sessions": 200, "exposed_sessions": 10, "exposure_percent": "5.00", "audience_rule": "eligible_operator_sessions_percent_5"},
+    "slo_summary": {
+      "query_latency_ms_p95": 1180,
+      "detail_latency_ms_p95": 1420,
+      "typed_error_rate": "0.20",
+      "malformed_event_rate": "0.00",
+      "stale_false_normal_count": 0,
+      "privacy_violation_count": 0,
+      "risk_detail_success_rate": "97.00",
+      "fallback_success_rate": null,
+      "telemetry_lag_seconds_p95": 31
+    },
+    "guardrails": {"status": "pass", "minimum_sample_count": 100, "observed_sample_count": 500, "blocking_reasons": [], "candidate_next_stage": "limited_25"},
+    "audit_access": {"surface_viewed_events": 120, "risk_detail_opened_events": 97, "missing_required_audit_events": 0},
+    "fallback": {"active": false, "policy": "rollback_to_internal_dogfood_on_guardrail_fail", "reason_code": null, "last_invoked_at": null, "audit_event_present": false},
+    "privacy": {"mode": "redacted", "forbidden_fields_present": false, "redaction_failures": 0},
+    "deprecation": {"old_reader_version": "0.9.0", "replacement_version": "1.0.0", "warning_active": true, "cutoff_active": false, "replacement_critical_incident": false},
+    "conditions": {"loading": false, "partial": false, "error": false, "guardrail_unknown": false},
+    "interrupted_journey_counted_success": false
+  }
+}
