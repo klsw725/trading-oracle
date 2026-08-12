@@ -1,0 +1,8 @@
+{
+  "schema_version":"v10.prd04.fixture.1","market":"US","cutoff":"2026-01-05T12:00:00+00:00","coverage":"healthy",
+  "contexts":[
+    {"context_type":"news","symbols":["US:AAPL"],"sectors":["technology"],"published_at":"2026-01-05T09:00:00+00:00","observed_at":"2026-01-05T10:00:00+00:00","ingested_at":"2026-01-05T10:01:00+00:00","text":"Apple filing archived","source_identity":"archive","archival_copy_verified":true,"revision":0},
+    {"context_type":"news","symbols":["US:AAPL"],"sectors":["technology"],"published_at":"2026-01-05T09:00:00+00:00","observed_at":"2026-01-05T11:00:00+00:00","ingested_at":"2026-01-05T11:01:00+00:00","text":"Apple filing corrected","source_identity":"archive","archival_copy_verified":true,"revision":1,"supersedes_index":0}
+  ],
+  "backfill_probe":{"context_index":1,"cutoff":"2026-01-05T10:30:00+00:00"}
+}
