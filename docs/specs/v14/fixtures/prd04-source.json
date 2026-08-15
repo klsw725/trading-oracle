@@ -1,0 +1,17 @@
+{
+  "schema_version": "v14.prd04.source.2",
+  "sources": {
+    "prd01_input": "docs/specs/v14/fixtures/prd01-input.json",
+    "prd02_input": "docs/specs/v14/fixtures/prd02-run-input.json",
+    "prd03_input": "docs/specs/v14/fixtures/prd03-verdict-scenarios.json",
+    "v13_source": "docs/specs/v13/fixtures/prd04-source.json"
+  },
+  "approval": {
+    "operator_id": "fixture-operator",
+    "approved_at": "2026-08-15T00:00:00Z",
+    "approval_reason": "offline synthetic acceptance"
+  },
+  "lease": {
+    "lease_id": "lease-v14-experiment-holdout-001"
+  }
+}
