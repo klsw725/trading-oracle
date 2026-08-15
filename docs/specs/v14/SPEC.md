@@ -1,5 +1,5 @@
 # Trading Oracle v14 SPEC: Research Validation And Statistical Gates
-> **상태**: 📝 초안
+> **상태**: ✅ 완료
 
 v14는 [v12](../v12/SPEC.md)의 15개 전략과 [v13](../v13/SPEC.md)의 mixed router를 개발, validation, untouched holdout에서 평가하는 통계 계약이다. 결과를 본 뒤 기준을 바꾸거나 holdout을 반복 사용하는 것을 금지한다.
 
