@@ -1,0 +1,49 @@
+{
+  "schema_version": "v14.prd02.input.1",
+  "policy": {
+    "version": "v11.cost.baseline",
+    "policy_hash": "sha256:pending",
+    "effective_session": "2024-01-01",
+    "prior_hash": "sha256:v11-cost-prior",
+    "reviewer": "fixture-reviewer",
+    "approved": true,
+    "commission_rate": "0.0001",
+    "kr_sell_tax_rate": "0.0002",
+    "spread_rate": "0.0001",
+    "slippage_rate": "0.0001",
+    "participation_rate": "0.00005",
+    "borrow_rate": "0.00002",
+    "locate_rate": "0.00001"
+  },
+  "stress_model_id": "v11.cost.variable-2x-fixed-unchanged",
+  "descriptors": [
+    {
+      "market": "KR", "segment": "validation", "hypothesis_id": "long_orb_15m",
+      "nav": "100000", "traded_notional": "1000", "gross_base": "0.001",
+      "gross_wave": ["-0.0002", "-0.0001", "0", "0.0001", "0.0002"],
+      "trade_day_modulus": 3, "signal_skip_modulus": 5,
+      "completed_trades_per_trade": 9, "wins_per_trade": 5
+    },
+    {
+      "market": "KR", "segment": "holdout", "hypothesis_id": "long_orb_15m",
+      "nav": "100000", "traded_notional": "1000", "gross_base": "0.001",
+      "gross_wave": ["-0.0002", "-0.0001", "0", "0.0001", "0.0002"],
+      "trade_day_modulus": 3, "signal_skip_modulus": 5,
+      "completed_trades_per_trade": 9, "wins_per_trade": 5
+    },
+    {
+      "market": "US", "segment": "validation", "hypothesis_id": "long_orb_15m",
+      "nav": "100000", "traded_notional": "1000", "gross_base": "0.0009",
+      "gross_wave": ["-0.0002", "-0.0001", "0", "0.0001", "0.0002"],
+      "trade_day_modulus": 3, "signal_skip_modulus": 5,
+      "completed_trades_per_trade": 9, "wins_per_trade": 5
+    },
+    {
+      "market": "US", "segment": "holdout", "hypothesis_id": "long_orb_15m",
+      "nav": "100000", "traded_notional": "1000", "gross_base": "0.0009",
+      "gross_wave": ["-0.0002", "-0.0001", "0", "0.0001", "0.0002"],
+      "trade_day_modulus": 3, "signal_skip_modulus": 5,
+      "completed_trades_per_trade": 9, "wins_per_trade": 5
+    }
+  ]
+}
