@@ -1,0 +1,90 @@
+{
+  "schema_version": "v14.prd01.input.1",
+  "cohorts": [
+    {
+      "market": "KR",
+      "start": "2024-01-01",
+      "month_count": 24,
+      "context_snapshot_hashes": [
+        "sha256:kr01", "sha256:kr02", "sha256:kr03", "sha256:kr04",
+        "sha256:kr05", "sha256:kr06", "sha256:kr07", "sha256:kr08",
+        "sha256:kr09", "sha256:kr10", "sha256:kr11", "sha256:kr12",
+        "sha256:kr13", "sha256:kr14", "sha256:kr15", "sha256:kr16",
+        "sha256:kr17", "sha256:kr18", "sha256:kr19", "sha256:kr20",
+        "sha256:kr21", "sha256:kr22", "sha256:kr23", "sha256:kr24"
+      ]
+    },
+    {
+      "market": "US",
+      "start": "2024-02-01",
+      "month_count": 24,
+      "context_snapshot_hashes": [
+        "sha256:us01", "sha256:us02", "sha256:us03", "sha256:us04",
+        "sha256:us05", "sha256:us06", "sha256:us07", "sha256:us08",
+        "sha256:us09", "sha256:us10", "sha256:us11", "sha256:us12",
+        "sha256:us13", "sha256:us14", "sha256:us15", "sha256:us16",
+        "sha256:us17", "sha256:us18", "sha256:us19", "sha256:us20",
+        "sha256:us21", "sha256:us22", "sha256:us23", "sha256:us24"
+      ]
+    }
+  ],
+  "selection": {
+    "markets": [
+      {
+        "market": "KR",
+        "strategy_templates": [
+          {"fold_returns": ["0.01", "0.02", "0.02", "0.03"], "turnover": "0.04"},
+          {"fold_returns": ["0.02", "0.025", "0.025", "0.03"], "turnover": "0.03"},
+          {"fold_returns": ["0.02", "0.025", "0.025", "0.03"], "turnover": "0.04"},
+          {"fold_returns": ["0.02", "0.025", "0.025", "0.03"], "turnover": "0.03"}
+        ],
+        "router_templates": [
+          {"fold_returns": ["0.01", "0.01", "0.02", "0.02"], "turnover": "0.06"},
+          {"fold_returns": ["0.02", "0.03", "0.03", "0.04"], "turnover": "0.04"},
+          {"fold_returns": ["0.02", "0.03", "0.03", "0.04"], "turnover": "0.05"},
+          {"fold_returns": ["0.01", "0.02", "0.02", "0.03"], "turnover": "0.03"},
+          {"fold_returns": ["0.00", "0.01", "0.01", "0.02"], "turnover": "0.02"},
+          {"fold_returns": ["0.00", "0.00", "0.01", "0.01"], "turnover": "0.01"}
+        ]
+      },
+      {
+        "market": "US",
+        "strategy_templates": [
+          {"fold_returns": ["0.01", "0.02", "0.02", "0.03"], "turnover": "0.02"},
+          {"fold_returns": ["0.02", "0.025", "0.025", "0.03"], "turnover": "0.02"},
+          {"fold_returns": ["0.03", "0.03", "0.04", "0.04"], "turnover": "0.03"},
+          {"fold_returns": ["0.01", "0.01", "0.02", "0.02"], "turnover": "0.01"}
+        ],
+        "router_templates": [
+          {"fold_returns": ["0.01", "0.01", "0.02", "0.02"], "turnover": "0.02"},
+          {"fold_returns": ["0.02", "0.02", "0.03", "0.03"], "turnover": "0.02"},
+          {"fold_returns": ["0.03", "0.04", "0.04", "0.05"], "turnover": "0.03"},
+          {"fold_returns": ["0.01", "0.02", "0.02", "0.03"], "turnover": "0.01"},
+          {"fold_returns": ["0.00", "0.01", "0.01", "0.02"], "turnover": "0.01"},
+          {"fold_returns": ["0.00", "0.00", "0.01", "0.01"], "turnover": "0.01"}
+        ]
+      }
+    ]
+  },
+  "plan": {
+    "code": {"commit": "fixture-commit-v14-prd01", "dirty": false},
+    "runtime_lock": {"python_version": "3.14.2", "dependency_lock_hash": "sha256:uv-lock-v14"},
+    "config": {"config_hash": "sha256:config-v14", "feature_flags": ["mixed_router", "long_orb_15m_primary"]},
+    "components": {"strategy": "v12.2", "parameters": "v12.registry.1", "risk": "v11", "router": "v13.router_policy.1"},
+    "universes": [
+      {"universe_version": "KR:v10", "eligibility_snapshot_chain": ["sha256:kr-eligibility-1", "sha256:kr-eligibility-2"]},
+      {"universe_version": "US:v10", "eligibility_snapshot_chain": ["sha256:us-eligibility-1", "sha256:us-eligibility-2"]}
+    ],
+    "references": {"market_calendar": "v10.calendar.1", "corporate_actions": "v10.corporate_actions.1"},
+    "data": {
+      "raw": ["sha256:kr-raw", "sha256:us-raw"],
+      "normalized": ["sha256:kr-normalized", "sha256:us-normalized"],
+      "derived": ["sha256:kr-derived", "sha256:us-derived"]
+    },
+    "sources": {"provenance": ["toss-primary", "archive-primary"], "fallback_history": ["none:KR", "none:US"]},
+    "costs": {"baseline": "v11.cost.baseline", "stress_2x_variable": "v11.cost.variable-2x-fixed-unchanged"},
+    "prompt": {"canonical_bytes_hex": "7631342d726f757465722d70726f6d7074", "codex_model": "gpt-5.1-codex", "output_schema_hash": "sha256:v13-router-schema"},
+    "bootstrap": {"seed": 1401001, "block_trading_days": 5, "resamples": 10000},
+    "exploratory_ids": ["completed_trades", "win_rate", "sharpe", "drawdown", "turnover"]
+  }
+}
