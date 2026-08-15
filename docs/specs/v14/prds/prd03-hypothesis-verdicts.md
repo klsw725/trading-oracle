@@ -45,7 +45,7 @@ uv run python -m src.v14.cli prd03-acceptance
 
 ## Acceptance와 Mutation
 
-- ORB primary와 14-strategy family
+- v12 `long_orb_15m` primary와 나머지 14-strategy family
 - Holm 첫 실패 이후 reject
 - Router 선행 gate 없는 pass 차단
 - `uncorrected_family`, `secondary_override`
@@ -55,3 +55,4 @@ uv run python -m src.v14.cli prd03-acceptance
 
 - 같은 입력과 seed가 같은 corrected verdict를 낸다.
 - Secondary·exploratory 결과가 confirmatory verdict를 뒤집지 않는다.
+- Validation을 통과한 router enabled set은 holdout 전 `HoldoutPlan`에 동결하며 holdout 결과로 subset을 다시 구성하지 않는다.

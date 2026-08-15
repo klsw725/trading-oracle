@@ -28,7 +28,7 @@
 - 신호일은 `pre_portfolio_candidate`가 하나 이상인 공식 거래일
 - No-trade day를 일별 series에서 삭제하지 않음
 
-Bootstrap은 PRD 01 plan manifest의 seed·block·resample 값을 읽기만 하며 자체 default를 만들거나 변경하지 않는다.
+Bootstrap은 PRD 01 plan manifest의 seed·block·resample 값을 읽기만 하며 자체 default를 만들거나 변경하지 않는다. Canonical sampling은 가능한 시작점 `0..n-5`에서 비순환 overlapping 5일 block을 복원추출하고 `ceil(n/5)`개 block을 이어 길이 `n`에서 자른다. 10,000개 평균을 오름차순 정렬한 0-based index 249와 9749를 95% CI로 사용한다. 파생 seed는 결과를 제외한 plan body hash와 market·segment·hypothesis ID·series kind의 canonical hash로 고정한다.
 
 ## CLI
 

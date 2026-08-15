@@ -84,14 +84,14 @@ Canonical block-bootstrap은 연속 5 공식 거래일 block, 10,000 resample, m
 
 ## 6. 다중검정 계층
 
-1. 15분 ORB는 사전 지정 primary hypothesis다.
+1. v12 `long_orb_15m`은 사전 지정 primary hypothesis다.
 2. 나머지 전략 family의 confirmatory 비교는 Holm correction을 사용한다.
 3. 탐색적 secondary metric과 후보 발견 보고는 BH-FDR을 사용하고 confirmatory pass로 표시하지 않는다.
 4. Mixed router는 구성 전략 gate 뒤에 위치한 계층형 hypothesis다.
 5. Router는 ORB와 필요한 구성 후보가 각자의 선행 gate를 통과하기 전에 confirmatory 승격할 수 없다.
 6. 시장별 분석을 별도 family로 보고 family 정의를 manifest에 고정한다.
 
-전략의 confirmatory null hypothesis는 비거래 기준선 대비 순비용 일별 초과수익이 0 이하라는 것이다. 15분 ORB는 primary로 단독 검사하고 나머지 14개 enabled 전략은 동일 시장 family 안에서 Holm 보정한다. Mixed router의 null hypothesis는 deterministic-only router 대비 paired 순비용 일별 초과수익이 0 이하라는 것이다. Router manifest에는 validation과 holdout을 통과해 실제 enabled 후보 집합에 들어간 전략만 포함할 수 있다.
+전략의 confirmatory null hypothesis는 비거래 기준선 대비 순비용 일별 초과수익이 0 이하라는 것이다. v12 `long_orb_15m`은 primary로 단독 검사하고 나머지 14개 enabled 전략은 동일 시장 family 안에서 Holm 보정한다. Mixed router의 null hypothesis는 deterministic-only router 대비 paired 순비용 일별 초과수익이 0 이하라는 것이다. Validation을 통과한 enabled 후보 집합은 holdout을 열기 전에 `HoldoutPlan`에 동결한다. Holdout에서 구성 전략이 실패해도 같은 version에서 후보 subset을 다시 구성하거나 재실행하지 않는다.
 
 One-sided bootstrap p-value는 `(1 + count(resampled_mean <= 0)) / (10000 + 1)`이다. 같은 시장의 비-ORB confirmatory p-value m개를 오름차순 정렬하고, i번째 값을 `0.05/(m-i+1)`과 순차 비교하는 Holm step-down을 적용한다. 최초 실패와 그 뒤 hypothesis는 correction 실패다. Validation과 holdout의 비-ORB `PASS`는 해당 segment sign·비용·CI 조건과 Holm reject를 모두 요구하며, correction 실패는 `REJECT_MULTIPLE_TESTING`이다. ORB primary와 선행 gate가 열린 mixed-router paired test는 각각 one-sided alpha 0.05를 사용한다.
 
@@ -101,7 +101,7 @@ Parameter grid 내부 선택은 development에만 존재하며 validation과 hol
 
 ### Validation gate
 
-Validation은 최소 독립 신호일 60일과 OOS 완료 거래 150건을 요구한다. 무결성 오류가 0건이고 baseline 순수익과 2× cost 순수익이 모두 0보다 크며 primary metric 95% CI upper bound가 0보다 클 때 `VALIDATION_PASS`다. CI lower bound가 0보다 클 필요는 없으며, 이는 untouched holdout의 최종 역할을 보존한다. 표본 미달은 `VALIDATION_INCONCLUSIVE`이고 pass가 아니므로 holdout을 열 수 없다. CI upper bound가 0 이하이거나 2× cost 순수익이 0 이하이면 `VALIDATION_REJECT`다.
+Validation은 최소 독립 신호일 60일과 OOS 완료 거래 150건을 요구한다. 무결성 오류가 0건이고 baseline 순수익과 2× cost 순수익이 모두 0보다 크며 primary metric 95% CI upper bound가 0보다 클 때 `VALIDATION_PASS`다. CI lower bound가 0보다 클 필요는 없으며, 이는 untouched holdout의 최종 역할을 보존한다. 표본 미달은 `VALIDATION_INCONCLUSIVE`이고 pass가 아니므로 holdout을 열 수 없다. Baseline 순수익이 0 이하이거나 CI upper bound가 0 이하이거나 2× cost 순수익이 0 이하이면 `VALIDATION_REJECT`다.
 
 ### Holdout verdict
 
