@@ -1,0 +1,8 @@
+{
+  "schema_version": "v13.prd04.input.1",
+  "v10_context_path": "docs/specs/v10/fixtures/prd04-context.json",
+  "v11_account_path": "docs/specs/v11/fixtures/prd01.json",
+  "v11_execution_path": "docs/specs/v11/fixtures/prd02.json",
+  "v12_cohort_path": "docs/specs/v12/fixtures/cohort.json",
+  "switch_path": "docs/specs/v13/fixtures/prd03-switch-recorded.json"
+}
