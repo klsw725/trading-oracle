@@ -1,0 +1,24 @@
+{
+  "schema_version": "v13.prd03.switch_fixture.1",
+  "session_id": "US:2026-01-05:regular",
+  "incumbent": {
+    "candidate_id": "candidate-incumbent",
+    "strategy_id": "strategy-incumbent",
+    "symbol": "US:AAPL",
+    "side": "long",
+    "entry_at": "2026-01-05T14:30:00Z",
+    "composite_score": "0.70"
+  },
+  "challengers": {
+    "below": "0.79999999",
+    "exact": "0.80",
+    "above": "0.81"
+  },
+  "expected_path": [
+    "incumbent",
+    "exit_pending",
+    "exit_reconciled_flat",
+    "entry_pending",
+    "terminal"
+  ]
+}
