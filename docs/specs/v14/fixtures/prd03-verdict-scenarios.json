@@ -1,0 +1,42 @@
+{
+  "schema_version": "v14.prd03.input.1",
+  "holdout_scenarios": [
+    {"scenario_id":"pass","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":100,"completed_trades":300,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"1.2","bootstrap_non_positive_count":100},
+    {"scenario_id":"no_edge","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":100,"completed_trades":300,"ci_lower":"-0.003","ci_upper":"0","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"9.9","bootstrap_non_positive_count":9000},
+    {"scenario_id":"cost_fragile","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":100,"completed_trades":300,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0","secondary_sharpe":"1.2","bootstrap_non_positive_count":100},
+    {"scenario_id":"multiple_testing","hypothesis_id":"long_orb_30m","integrity_valid":true,"signal_days":100,"completed_trades":300,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"1.2","bootstrap_non_positive_count":99},
+    {"scenario_id":"inconclusive","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":100,"completed_trades":300,"ci_lower":"0","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"1.2","bootstrap_non_positive_count":5000},
+    {"scenario_id":"insufficient_sample","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":99,"completed_trades":300,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"1.2","bootstrap_non_positive_count":100},
+    {"scenario_id":"invalid_experiment","hypothesis_id":"long_orb_15m","integrity_valid":false,"signal_days":100,"completed_trades":300,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.05","stress_return":"0.03","secondary_sharpe":"1.2","bootstrap_non_positive_count":100}
+  ],
+  "validation_scenarios": [
+    {"scenario_id":"validation_pass","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":60,"completed_trades":150,"ci_lower":"-0.001","ci_upper":"0.002","baseline_return":"0.02","stress_return":"0.01","secondary_sharpe":"1.2","bootstrap_non_positive_count":4000},
+    {"scenario_id":"validation_reject","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":60,"completed_trades":150,"ci_lower":"-0.003","ci_upper":"0","baseline_return":"0.02","stress_return":"0.01","secondary_sharpe":"1.2","bootstrap_non_positive_count":9000},
+    {"scenario_id":"validation_inconclusive","hypothesis_id":"long_orb_15m","integrity_valid":true,"signal_days":59,"completed_trades":150,"ci_lower":"0.001","ci_upper":"0.003","baseline_return":"0.02","stress_return":"0.01","secondary_sharpe":"1.2","bootstrap_non_positive_count":100}
+  ],
+  "holm_inputs": [
+    {"hypothesis_id":"long_orb_30m","p_value":"0.01","tested":true},
+    {"hypothesis_id":"long_gap_continuation","p_value":"0.001","tested":true},
+    {"hypothesis_id":"long_session_high_breakout","p_value":"0.002","tested":true},
+    {"hypothesis_id":"long_vwap_reclaim","p_value":"0.011","tested":true},
+    {"hypothesis_id":"long_ma_trend","p_value":"0.012","tested":true},
+    {"hypothesis_id":"long_relative_strength","p_value":"0.013","tested":true},
+    {"hypothesis_id":"long_volume_breakout","p_value":"0.014","tested":true},
+    {"hypothesis_id":"long_volatility_expansion","p_value":"0.015","tested":true},
+    {"hypothesis_id":"long_range_compression","p_value":"0.016","tested":true},
+    {"hypothesis_id":"short_orb_15m","p_value":"0.017","tested":true},
+    {"hypothesis_id":"short_gap_continuation","p_value":"0.018","tested":true},
+    {"hypothesis_id":"short_session_low_breakdown","p_value":"0.019","tested":true},
+    {"hypothesis_id":"short_vwap_rejection","p_value":"1","tested":false},
+    {"hypothesis_id":"short_volume_breakdown","p_value":"1","tested":false}
+  ],
+  "exploratory_inputs": [
+    {"hypothesis_id":"completed_trades","p_value":"0.001"},
+    {"hypothesis_id":"win_rate","p_value":"0.01"},
+    {"hypothesis_id":"sharpe","p_value":"0.04"},
+    {"hypothesis_id":"drawdown","p_value":"0.2"},
+    {"hypothesis_id":"turnover","p_value":"0.8"}
+  ],
+  "router_pass": {"orb_passed":true,"enabled_ids":["long_orb_30m","long_gap_continuation"],"constituent_passes":[true,true],"router_metric_passed":true,"paired_p_value":"0.01"},
+  "router_blocked": {"orb_passed":true,"enabled_ids":["long_orb_30m","long_gap_continuation"],"constituent_passes":[true,false],"router_metric_passed":true,"paired_p_value":"0.01"}
+}
