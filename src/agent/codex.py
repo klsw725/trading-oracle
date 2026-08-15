@@ -2,20 +2,32 @@
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import httpx
 
-from oauth_cli_kit import get_token, login_oauth_interactive, OPENAI_CODEX_PROVIDER
-from oauth_cli_kit.storage import FileTokenStorage
+from oauth_cli_kit import get_token, login_oauth_interactive, OPENAI_CODEX_PROVIDER  # pyright: ignore[reportMissingTypeStubs]
+from oauth_cli_kit.storage import FileTokenStorage  # pyright: ignore[reportMissingTypeStubs]
 
 CODEX_URL = "https://chatgpt.com/backend-api/codex/responses"
 _DATA_DIR = Path.home() / ".trading-oracle"
 _SHACS_DATA_DIR = Path.home() / ".shacs-bot"
 
+type JsonValue = str | int | float | bool | None | list[JsonValue] | dict[str, JsonValue]
+
 
 class CodexError(RuntimeError):
     pass
+
+
+@dataclass(frozen=True, slots=True)
+class _GenerationRequest:
+    system_prompt: str
+    user_prompt: str
+    model: str
+    timeout_seconds: float
 
 
 def _get_storage() -> FileTokenStorage:
@@ -42,8 +54,7 @@ def _ensure_token() -> tuple[str, str]:
         token = get_token(storage=storage)
     except RuntimeError:
         raise CodexError(
-            "Codex OAuth 토큰이 없습니다.\n"
-            "  uv run main.py codex-login 으로 로그인하세요."
+            "Codex OAuth 토큰이 없습니다.\n  uv run main.py codex-login 으로 로그인하세요."
         )
     if not token.account_id:
         raise CodexError("Codex 토큰에 account_id가 없습니다. 재로그인 필요.")
@@ -84,18 +95,26 @@ def _parse_sse_stream(response: httpx.Response) -> str:
                 if not data or data == "[DONE]":
                     continue
                 try:
-                    event = json.loads(data)
+                    event = cast(JsonValue, json.loads(data))
                 except json.JSONDecodeError:
+                    continue
+                if not isinstance(event, dict):
                     continue
                 event_type = event.get("type")
                 if event_type == "response.output_text.delta":
-                    content += event.get("delta") or ""
+                    delta = event.get("delta")
+                    if isinstance(delta, str):
+                        content += delta
                 elif event_type in ("error", "response.failed"):
-                    error = (
-                        event.get("error")
-                        or event.get("response", {}).get("error")
-                        or {}
-                    )
+                    raw_error = event.get("error")
+                    if not isinstance(raw_error, dict):
+                        raw_response = event.get("response")
+                        raw_error = (
+                            raw_response.get("error")
+                            if isinstance(raw_response, dict)
+                            else None
+                        )
+                    error = raw_error if isinstance(raw_error, dict) else {}
                     code = error.get("code") or error.get("type")
                     message = error.get("message")
                     detail = ": ".join(str(value) for value in (code, message) if value)
@@ -112,6 +131,34 @@ def _parse_sse_stream(response: httpx.Response) -> str:
 
 def generate(system_prompt: str, user_prompt: str, model: str = "gpt-5.1-codex") -> str:
     """Codex Responses API로 텍스트 생성. 동기 호출."""
+    return _generate(
+        _GenerationRequest(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            model=model,
+            timeout_seconds=120.0,
+        )
+    )
+
+
+def probe_model(model_id: str = "gpt-5.1-codex", timeout_seconds: int = 20) -> str:
+    try:
+        response = _generate(
+            _GenerationRequest(
+                system_prompt="Return a short plain-text health response.",
+                user_prompt="Respond with OK.",
+                model=model_id,
+                timeout_seconds=float(timeout_seconds),
+            )
+        )
+    except httpx.HTTPError as error:
+        raise CodexError(f"Codex integration probe failed: {error}") from error
+    if not response.strip():
+        raise CodexError("Codex integration probe returned empty output")
+    return response
+
+
+def _generate(request: _GenerationRequest) -> str:
     access_token, account_id = _ensure_token()
 
     headers = {
@@ -125,22 +172,22 @@ def generate(system_prompt: str, user_prompt: str, model: str = "gpt-5.1-codex")
     }
 
     body = {
-        "model": model,
+        "model": request.model,
         "store": False,
         "stream": True,
-        "instructions": system_prompt,
+        "instructions": request.system_prompt,
         "input": [
             {
                 "role": "user",
-                "content": [{"type": "input_text", "text": user_prompt}],
+                "content": [{"type": "input_text", "text": request.user_prompt}],
             }
         ],
         "text": {"verbosity": "medium"},
         "include": ["reasoning.encrypted_content"],
-        "prompt_cache_key": _prompt_cache_key(system_prompt, user_prompt),
+        "prompt_cache_key": _prompt_cache_key(request.system_prompt, request.user_prompt),
     }
 
-    with httpx.Client(timeout=120.0) as client:
+    with httpx.Client(timeout=request.timeout_seconds) as client:
         with client.stream("POST", CODEX_URL, headers=headers, json=body) as response:
             if response.status_code == 429:
                 raise CodexError("ChatGPT 사용량 한도 초과. 잠시 후 다시 시도하세요.")
