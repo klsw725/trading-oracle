@@ -1,0 +1,14 @@
+{
+  "schema_version": "v15.prd03_fixture.1",
+  "prior_close_nav": "100000",
+  "realized_pnl": "-500",
+  "unrealized_pnl": "-1000",
+  "commission": "100",
+  "tax": "100",
+  "spread": "100",
+  "slippage": "100",
+  "participation": "50",
+  "borrow": "50",
+  "locate": "50",
+  "other_execution_cost": "50"
+}
