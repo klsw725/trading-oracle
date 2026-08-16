@@ -1,5 +1,5 @@
 # PRD: v15 PRD 03 Kill Switch And Recovery
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v15 SPEC](../SPEC.md)
 
 ## 의존성
@@ -26,7 +26,7 @@ Market·arm 2% loss kill과 symbol·arm·market·global 운영 kill scope, cance
 
 | Trigger | Scope |
 | --- | --- |
-| Isolated symbol data·action·borrow | Symbol eligibility block |
+| Isolated symbol data·action·borrow | 관련 market arm 전체에서 target symbol만 취소·청산, NORMAL 포지션 보존 |
 | Arm ledger·reservation mismatch | Market·arm kill |
 | Shared market calendar·source·regulation | All market arms kill |
 | Manifest·code·policy identity failure | Global paper kill |
@@ -46,7 +46,8 @@ uv run python -m src.v15.cli prd03-acceptance
 - 비용 포함 2% loss와 arm 격리
 - Symbol defect가 market kill로 확대되지 않음
 - 범위 불명 시 한 단계 fail-closed 확대
-- `loss_realized_only`, `kill_no_flatten`, `operation_auto_reset`, `symbol_to_market_kill`
+- `daily_economics_and_loss_mark_lineage_e2e`, `kill_and_recovery_chain_truncation_e2e`
+- `operation_recovery_approval_forgery_e2e`, `isolated_symbol_escalates_market_e2e`
 - LLM quant fallback을 kill로 오분류하지 않음
 
 ## 완료 조건

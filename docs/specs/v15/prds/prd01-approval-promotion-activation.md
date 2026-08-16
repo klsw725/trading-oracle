@@ -1,5 +1,5 @@
 # PRD: v15 PRD 01 Approval, Promotion, Activation
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v15 SPEC](../SPEC.md)
 
 ## 의존성
@@ -22,6 +22,7 @@
 ## 승인 계약
 
 - 변경 없는 정상 run은 자동 승인
+- Hash-verified source fallback·data exception evidence가 있으면 policy identity가 같아도 수동 승인
 - Source fallback, missing, corporate action, borrow, hash·replay 이상은 수동
 - Strategy, risk, cost, router, prompt, model, schema 변경은 수동
 - 승인에는 exact manifest hash, effective session, reason, reviewer 포함
@@ -31,7 +32,7 @@
 
 ```text
 foundation_ready -> orb_paper
--> 20 sessions + 30 trades + 0 critical incidents
+-> 별도 v11 qualification ledger의 20 sessions + 30 trades + 0 critical incidents
 -> 14 strategies shadow
 -> router gate passed -> router_challenger
 ```
@@ -47,7 +48,7 @@ uv run python -m src.v15.cli prd01-acceptance
 - ORB holdout pass 자동 승격
 - KR·US 독립 승격
 - Data·policy 변경 자동 승인 차단
-- `policy_auto_approve`, `router_early_promotion`, `approval_bypass_gate`
+- `approval_hash_forgery_e2e`, `policy_data_auto_approval_e2e`, `orb_qualification_early_promotion_e2e`
 - 20세션·30거래·0 incident 경계
 
 ## 완료 조건

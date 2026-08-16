@@ -1,5 +1,5 @@
 # PRD: v15 PRD 04 Rollback, Report, Acceptance
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v15 SPEC](../SPEC.md)
 
 ## 의존성
@@ -29,7 +29,7 @@ Router 운영·성과 rollback, version 폐기·복구, 운영 보고, 최종 pa
 
 ## 운영 보고
 
-Manifest, data health, candidates, NO_TRADE, fills, exposures, P&L 비용, LLM fallback, kill·recovery, paired performance를 market·arm·session별로 출력한다.
+Manifest, data health, candidates, NO_TRADE, fills, exposures, P&L 비용, LLM fallback, kill·recovery, paired performance를 market·arm·session별로 출력한다. LLM breaker 집계는 같은 세션의 call history만 사용하고 다음 공식 세션에는 mixed mode reset을 보고한다.
 
 ## Version CLI
 
@@ -45,7 +45,7 @@ uv run python -m src.v15.cli acceptance
 - Operational rollback·same-version recovery
 - Performance rollback·retired rejection
 - Arm·market·global kill과 next-session reset
-- `hidden_quant_fallback`, `performance_repromote`, `live_destination`
+- `llm_breaker_same_session_reset_e2e`, `retirement_history_and_report_lineage_e2e`, `live_destination_e2e`
 - Credential, raw account ID, `data/portfolio.json` mutation 차단
 
 ## 완료 조건

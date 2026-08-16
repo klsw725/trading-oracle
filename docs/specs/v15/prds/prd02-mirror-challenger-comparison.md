@@ -1,5 +1,5 @@
 # PRD: v15 PRD 02 Mirror Challenger Comparison
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v15 SPEC](../SPEC.md)
 
 ## 의존성
@@ -40,9 +40,9 @@ uv run python -m src.v15.cli prd02-acceptance
 ## Acceptance와 Mutation
 
 - Same epoch·NAV·data·cost initialization
-- `shared_account`, missing common day, unequal sample gate
+- `shared_account_namespace_e2e`, `paired_series_missing_official_session_e2e`, `winner_sample_below_300_replayed_ledger_e2e`
 - Router win·inconclusive·loss
-- `mirror_no_fill`과 ORB comparator drift
+- `mirror_day_evidence_drift_reaches_report_e2e`, `winner_integrity_forgery_e2e`
 
 ## 완료 조건
 
