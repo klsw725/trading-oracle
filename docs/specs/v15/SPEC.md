@@ -1,5 +1,5 @@
 # Trading Oracle v15 SPEC: Paper Operations, Promotion And Rollback
-> **상태**: 📝 초안
+> **상태**: ✅ 구현 완료
 
 v15는 [v10](../v10/SPEC.md)부터 [v14](../v14/SPEC.md)까지의 산출물을 paper research 운영으로 활성화하는 마지막 계약이다. 이 문서의 `paper`, `primary`, `challenger`, `automation`은 모두 virtual ledger 범위이며 실계좌 주문 권한을 뜻하지 않는다.
 
@@ -11,6 +11,12 @@ v15는 [v10](../v10/SPEC.md)부터 [v14](../v14/SPEC.md)까지의 산출물을 p
 - Acceptance는 정상 승격, 표본 보류, router 승리, 운영 rollback·재개, 성과 rollback·폐기, arm·market·global kill scope, 다음 장 reset을 모두 실행한다.
 - 실계좌 destination, credential, raw account ID, `data/portfolio.json` mutation 없이 v15 자체가 최종 runnable paper system을 구성해야 한다.
 - 이 조건과 아래 Acceptance Criteria가 모두 통과하면 v15 구현은 단독으로 완료다.
+
+최종 구현은 `uv run python -m src.v15.cli acceptance`에서 44개 check,
+15개 mutation, 3개 hard boundary를 통과한다. Canonical operation bundle hash는
+`sha256:11bb7cf150a6c26e1f067bbcc1f00904dd42a38f1f76f178a78f93e038706bdb`,
+replay hash는
+`sha256:064d6b2573456587512284e95643d266562b372d9574fe31072f272b9747c589`다.
 
 ## Local PRD Map
 
@@ -54,7 +60,7 @@ data/calendar/universe
 - strategy, parameter, risk, cost model version 변경
 - router weight, prompt, Codex model, output schema 변경
 
-승인은 정확한 manifest hash, effective session, 변경 이유, reviewer identity를 가진다. 과거 approval을 새 hash에 재사용하지 않는다.
+승인은 정확한 manifest hash, effective session, 변경 이유, reviewer identity를 가진다. Source fallback과 data exception은 kind, market, session, source hash, detail hash를 가진 hash-verified evidence로 approval body에 포함하며, 하나라도 존재하면 정책 identity가 같아도 수동 승인한다. 과거 approval을 새 hash에 재사용하지 않는다.
 
 수동 승인은 변경 적용의 필요조건일 뿐 [v14](../v14/SPEC.md)의 새 experiment version과 전체 validation·holdout gate를 대체하지 않는다. Manifest hash가 바뀌는 변경은 승인만으로 기존 paper version에 적용할 수 없다.
 
@@ -66,7 +72,7 @@ ORB paper는 [v11](../v11/SPEC.md)의 독립 KRW·USD account, risk, fill, cost,
 
 ## 4. Shadow 전략과 Router 승격
 
-- 나머지 14개 전략은 ORB paper가 20 공식 거래세션, 완료 거래 30건, critical ledger·replay·risk incident 0건을 충족한 뒤 shadow로 활성화한다.
+- 나머지 14개 전략은 별도 ORB qualification v11 ledger가 첫 post-gate 공식 세션부터 20 공식 거래세션, 완료 거래 30건, critical ledger·replay·risk incident 0건을 증명한 뒤 shadow로 활성화한다. Qualification ledger와 sample inventory hash는 shadow/router activation event에 직접 연결한다.
 - Mixed router도 development, validation, untouched holdout, 최소 표본을 독립 통과해야 한다.
 - ORB가 paper 상태이고 router 자체 gate가 통과한 시장에서만 router를 paper challenger로 자동 승격한다.
 - Shadow 결과만으로 offline gate를 생략하지 않는다.
@@ -140,7 +146,7 @@ Paired series는 comparison epoch 이후 두 arm의 공통 공식 거래일 전�
 | 시장 calendar, shared source stream, market-wide universe, 규제 snapshot 무결성 실패 | 해당 시장의 모든 arm kill |
 | manifest, code, policy identity 또는 공통 hash chain 신뢰 실패 | 전체 paper system kill |
 
-개별 symbol data defect만으로 정상 symbol의 포지션까지 전량청산하지 않는다. 결함 범위를 증명할 수 없으면 한 단계 넓은 scope로 fail closed 한다.
+개별 symbol data defect는 해당 시장의 모든 관련 arm에서 그 symbol만 취소·청산하고 각 arm의 정상 symbol 포지션은 보존한다. 개별 defect만으로 시장 전체 포지션을 전량청산하지 않으며, 결함 범위를 증명할 수 없으면 한 단계 넓은 scope로 fail closed 한다.
 
 ## 10. Kill Switch 동작과 재개
 
@@ -156,7 +162,7 @@ Paired series는 comparison epoch 이후 두 arm의 공통 공식 거래일 전�
 
 ## 11. LLM 운영 상태
 
-[v13](../v13/SPEC.md)의 timeout, schema failure, batch overflow, abstain은 quant fallback으로 처리한다. 3회 연속 또는 최근 20회 중 20% 실패 circuit breaker가 열리면 남은 세션은 quant-only다. 이 상태는 손실 kill switch가 아니며 주문을 중단하지 않는다. 다만 LLM arm 상태, fallback rate, 원인 code를 성과와 운영 보고에서 분리해 보여야 한다.
+[v13](../v13/SPEC.md)의 timeout, schema failure, batch overflow, abstain은 quant fallback으로 처리한다. 같은 세션에서 3회 연속 또는 최근 20회 중 20% 실패 circuit breaker가 열리면 그 세션의 남은 호출은 quant-only다. 다음 공식 세션에는 breaker·연속 실패·call history를 초기화하고 mixed mode로 다시 시작한다. 이 상태는 손실 kill switch가 아니며 주문을 중단하지 않는다. 다만 LLM arm 상태, fallback rate, 원인 code를 성과와 운영 보고에서 세션별로 분리해 보여야 한다.
 
 Prompt injection artifact, provider auth failure, model version mismatch가 policy integrity를 훼손하면 단순 fallback이 아니라 운영 incident로 승격할 수 있다. manifest mismatch는 항상 운영 kill switch다.
 
@@ -199,18 +205,21 @@ any_active -> kill_switch_active -> next_session|manual_recovery
 
 | Probe | Mutation | Required result |
 | --- | --- | --- |
-| `policy_auto_approve` | model version 변경을 자동 승인 | approval failure |
-| `router_early_promotion` | router holdout 없이 challenger 활성화 | promotion failure |
-| `shared_account` | ORB와 router가 같은 slot 공유 | mirror isolation failure |
-| `loss_realized_only` | 미실현·비용 제외 | daily-loss failure |
-| `kill_no_flatten` | kill switch 뒤 포지션 유지 | termination failure |
-| `operation_auto_reset` | reconciliation incident 다음 장 자동 재개 | recovery failure |
-| `symbol_to_market_kill` | 격리 가능한 단일 symbol 누락으로 전체 시장 청산 | trigger-scope failure |
-| `approval_bypass_gate` | 새 manifest를 승인만으로 paper 적용 | validation bypass failure |
-| `mirror_no_fill` | 승격 뒤 ORB mirror NAV 갱신 중단 | comparator failure |
-| `performance_repromote` | 성과 rollback version 재승격 | retired-version failure |
-| `hidden_quant_fallback` | LLM 실패를 mixed 성공으로 집계 | observability failure |
-| `live_destination` | paper state에서 broker live submit | hard boundary failure |
+| `approval_hash_forgery_e2e` | approval body hash 변조 | approval failure |
+| `orb_qualification_early_promotion_e2e` | 19세션·19거래 v11 qualification 또는 첫 eligible session 건너뜀 | promotion failure |
+| `policy_data_auto_approval_e2e` | 실제 policy diff 또는 hash-invalid data exception을 자동 승인 | approval failure |
+| `shared_account_namespace_e2e` | ORB와 router account namespace 공유 | mirror isolation failure |
+| `paired_series_missing_official_session_e2e` | 공식 comparison session 제거 | comparison failure |
+| `winner_sample_below_300_replayed_ledger_e2e` | 실제 fill ledger를 300거래 미만으로 변조 | sample failure |
+| `mirror_day_evidence_drift_reaches_report_e2e` | mirror evidence manifest drift | ledger evidence failure |
+| `winner_integrity_forgery_e2e` | winner integrity evidence hash 변조 | integrity failure |
+| `daily_economics_and_loss_mark_lineage_e2e` | 일별 replay 경제 지표 또는 loss-mark lineage 변조 | daily-loss·ledger failure |
+| `kill_and_recovery_chain_truncation_e2e` | kill·recovery chain 제거 또는 pre-kill suffix 복원 | termination·replay failure |
+| `operation_recovery_approval_forgery_e2e` | recovery approval hash 변조 | recovery failure |
+| `isolated_symbol_escalates_market_e2e` | symbol incident를 market scope로 확대 | trigger-scope failure |
+| `llm_breaker_same_session_reset_e2e` | 같은 세션 breaker 이후 provider 재호출 또는 다음 세션 reset 위조 | observability failure |
+| `retirement_history_and_report_lineage_e2e` | retirement history 제거, retired version 재활성화 또는 report lineage 오염 | retired-version·report failure |
+| `live_destination_e2e` | paper artifact를 live destination으로 변조 | hard boundary failure |
 
 ## 15. Acceptance Criteria
 
