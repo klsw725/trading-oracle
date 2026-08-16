@@ -61,6 +61,26 @@ uv run scripts/backtest.py --period 6m --optimize
 uv run scripts/daily.py -t AAPL MSFT --json
 ```
 
+## v15 Paper 운영 검증
+
+v15 운영 아티팩트는 로컬 fixture만 읽으며 broker, credential, portfolio,
+network 또는 live destination에 접근하지 않습니다.
+
+```bash
+# 전체 acceptance와 PRD별 acceptance
+uv run python -m src.v15.cli acceptance
+uv run python -m src.v15.cli prd01-acceptance
+uv run python -m src.v15.cli prd02-acceptance
+uv run python -m src.v15.cli prd03-acceptance
+uv run python -m src.v15.cli prd04-acceptance
+
+# source에서 결정적 bundle 생성 및 canonical bundle 검증
+uv run python -m src.v15.cli build \
+  --input docs/specs/v15/fixtures/operation-source.json
+uv run python -m src.v15.cli verify \
+  --artifact docs/specs/v15/fixtures/operation-bundle.json
+```
+
 ## Toss Open API 설정
 
 프로젝트 루트의 `config.yaml`에 WTS에서 발급한 값을 입력합니다. 이 파일은 `.gitignore`에 포함되어 Git으로 추적되지 않습니다.
