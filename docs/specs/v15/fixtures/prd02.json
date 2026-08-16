@@ -1,0 +1,5 @@
+{
+  "schema_version": "v15.prd02_fixture.2",
+  "operation_source": "docs/specs/v15/fixtures/operation-source.json",
+  "operation_bundle": "docs/specs/v15/fixtures/operation-bundle.json"
+}
