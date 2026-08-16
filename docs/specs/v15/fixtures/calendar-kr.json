@@ -1,0 +1,19 @@
+{
+  "schema_version": "v15.official_calendar.1",
+  "market": "KR",
+  "calendar_id": "KRX-XKRX",
+  "source": "KRX official trading calendar",
+  "version": "2026.08",
+  "timezone": "Asia/Seoul",
+  "holidays": [
+    "2026-08-17",
+    "2026-09-24",
+    "2026-09-25",
+    "2026-10-05",
+    "2026-10-09",
+    "2026-12-25",
+    "2027-01-01"
+  ],
+  "early_closes": [],
+  "calendar_hash": "sha256:388c05a0d9d3370faef969eda98c6796b8d57c7051114a2061ca0cb95705ab2c"
+}

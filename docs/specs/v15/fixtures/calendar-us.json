@@ -1,0 +1,20 @@
+{
+  "schema_version": "v15.official_calendar.1",
+  "market": "US",
+  "calendar_id": "XNYS",
+  "source": "NYSE official trading calendar",
+  "version": "2026.08",
+  "timezone": "America/New_York",
+  "holidays": [
+    "2026-09-07",
+    "2026-11-26",
+    "2026-12-25",
+    "2027-01-01",
+    "2027-01-18"
+  ],
+  "early_closes": [
+    "2026-11-27",
+    "2026-12-24"
+  ],
+  "calendar_hash": "sha256:63b0f1570315bed1e736d99bb957e5121f1fd3d53672c9381195fa9d6b911cd1"
+}
