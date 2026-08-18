@@ -1,0 +1,20 @@
+config_schema_version: v16.runtime-config.1
+policy_version: v16.policy.1
+runtime:
+  mode: paper
+  account_selector: fixture-account
+  arm_selector: control
+markets:
+  KR:
+    currency: KRW
+    timezone: Asia/Seoul
+    calendar_version: kr-calendar-2026.1
+  US:
+    currency: USD
+    timezone: America/New_York
+    calendar_version: us-calendar-2026.1
+data:
+  freshness_minutes:
+    minute-bars:
+      KR: 10
+      US: 10
