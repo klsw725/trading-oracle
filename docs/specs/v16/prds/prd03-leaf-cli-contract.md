@@ -1,6 +1,9 @@
 # PRD: v16 PRD 03 Leaf CLI Contract
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v16 SPEC](../SPEC.md)
+
+Canonical PRD acceptance report hash:
+`sha256:862514be5f675d7b0bdb80a8a6e295dba05a91ceb86c8837a437f98d5b0a281c`
 
 ## 의존성
 

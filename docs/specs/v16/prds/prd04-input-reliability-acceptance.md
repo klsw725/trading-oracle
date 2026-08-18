@@ -1,6 +1,9 @@
 # PRD: v16 PRD 04 Input Reliability Acceptance
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v16 SPEC](../SPEC.md)
+
+`uv run python -m src.v16.cli prd04-acceptance`가 canonical `PASS`를 출력하고
+exit 0임을 확인했다.
 
 ## 의존성
 

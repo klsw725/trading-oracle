@@ -1,6 +1,9 @@
 # PRD: v16 PRD 02 Data And Calendar Health
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v16 SPEC](../SPEC.md)
+
+Canonical PRD acceptance report hash:
+`sha256:2f3043b41f537245b8fe014fad4f21496401d33d749e5cdf67e4e6f9aacf4311`
 
 ## 의존성
 

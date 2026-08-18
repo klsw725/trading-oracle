@@ -1,6 +1,9 @@
 # PRD: v16 PRD 01 Config Path And Identity
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v16 SPEC](../SPEC.md)
+
+Canonical PRD acceptance report hash:
+`sha256:a44990bc3898e6199ffd6863ef50f4b039310b4b79fbd97691db494f99548f6b`
 
 ## 의존성
 
