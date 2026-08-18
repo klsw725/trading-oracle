@@ -1,5 +1,5 @@
 # Trading Oracle v16 SPEC: Runtime Inputs, Configuration, Data And Leaf-CLI Reliability
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 
 v16은 paper system이 실행 전에 읽는 경로, 설정, 정책 identity, 시장 데이터와 calendar를 하나의 검증된 runtime input으로 고정한다. 이 버전은 계좌나 주문 상태를 만들지 않으며, [v15](../v15/SPEC.md)의 운영 의미를 새 저장소로 이전하지 않는다.
 
@@ -11,6 +11,11 @@ v16은 paper system이 실행 전에 읽는 경로, 설정, 정책 identity, 시
 - 모든 시간 판정은 fixture의 명시적 `as_of`를 사용한다. wall clock, 파일 mtime, 실행 순서가 결과를 바꾸지 않는다.
 - Acceptance 전후 tracked worktree와 `data/portfolio.json`의 존재 여부·bytes·hash가 같아야 하며 broker, credential, live destination에 접근하지 않는다.
 - 이 조건과 아래 Acceptance Criteria가 모두 통과하면 v16은 후속 버전 없이 단독 완료다.
+
+최종 구현은 `uv run python -m src.v16.cli acceptance`에서 32개 check,
+14개 mutation, 6개 hard boundary를 통과하며 두 연속 실행이 byte-identical하다.
+Runtime identity는
+`sha256:8078b2da4b0320378dbfb3a8f9d5643672aaec9df42c68384d52725410964482`다.
 
 ## Local PRD Map
 
