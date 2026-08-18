@@ -61,6 +61,27 @@ uv run scripts/backtest.py --period 6m --optimize
 uv run scripts/daily.py -t AAPL MSFT --json
 ```
 
+## v16 Runtime 입력 신뢰성 검증
+
+v16은 로컬 fixture로 config identity, KR/US calendar와 data health,
+CLI 계약과 hard boundary를 네트워크 없이 검증합니다.
+
+```bash
+# 전체 acceptance와 PRD별 acceptance
+uv run python -m src.v16.cli acceptance
+uv run python -m src.v16.cli prd01-acceptance
+uv run python -m src.v16.cli prd02-acceptance
+uv run python -m src.v16.cli prd03-acceptance
+uv run python -m src.v16.cli prd04-acceptance
+
+# fixture config와 KR/US data health 검증
+uv run python -m src.v16.cli config-check \
+  --config docs/specs/v16/fixtures/runtime-config.yaml
+uv run python -m src.v16.cli data-health \
+  --manifest docs/specs/v16/fixtures/input-manifest.json \
+  --as-of 2026-01-05T21:00:00Z --market ALL
+```
+
 ## v15 Paper 운영 검증
 
 v15 운영 아티팩트는 로컬 fixture만 읽으며 broker, credential, portfolio,
