@@ -1,6 +1,8 @@
 # PRD: v17 PRD 03 Account Projection And Reconciliation
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v17 SPEC](../SPEC.md)
+
+`uv run python -m src.v17.cli prd03-acceptance`가 canonical `PASS`와 exit 0을 반환한다.
 
 ## 의존성
 
