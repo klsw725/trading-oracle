@@ -61,6 +61,25 @@ uv run scripts/backtest.py --period 6m --optimize
 uv run scripts/daily.py -t AAPL MSFT --json
 ```
 
+## v17 Durable Paper Account 검증
+
+v17은 SQLite event log를 paper account의 유일한 durable truth로 사용하며,
+migration, semantic idempotency, projection replay와 reconciliation을 검증합니다.
+
+```bash
+# 전체 acceptance와 PRD별 acceptance
+uv run python -m src.v17.cli acceptance
+uv run python -m src.v17.cli prd01-acceptance
+uv run python -m src.v17.cli prd02-acceptance
+uv run python -m src.v17.cli prd03-acceptance
+uv run python -m src.v17.cli prd04-acceptance
+
+# production database migration과 read-only 검증/replay
+uv run python -m src.v17.cli migrate --database data/paper/v17/paper.sqlite3
+uv run python -m src.v17.cli verify --database data/paper/v17/paper.sqlite3
+uv run python -m src.v17.cli replay --database data/paper/v17/paper.sqlite3
+```
+
 ## v16 Runtime 입력 신뢰성 검증
 
 v16은 로컬 fixture로 config identity, KR/US calendar와 data health,
