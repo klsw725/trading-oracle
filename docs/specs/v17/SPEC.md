@@ -1,5 +1,5 @@
 # Trading Oracle v17 SPEC: Durable Paper Account, Event And State Foundation
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 
 v17은 [v16](../v16/SPEC.md)이 검증한 runtime input identity 위에 durable paper account를 세운다. SQLite event log가 유일한 상태 진실이며 projection과 JSON report는 언제든 event replay로 재생성할 수 있어야 한다.
 
@@ -13,6 +13,13 @@ v17은 [v16](../v16/SPEC.md)이 검증한 runtime input identity 위에 durable 
 - 모든 event·projection·idempotency key는 KR/US, KRW/USD, account, arm, policy/config version을 격리한다.
 - Acceptance는 temp database만 변경하며 tracked file과 `data/portfolio.json`의 존재·bytes·hash를 바꾸지 않는다.
 - 이 조건과 아래 Acceptance Criteria가 모두 통과하면 v17은 후속 버전 없이 단독 완료다.
+
+최종 구현은 `uv run python -m src.v17.cli acceptance`에서 33개 check,
+18개 mutation, 8개 hard boundary를 통과하며 두 연속 실행이 byte-identical하다.
+Canonical report hash는
+`sha256:96b365dce2d0ef6527e4db4869417911712e20c0f4f80ca76e97a0f66fe88c34`,
+projection hash는
+`sha256:b5ba04603a6d87251ba6cbdf8dec6cf4dc7f82ab5196375adad760058b7e6aac`다.
 
 ## Local PRD Map
 
