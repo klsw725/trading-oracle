@@ -61,6 +61,29 @@ uv run scripts/backtest.py --period 6m --optimize
 uv run scripts/daily.py -t AAPL MSFT --json
 ```
 
+## v18 Recommendation Outcome Measurement 검증
+
+v18은 advisory recommendation을 immutable prediction으로 등록하고 정확한 공식 시장
+session의 adjusted close로 outcome을 확정합니다. 학습 결과는 inactive bounded candidate로만
+저장하며 active policy와 v17 account projection을 변경하지 않습니다.
+
+```bash
+# 전체 acceptance와 PRD별 acceptance
+uv run python -m src.v18.cli acceptance
+uv run python -m src.v18.cli prd01-acceptance
+uv run python -m src.v18.cli prd02-acceptance
+uv run python -m src.v18.cli prd03-acceptance
+uv run python -m src.v18.cli prd04-acceptance
+
+# prediction 등록과 local versioned fixture를 사용한 outcome 평가
+uv run python -m src.v18.cli register-prediction \
+  --input docs/specs/v18/fixtures/prediction-kr.json \
+  --database data/paper/v18/measurement.sqlite3
+uv run python -m src.v18.cli evaluate \
+  --prediction-id sha256:... --as-of 2026-01-05T06:30:00Z \
+  --database data/paper/v18/measurement.sqlite3
+```
+
 ## v17 Durable Paper Account 검증
 
 v17은 SQLite event log를 paper account의 유일한 durable truth로 사용하며,
