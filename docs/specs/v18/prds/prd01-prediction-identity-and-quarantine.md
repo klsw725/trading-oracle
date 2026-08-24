@@ -1,5 +1,5 @@
 # PRD: v18 PRD 01 Prediction Identity And Quarantine
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v18 SPEC](../SPEC.md)
 
 ## 의존성

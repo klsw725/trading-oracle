@@ -1,5 +1,5 @@
 # PRD: v18 PRD 02 Horizon Outcome Evaluation
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 > 상위 SPEC: [v18 SPEC](../SPEC.md)
 
 ## 의존성
