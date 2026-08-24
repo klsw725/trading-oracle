@@ -1,0 +1,32 @@
+{
+  "schema_version": "v18.normalized-recommendation.1",
+  "recommendation_id": "fixture-kr-005930-20260102",
+  "namespace": {
+    "market": "KR",
+    "currency": "KRW",
+    "account_id": "fixture-paper",
+    "arm_id": "fixture-arm",
+    "symbol": "005930"
+  },
+  "lineage": {
+    "runtime_identity": "v18.runtime.fixture.1",
+    "config_version": "v18.config.fixture.1",
+    "source_policy_version": "v18.base-policy.fixture.1",
+    "calendar_version": "v18.calendar.fixture.1",
+    "calendar_hash": "sha256:013da18c9e3878b90285fca7ed91bce07930b757141c881fdf4fa29fe25f3dcd",
+    "price_adjustment_version": "v18.adjustment.fixture.1"
+  },
+  "prediction_session": "2026-01-02",
+  "horizon_sessions": 1,
+  "action": "BUY",
+  "reference_price_minor": 10000,
+  "perspective_scores": {
+    "kwangsoo": "0.900000",
+    "ouroboros": "0.100000",
+    "quant": "0.200000",
+    "macro": "0.300000",
+    "value": "0.400000"
+  },
+  "perspective_scores_as_of": "2026-01-02T06:30:00Z",
+  "recorded_as_of": "2026-01-02T06:30:00Z"
+}

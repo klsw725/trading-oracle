@@ -1,0 +1,33 @@
+{
+  "schema_version": "v18.fixture.1",
+  "calendar_version": "v18.calendar.fixture.1",
+  "calendar_hash": "sha256:013da18c9e3878b90285fca7ed91bce07930b757141c881fdf4fa29fe25f3dcd",
+  "price_adjustment_version": "v18.adjustment.fixture.1",
+  "price_dataset_hash": "sha256:51667158f6e27a5da8e8a950bdd6c06bfc6ab940fb53ba3b1dca1e67cfbf5c95",
+  "sessions": [
+    {"market":"KR","session":"2026-01-02","status":"OPEN","close_at":"2026-01-02T06:30:00Z"},
+    {"market":"KR","session":"2026-01-03","status":"CLOSED","close_at":null},
+    {"market":"KR","session":"2026-01-04","status":"CLOSED","close_at":null},
+    {"market":"KR","session":"2026-01-05","status":"OPEN","close_at":"2026-01-05T06:30:00Z"},
+    {"market":"KR","session":"2026-01-06","status":"OPEN","close_at":"2026-01-06T06:30:00Z"},
+    {"market":"KR","session":"2026-01-07","status":"OPEN","close_at":"2026-01-07T06:30:00Z"},
+    {"market":"KR","session":"2026-01-08","status":"OPEN","close_at":"2026-01-08T06:30:00Z"},
+    {"market":"US","session":"2026-01-02","status":"OPEN","close_at":"2026-01-02T21:00:00Z"},
+    {"market":"US","session":"2026-01-03","status":"CLOSED","close_at":null},
+    {"market":"US","session":"2026-01-04","status":"CLOSED","close_at":null},
+    {"market":"US","session":"2026-01-05","status":"OPEN","close_at":"2026-01-05T21:00:00Z"},
+    {"market":"US","session":"2026-01-06","status":"EARLY_CLOSE","close_at":"2026-01-06T18:00:00Z"},
+    {"market":"US","session":"2026-01-07","status":"OPEN","close_at":"2026-01-07T21:00:00Z"},
+    {"market":"US","session":"2026-01-08","status":"OPEN","close_at":"2026-01-08T21:00:00Z"}
+  ],
+  "prices": [
+    {"market":"KR","currency":"KRW","symbol":"005930","session":"2026-01-05","adjusted_close_minor":10100},
+    {"market":"KR","currency":"KRW","symbol":"000660","session":"2026-01-05","adjusted_close_minor":10120},
+    {"market":"KR","currency":"KRW","symbol":"005380","session":"2026-01-05","adjusted_close_minor":10080},
+    {"market":"KR","currency":"KRW","symbol":"035420","session":"2026-01-05","adjusted_close_minor":10150},
+    {"market":"KR","currency":"KRW","symbol":"051910","session":"2026-01-05","adjusted_close_minor":10060},
+    {"market":"KR","currency":"KRW","symbol":"006400","session":"2026-01-05","adjusted_close_minor":10110},
+    {"market":"US","currency":"USD","symbol":"AAPL","session":"2026-01-05","adjusted_close_minor":10200},
+    {"market":"US","currency":"USD","symbol":"AAPL","session":"2026-01-06","adjusted_close_minor":10300}
+  ]
+}
