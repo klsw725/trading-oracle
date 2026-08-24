@@ -1,5 +1,5 @@
 # Trading Oracle v18 SPEC: Recommendation Outcome Measurement And Adaptive Policy Correctness
-> **상태**: 📋 구현 예정
+> **상태**: ✅ 구현 완료
 
 v18은 [v16](../v16/SPEC.md)의 검증된 session/data identity와 [v17](../v17/SPEC.md)의 SQLite durable foundation 위에서 advisory recommendation을 immutable prediction으로 등록하고, 정확한 N번째 공식 시장 session의 adjusted price로 성숙 결과를 측정한다. 학습 결과는 검토 가능한 bounded policy candidate일 뿐 active weight를 바꾸지 않는다.
 
@@ -47,6 +47,7 @@ Legacy `data/snapshots` 또는 JSON recommendation은 신뢰 가능한 predictio
 | namespace | market, currency, account ID, arm ID, symbol |
 | identity lineage | runtime, config, source policy, calendar, price-adjustment version |
 | `perspective_scores` | registered perspective ID별 canonical decimal string |
+| `perspective_scores_as_of` | score feature가 사용 가능했던 explicit UTC cutoff; leakage 판정 기준 |
 | `source_payload_hash` | strict normalized recommendation payload hash |
 | `recorded_as_of` | caller-supplied UTC RFC 3339 cutoff |
 
@@ -190,3 +191,11 @@ Canonical 명령은 `uv run python -m src.v18.cli acceptance`다. 성공은 exit
 - Candidate는 active policy를 절대 덮지 않으며 v18은 promotion을 수행하지 않는다.
 - SQLite가 measurement truth이고 account projection과 `data/portfolio.json`은 변하지 않는다.
 - Canonical acceptance가 offline·deterministic하며 v19 이후를 import하지 않는다.
+
+## 13. 구현 고정 정책
+
+- v18은 v17 package를 수정하지 않고 자체 migration inventory에서 v17 `001` bytes/hash를 검증한 뒤 `002_measurement.sql`을 적용한다.
+- Fixture evaluator policy는 neutral band `25` bps, eligibility는 minimum sample `5`와 per-symbol cap `2`를 사용한다.
+- Registered perspective 순서는 `kwangsoo`, `ouroboros`, `quant`, `macro`, `value`다.
+- Base weight는 각 `0.200000`, individual bound는 `[0.100000,0.300000]`, per-weight delta는 `0.050000`, total L1 delta는 `0.100000`이다.
+- Production `evaluate`는 v18 local registered calendar/price fixture만 소비한다. External vendor manifest는 v18 범위가 아니다.
